@@ -1,0 +1,231 @@
+---
+title: "Let's build our first predictive machine!"
+author: "Filippo Biscarini"
+date: "6/9/2020"
+output: html_document
+---
+
+## DNA methylation and age in bats
+
+We are now ready to build our first **predictive machine**! <br>
+First, we load the R packages that are needed for this analysis:
+
+```{r setup, include=FALSE}
+library("xlsx")
+library("broom")
+library("knitr")
+library("dplyr")
+library("ggplot2")
+library("corrplot")
+library("reshape2")
+library("tidyverse")
+library("tidymodels")
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Reading the data
+
+For this practical session on linear regression we are using a dataset on the relationship between the age of wild bats and DNA methylation at specific CpG sites ([data](https://datadryad.org/stash/dataset/doi:10.5061/dryad.rn0198d); [paper](https://onlinelibrary.wiley.com/doi/abs/10.1111/1755-0998.12925)).
+
+The public dataset downloaded from Dryad is an `.xlsm` file, and can be read into *R* using the `read.xlsx()` function from the **xlsx** package.
+
+```{r label="reading_data"}
+ch4 <- read.xlsx("../data/DNA methylation data.xlsm", sheetIndex = 1)
+ch4 %>%
+  head() %>%
+  kable()
+```
+
+## Exploratory Data Analysis
+
+The dataset contains the age of bats in years and the percentage methylation at 7 CpG sites (epigenetic modifications).
+
+```{r}
+mCH4 <- reshape2::melt(ch4, id.vars = c("Sample","Age.category"), variable.name = "var")
+mCH4 %>%
+  group_by(var) %>%
+  summarise(N = n(),
+            n_missing = sum(is.na(value)),
+            avg = round(mean(value, na.rm = TRUE),2),
+            std = round(sd(value, na.rm = TRUE),2),
+            min = min(value),
+            max = max(value)) %>%
+  kable()
+```
+
+```{r}
+ggplot(data = ch4, aes(Age)) + geom_histogram(binwidth = 1)
+```
+
+The columns `Sample` and `Age.category` will not be used for the analysis:
+
+```{r}
+ch4 <- na.omit(ch4[,-c(1,3)])
+plot(ch4)
+```
+
+#### Correlation matrix
+
+```{r}
+M <- cor(ch4, use = "complete.obs")
+kable(M)
+```
+
+```{r}
+corrplot(M)
+```
+
+## Fitting the multiple linear regression model
+
+$$
+y_{ik} = \mu + \sum_{i=1}^k CpG_k + e_{ik}
+$$
+
+```{r}
+fit <- lm(Age ~ ., data = ch4)
+tidy(fit)
+r_squared <- summary(fit)$r.squared
+```
+
+The coefficient of determination **$R^2$** is `r r_squared`
+
+```{r}
+data.frame("coefficient"=coef(fit)) %>% kable()
+```
+
+## Predictions
+
+We start by manually predicting one observation $i$ from the estimated coefficients and the feature vector $x_i$
+
+```{r}
+n <- sample(nrow(ch4),1)
+x <- as.matrix(ch4[n,-1])
+x <- c(1,x) ## add intercept
+y <- ch4[n,1]
+coefs <- as.vector(coef(fit))
+y_hat = t(coefs) %*% x
+error = y - y_hat
+```
+
+Our prediction is `r y_hat`; the corresponding observation is `r y`; hence the prediction error is `r error`.
+
+We then predict all observations using the `predict()` function:
+
+```{r}
+predictions <- predict(fit,ch4[,-1],interval="none", type = "response", na.action=na.pass)
+
+cbind(ch4, predictions) %>% head() %>% kable()
+```
+
+Finally, we can measure the predictive performance of the model:
+
+```{r}
+r_pearson = cor(ch4$Age,predictions)
+r_spearman = cor(ch4$Age,predictions, method = "spearman")
+mse = mean((ch4$Age-predictions)^2)
+rmse = sqrt(mse)
+nrmse = sqrt(mse)/mean(ch4$Age)
+
+data.frame("metric"=c("MSE","RMSE","NRMSE","r pearson","r spearman"),
+           "value"=c(mse,rmse,nrmse,r_pearson,r_spearman)) %>% kable()
+```
+
+#### Visuliazing results
+
+```{r}
+ggplot(data.frame("y"=ch4$Age,"predictions"=predictions), aes(x=predictions,y=y)) +
+  geom_point()
+```
+
+### Normalised Discounted Cumulative Gain
+
+**NDCG** (Normalised Discounted Cumulative Gain)
+
+Gain function
+
+$$
+g(y_{\pi}) = y[\pi(\hat{y})]
+$$
+
+```{r}
+g = ch4$Age[order(predictions,decreasing = TRUE)]
+g
+```
+
+If predictions are accurate, you should see (above) that when ordered based on predictions (gain function) the oldest bats are on top, and the youngest bats are at the bottom of the rank.
+
+Discount:
+
+$$
+d(i) = \frac{1}{log_2(i+1)}
+$$
+
+Discounted cumulative gain:
+
+$$
+DCG@k = \sum_{i=1}^k g(y_{\pi_i}) \cdot d(i) 
+$$
+
+The top ranked observations have the highest weight ("discount"), while the lower ranked observations get lower weights following the hyperbolic curve below (asymptotically going towards zero as the number of top ranked observations considered increases, without ever reaching it)
+
+```{r}
+i = seq(1,10)
+d = 1/(log2(i+1))
+
+plot(i, d, type="l", col="red")
+```
+
+Example for $k=2$ (top 2 individuals in the ranking)
+
+```{r}
+k = 2
+gk = g[1:k] ## top two observed values according to ordered predictions
+print(paste("top k obs ordered based on predictions",gk))
+d = 1/log(x = 1+1:k, base = 2)
+dcg = sum(gk*d)
+print(paste("cumulative discounted gain of the top k observations",dcg))
+```
+
+*DCG* is `r dcg`: high? low? We must normalise:
+
+```{r}
+denominator = ch4$Age[order(ch4$Age,decreasing = TRUE)]
+print(denominator) ## perfect ordering
+ndcg = dcg/sum(denominator[1:k]*d)
+print(paste("NDCG is",ndcg))
+```
+
+*NDCG* is `r ndcg`.
+
+Below a function to compute NDCG:
+
+
+```{r}
+#Function to calculate Mean Normalized discounted cumulative gain (MNV)
+ndcg <- function(y_hat,y,k) {
+  
+  y.sort_y_hat = y[order(y_hat,decreasing=TRUE)]
+  y.sort_y = y[order(y,decreasing=TRUE)]
+  d <- 1/log2(1+1:k)
+  
+  ndcg = sum(y.sort_y_hat[1:k]*d)/sum(y.sort_y[1:k]*d)
+
+  return(ndcg)
+}
+```
+
+```{r}
+ndcg(y_hat = predictions, y = ch4$Age, k = 10)
+```
+
+
+## Exercise 2.1
+
+- write your own model: remove variables, add interactions, quadratic effects etc.
+- measure the performance of your model
+
+```{r}
+## write your code here
+```
+
