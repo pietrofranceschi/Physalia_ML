@@ -12,9 +12,7 @@ First, we load the R packages that are needed for this analysis:
 
 ```{r setup, include=FALSE}
 library("xlsx")
-library("broom")
 library("knitr")
-library("dplyr")
 library("ggplot2")
 library("corrplot")
 library("reshape2")
