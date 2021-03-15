@@ -1,0 +1,301 @@
+---
+title: "Introduction to Machine Learning for predictions"
+author: "Filippo Biscarini"
+date: "18/03/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library("knitr")
+library("dplyr")
+library("plotly")
+library("ggplot2")
+```
+
+## 1.1 Linear regression: a basic model for parameter estimation
+
+Here we look more in detail to how the estimation of model parameters works. <br> We have a generating model of the following form:
+
+$$
+y = 1.25 \cdot x
+$$
+
+The **true** $\theta$ (model parameter: slope) is therefore $1.25$
+
+```{r lin_reg}
+lin_reg <- function(x) 1.25*x
+```
+
+```{r}
+x = 1
+y = lin_reg(x)
+print(paste("y as function of x=1 in the model above:",y))
+
+## now apply the function to a bunch of data
+x = seq(-5,+5,0.5)
+y = lin_reg(x)
+
+kable(data.frame("x" = x, "y" = y))
+```
+
+
+```{r echo=FALSE}
+p <- ggplot(data = data.frame(x = 0), mapping = aes(x = x))
+p <- p + stat_function(fun = lin_reg) + xlim(-5,6)
+p <- p + theme(axis.title.y = element_text(angle=0, vjust = 0.5))
+p
+```
+
+### The loss function
+
+For linear regression (simple or multiple, as long as $n > p$), the least squares method can be used, where the residul sum of squares is minimised through differentiation of vector and matrix expressions (linear algebra $\rightarrow$ *normal equations*).
+
+However, from the perspective of machine learning a different approach is taken. First, a **loss function** is chosen: a common choice for (multiple) linear regression is the **normalised squared error function**:
+
+```{r}
+loss_function <- function(x,beta) {
+  
+  n = length(x)
+  y = lin_reg(x)
+  normalised_squared_error = sum((y - beta*x)^2)/(2*n)
+  
+  return(normalised_squared_error)
+}
+```
+
+We then calculate the loss function for different values of the parameter(s) to estimate.
+We take 11 datapoints (from 0 to 10) for our linear regression model and try different values for beta:
+
+```{r}
+x <- seq(0,10,0.25)
+beta <- seq(0.25,2.25,0.05)
+
+cost <- sapply(beta, function(z) loss_function(x,z))
+res <- data.frame("x" = x, "beta" = beta, "loss" = cost)
+beta_min = res[which.min(res$loss),"beta"]
+
+print(paste("parameter value for which the cost function is minimised:", beta_min))
+```
+
+```{r pressure, echo=FALSE}
+plot(beta,cost, type="l",xlab = "Values for parameter beta", ylab = "Value for loss function")
+```
+
+
+Note: sometimes the term **loss function** is used to define the individual loss (each single record, i.e. $(y_i-\hat{y_i})^2$) and the term **cost function** is used for the summ of individual losses
+
+
+### Exercise 1.1
+
+Try to estimate your own model coefficient:
+
+1. Create your generating (true) model (dare try with the intercept, too?):
+
+```{r results="asis"}
+lin_reg.1 <- function(x) {x}
+```
+
+2. Define your own loss function:
+
+```{r results="asis"}
+loss_function.1 <- function(x) {x}
+```
+
+3. Create your dataset:
+
+```{r results="asis"}
+x <- c()
+```
+
+4. Choose a set of values for $\beta$ to be tested
+
+```{r results="asis"}
+beta = c()
+```
+
+5. Calculate the values for the loss function and plot results
+
+```{r results="asis"}
+cost = c()
+```
+
+6. Plot the cost function vs values of the parameter(s)
+
+```{r results="asis"}
+# plot()
+```
+
+
+## 1.2 Linear regression: measuring performance
+
+In practice, we are not going to manually minimise the loss function to estimate model parameters for our predictive machine: instead, higher-level *R* functions are used, like `lm()`.
+
+An important aspect of predictive statistics is to measure the performance of the developed predictive model (predictive machine).
+
+Let's start by creating an artificial dataset sampling from a normal distribution:
+
+```{r}
+y <- rnorm(n = 100, mean = 0, sd = 1)
+x <- rnorm(n = 100, mean = 0, sd = 1)
+
+dataset <- data.frame("y"=y, "x"=x)
+kable(head(dataset))
+```
+
+We now fit a simple linear regression model:
+
+$$
+y = \mu + \beta \cdot x + e
+$$
+
+```{r}
+fit <- lm(y ~ x, data = dataset)
+coef(fit)
+```
+
+```{r}
+plot(dataset$x, dataset$y, ylab = "y (target variable)", xlab = "x (predictive variable)")
+abline(fit)
+```
+
+We now have all the ingredients to obtain predictions: either by explicitly using the estimated coefficients:
+
+```{r}
+predictions <- dataset$x*coef(fit)[2] + coef(fit)[1]
+```
+
+or by using the *R* `predict()` function:
+
+```{r}
+?predict
+predictions <- predict(fit, newdata = dataset)
+```
+
+The two approaches are obviously equivalent
+
+```{r}
+concordance <- predict(fit, newdata = dataset) == dataset$x*coef(fit)[2] + coef(fit)[1]
+sum(concordance)/length(predictions)
+```
+
+The predict function is more flexible and can for instance also give us a confidence interval for predictions:
+
+```{r}
+predict(fit, newdata = dataset, interval = "confidence") %>%
+  head() %>%
+  kable()
+```
+
+Finally, we can plot predictions against observations:
+
+```{r}
+dataset$predictions <- predictions
+plot(dataset$y, dataset$predictions, xlab = "observations", ylab = "predictions")
+#abline(fit)
+```
+
+
+Besides visualizing how predictions relate to observations, we need also to measure (quantify) the predictive performance of the model.
+
+Several metrics exist for regression problems. Here we list a few of the most commonly used.
+
+1. **MSE** (mean squared error)
+
+```{r}
+mse <- function(y,y_hat) {
+  
+  n = length(y)
+  se = sum((y-y_hat)^2)
+  mse = se/n
+  
+  return(mse)
+}
+
+error = mse(y = dataset$y, y_hat = predictions)
+error
+```
+
+The MSE is **`r round(error,3)`**.
+
+2. **RMSE** (root mean squared error): this is on the same scale as the target variable
+
+```{r}
+rmse = sqrt(error)
+rmse
+```
+
+The RMSE is **`r round(rmse,3)`**.
+
+3. **MAE** (mean absolute error)
+
+```{r}
+mae <- function(y,y_hat) {
+  
+  n = length(y)
+  se = sum(abs(y-y_hat))
+  mae = se/n
+  
+  return(mae)
+}
+
+error = mae(y = dataset$y, y_hat = predictions)
+error
+```
+
+The MAE is **`r round(error,3)`**.
+
+The we have correlations:
+
+4. **Pearson's linear** correlation coefficient
+5. **Spearman's rank** correlation coefficient
+
+```{r}
+r_pearson = cor(dataset$y, predictions, method = "pearson")
+r_spearman = cor(dataset$y, predictions, method = "spearman")
+```
+
+```{r}
+print(r_pearson)
+print(r_spearman)
+```
+
+## Exercise 1.2
+
+Generate a dataset, fit a linear model and measure the accuracy of predictions:
+
+1. Generate a dataset (you can pick a different distribution e.g. t-student, chi-square etc., or you can choose one of the many built-in R datasets, using the function `data()`):
+
+```{r results="asis"}
+data()
+
+y = NULL # target variable
+x = NULL # feature 1
+z = NULL # feature 2 (optional)
+```
+
+2. Fit a linear model
+
+```{r results="asis"}
+# fit <- lm()
+```
+
+3. Obtain predictions
+
+```{r results="asis"}
+# predictions <- predict()
+```
+
+4. Plot observations vs predictions
+
+```{r}
+# p <- ggplot()
+```
+
+5. Choose a metric to measure the accuracy of predictions (performance)
+
+```{r results="asis"}
+# metric = 
+```
+
+
