@@ -1,16 +1,28 @@
 ## packages to install
 
 ## install libraries
+install.packages("vip")
 install.packages("gbm")
+install.packages("xlsx")
+install.packages("ipred")
+install.packages("knitr")
 install.packages("broom")
 install.packages("purrr")
+install.packages("rpart")
 install.packages("glmnet")
+install.packages("plotly")
+install.packages("xgboost")
+install.packages("foreach")
 install.packages("ggplot2")
+install.packages("corrplot")
+install.packages("reshape2")
 install.packages("tidyverse")
 install.packages("tidymodels")
 install.packages("data.table")
+install.packages("rpart.plot")
 install.packages("FactoMineR")
 install.packages("factoextra")
+install.packages("doParallel")
 install.packages("randomForest")
 
 ## load libraries
