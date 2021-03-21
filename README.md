@@ -27,7 +27,7 @@ The objective of this course is to highlight advantages and limitations of these
 **Day 3**
 * Machine learning for regression problems
 * Overfitting and resampling techniques
-* Classificartion problems
+* Classification problems
 * Lasso-penalised linear and logistic regression
 
 **Day 4**
