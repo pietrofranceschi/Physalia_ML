@@ -33,7 +33,7 @@ The objective of this course is to highlight advantages and limitations of these
 **Day 4**
 * Lasso and model tuning
 * Random Forest for regression and classification
-* Weak learning: the boosting approach
+* Slow learning: the boosting approach
 
 **Day 5**
 * Data visualization
