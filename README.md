@@ -14,6 +14,7 @@ The objective of this course is to highlight advantages and limitations of these
 
 * General Introduction 
 * Data mining, -omics and machine learning
+    * slides 0.Introduction to ML (Filippo) 
 * Experimental Design 
 * Introduction to advanced R data libraries 
 
