@@ -9,6 +9,9 @@ Synopsis
 The use of modern quantitative technologies to characterize complex phenomena represents the standard approach in almost every research domain. Biology makes no exception and the use of multi-omics techniques (metabolomics, transcriptomics, genomics and proteomics) is pervasive in every facet of life sciences. The resulting multivariate datasets are highly complex and advanced data analysis approaches need to be applied to optimize the information retrieved. For relatively large-scale studies, machine learning represents a valid tool to complement classical multivariate statistical methods.
 The objective of this course is to highlight advantages and limitations of these data analysis approaches in the context of biological research, providing a broad hands-on introduction to the use of multivariate methods and machine learning for the analysis of ‘omics datasets.
 
+Below the structure of the course, and a detailed timetable (link at the end of the document).
+Code and data will be available at the beginning of each day. Slides will be available at the end of each day.
+
 
 **Day 1**
 
