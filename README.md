@@ -42,7 +42,8 @@ The objective of this course is to highlight advantages and limitations of these
 **R Libraries**
 * `tidyverse`, `data.table`, `tidymodels`, `broom`, `purrr`, `FactoMineR`, `factoextra` 
 
-
+## Timetable
+[https://docs.google.com/spreadsheets/d/1KJlq50n6D_TxiQWGZhsVhJVmQWgiPh37WoBmexnMT1k/edit?usp=sharing](timetable)
 
 
 
