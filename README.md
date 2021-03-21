@@ -16,9 +16,9 @@ The objective of this course is to highlight advantages and limitations of these
 * Data mining, -omics and machine learning
 * Experimental Design 
 * Introduction to advanced R data libraries 
-* Multivariate data Generalities
 
 **Day 2**
+* Multivariate data Generalities
 * Unsupervised statistical problems
 * Principal Component Analysis & Beyond
 * PCA as a data model, introduction to validation
