@@ -25,11 +25,13 @@ The objective of this course is to highlight advantages and limitations of these
 * Supervised learning: regression and classification
 
 **Day 3**
-* Model tuning and validation 
-* Resampling techniques
+* Machine learning for regression problems
+* Overfitting and resampling techniques
+* Classificartion problems
 * Lasso-penalised linear and logistic regression
 
 **Day 4**
+* Lasso and model tuning
 * Random Forest for regression and classification
 * Weak learning: the boosting approach
 
