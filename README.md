@@ -46,7 +46,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Q&A
 
 **R Libraries**
-* `tidyverse`, `data.table`, `tidymodels`, `broom`, `purrr`, `FactoMineR`, `factoextra` 
+* `tidyverse`, `data.table`, `tidymodels`, `broom`, `purrr`, `FactoMineR`, `factoextra` Complete list [here](https://github.com/pietrofranceschi/Physalia_ML/blob/main/r_packages.R)
 
 ## Timetable
 [timetable](https://docs.google.com/spreadsheets/d/1KJlq50n6D_TxiQWGZhsVhJVmQWgiPh37WoBmexnMT1k/edit?usp=sharing)
