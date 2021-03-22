@@ -27,11 +27,14 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Principal Component Analysis & Beyond
 * PCA as a data model, introduction to validation
 * Supervised learning: regression and classification
+   * [script 1.introduction_to_ml.Rmd]
    * [slides 1.Supervised learning] (Filippo) 
 
 **Day 3**
 * Machine learning for regression problems
    * [data](data/DNA methylation data.xlsm)
+   * [script 2.linear_regression]
+   * [slides 2.Regression] (Filippo)
 * Overfitting and resampling techniques
 * Classification problems
 * Lasso-penalised linear and logistic regression
