@@ -30,6 +30,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 
 **Day 3**
 * Machine learning for regression problems
+   * [data](data/DNA methylation data.xlsm)
 * Overfitting and resampling techniques
 * Classification problems
 * Lasso-penalised linear and logistic regression
