@@ -18,11 +18,11 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * General Introduction 
 * Data mining, -omics and machine learning
     * slides 0.Introduction to ML (Filippo) 
-* Experimental Design 
+    * Omics meet ML
 * Introduction to advanced R data libraries 
 
 **Day 2**
-* Multivariate data Generalities
+* Multivariate data: Generalities
 * Unsupervised statistical problems
 * Principal Component Analysis & Beyond
 * PCA as a data model, introduction to validation
@@ -40,13 +40,13 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Slow learning: the boosting approach
 
 **Day 5**
-* Data visualization
+* Data visualization: master ggplot!
 * Model and variable selection: the machine learning paradigm
 * Kahoot quiz: let’s test our machine learning skills!
 * Q&A
 
 **R Libraries**
-* `tidyverse`, `data.table`, `tidymodels`, `broom`, `purrr`, `FactoMineR`, `factoextra` Complete list [here](https://github.com/pietrofranceschi/Physalia_ML/blob/main/r_packages.R)
+* Complete list [here](https://github.com/pietrofranceschi/Physalia_ML/blob/main/r_packages.R)
 
 ## Timetable
 [timetable](https://docs.google.com/spreadsheets/d/1KJlq50n6D_TxiQWGZhsVhJVmQWgiPh37WoBmexnMT1k/edit?usp=sharing)
