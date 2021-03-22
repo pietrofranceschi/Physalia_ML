@@ -33,8 +33,8 @@ y = lin_reg(x)
 print(paste("y as function of x=1 in the model above:",y))
 
 ## now apply the function to a bunch of data
-x = seq(-5,+5,0.5)
-y = lin_reg(x)
+x = seq(-5,+5,0.5) ## independent variable
+y = lin_reg(x) ## dependent variable
 
 kable(data.frame("x" = x, "y" = y))
 ```
