@@ -12,7 +12,9 @@ First, we load the R packages that are needed for this analysis:
 
 ```{r setup, include=FALSE}
 library("xlsx")
+library("broom")
 library("knitr")
+library("dplyr")
 library("ggplot2")
 library("corrplot")
 library("reshape2")
@@ -97,12 +99,17 @@ data.frame("coefficient"=coef(fit)) %>% kable()
 We start by manually predicting one observation $i$ from the estimated coefficients and the feature vector $x_i$
 
 ```{r}
-n <- sample(nrow(ch4),1)
+n <- sample(nrow(ch4),1) ## we sample one record to predict
 x <- as.matrix(ch4[n,-1])
 x <- c(1,x) ## add intercept
 y <- ch4[n,1]
 coefs <- as.vector(coef(fit))
+print(coefs)
+```
+
+```{r}
 y_hat = t(coefs) %*% x
+print(c(y,y_hat))
 error = y - y_hat
 ```
 
@@ -179,10 +186,10 @@ Example for $k=2$ (top 2 individuals in the ranking)
 ```{r}
 k = 2
 gk = g[1:k] ## top two observed values according to ordered predictions
-print(paste("top k obs ordered based on predictions",gk))
+print(paste("top k obs ordered based on predictions",paste(gk, collapse = " ")))
 d = 1/log(x = 1+1:k, base = 2)
 dcg = sum(gk*d)
-print(paste("cumulative discounted gain of the top k observations",dcg))
+print(paste("cumulative discounted gain of the top k observations", dcg))
 ```
 
 *DCG* is `r dcg`: high? low? We must normalise:
@@ -226,4 +233,3 @@ ndcg(y_hat = predictions, y = ch4$Age, k = 10)
 ```{r}
 ## write your code here
 ```
-
