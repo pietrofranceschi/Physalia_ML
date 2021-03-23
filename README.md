@@ -28,7 +28,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Principal Component Analysis & Beyond
 * PCA as a data model, introduction to validation
 * Supervised learning: regression and classification
-   * [script 1.introduction_to_ml.Rmd](scripts/1.introduction_to_ml.Rmd) [(html)](scripts/1.introduction_to_ml.html)
+   * [script 1.introduction_to_ml.Rmd](scripts/1.introduction_to_ml.Rmd) [(html)]
    * [slides 1.Supervised learning]  (Filippo) 
 
 **Day 3**
