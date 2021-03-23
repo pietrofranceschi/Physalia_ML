@@ -24,6 +24,4 @@
 ## general files
 *.log
 
-## html compiled from Rmd files
-*.html
 
