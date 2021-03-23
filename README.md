@@ -29,7 +29,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * PCA as a data model, introduction to validation
 * Supervised learning: regression and classification
    * [script 1.introduction_to_ml.Rmd]
-   * [slides 1.Supervised learning] (Filippo) 
+   * [slides 1.Supervised learning](scripts/1.introduction_to_ml.Rmd) (Filippo) 
 
 **Day 3**
 * Machine learning for regression problems
