@@ -42,7 +42,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [slides 4.resampling] (filippo)
 * Classification problems
    * [data_class](data/dogs_imputed_reduced.raw) 
-   * [script 4.classification.Rmd]
+   * [script 4.classification] [(.Rmd)](scripts/4.classification.Rmd) [(html)](scripts/4.classification.html) [(ipynb)](scripts/4.classification.ipynb)
    * [slides 5.classification]
 * Lasso-penalised linear and logistic regression
    * [data_lasso](data/dogs_imputed.raw) 
