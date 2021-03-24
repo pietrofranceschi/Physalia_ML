@@ -61,12 +61,13 @@ Note: we use only the **training data** to fit the model!
 fit <- lm(Age ~ ., data = training_set)
 tidy(fit)
 r_squared <- summary(fit)$r.squared
+print(paste("R^2", round(r_squared,4)))
 ```
 
 The coefficient of determination **$R^2$** is `r r_squared`
 
 ```{r}
-data.frame("coefficient"=coef(fit)) %>% kable()
+data.frame("coefficient"=coef(fit))
 ```
 
 ### The test error
@@ -74,7 +75,7 @@ data.frame("coefficient"=coef(fit)) %>% kable()
 ```{r}
 predictions <- predict(fit, newdata = test_set[,-1], interval="none", type = "response", na.action=na.pass)
 
-cbind.data.frame("test_age"=test_set[,1], "predictions"=round(predictions,2)) %>% kable()
+cbind.data.frame("test_age"=test_set[,1], "predictions"=round(predictions,2))
 ```
 
 ```{r}
@@ -85,7 +86,7 @@ rmse = sqrt(mse)
 nrmse = sqrt(mse)/mean(test_set$Age)
 
 data.frame("metric"=c("MSE","RMSE","NRMSE","r pearson","r spearman"),
-           "value"=c(mse,rmse,nrmse,r_pearson,r_spearman)) %>% kable()
+           "value"=c(mse,rmse,nrmse,r_pearson,r_spearman))
 ```
 
 ```{r}
@@ -162,12 +163,12 @@ validation_approach <- function(dataset,proportion) {
   return(res)
 }
 
-results <- replicate(n=10, validation_approach(ch4,0.7),simplify = FALSE)
+results <- replicate(n=20, validation_approach(ch4,0.7),simplify = FALSE)
 
 df <- do.call(cbind.data.frame, results)
 df <- transpose(df)
 names(df) <- c("MSE","RMSE","NRMSE","r pearson","r spearman")
-head(df)
+head(df,10)
 ```
 
 We can now summarise and visualise the results:
