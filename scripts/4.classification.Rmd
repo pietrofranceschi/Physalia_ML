@@ -1,0 +1,161 @@
+---
+title: "classification problems"
+author: "Filippo Biscarini"
+date: "7/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library("ggplot2")
+library("reshape2")
+library("tidyverse")
+library("data.table")
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Our first classifier!
+
+\[reminder: classifier = predictive machine for classification problems \]
+
+### Reading the data
+
+For this practical session on logistic regression we are using a dataset on the relationship between cleft lip in dogs (Nova Scotia Duck Tolling Retriever, NSDTR) and SNP genotypes ([data](https://datadryad.org/stash/dataset/doi:10.5061/dryad.j8r8q); [paper](https://journals.plos.org/plosgenetics/article?id=10.1371/journal.pgen.1005059)).
+
+The public dataset downloaded from Dryad is a *Plink* `.tped/.tfam` file. The data have been preprocessed:
+
+- filtered (SNP quality, call-rate, MAF)
+- imputed (imputation of missing genotypes using LHCI: localised haplotype-clustering imputation)
+- selected (only SNPs on chromosomes 25, 26, 27, 28, 29)
+
+We begin by using a reduced version of the dataset, where $0.5\%$ of the SNP loci have been randomly picked: 
+
+```{r label="reading_data"}
+dogs <- fread("../data/dogs_imputed_reduced.raw")
+dogs <- dogs %>%
+  select(-c(IID,FID,PAT,MAT,SEX))
+
+## values for logistic regression in glm() must be 0 - 1
+dogs$PHENOTYPE = dogs$PHENOTYPE-1
+head(dogs)
+print(nrow(dogs))
+print(ncol(dogs)-1)
+```
+
+The dataset contains data on `r nrow(dogs)` and `r ncol(dogs)-2` SNP genotypes.
+Controls (dogs without cleft lip) are coded as `1`'s, cases (dogs with cleft lip) are coded as `2`'s:
+
+```{r}
+dogs %>%
+  group_by(PHENOTYPE) %>%
+  summarise(N=n())
+```
+
+```{r}
+maf_controls <- colSums(dogs[dogs$PHENOTYPE==0,-c(1,2)])/(2*nrow(dogs[dogs$PHENOTYPE==0,]))
+maf_cases <- colSums(dogs[dogs$PHENOTYPE==1,-c(1,2)])/(2*nrow(dogs[dogs$PHENOTYPE==1,]))
+```
+
+```{r}
+maf <- data.frame("cases"=maf_cases, "controls"=maf_controls)
+mD <- reshape2::melt(maf)
+ggplot(mD, aes(y = value, x = variable)) + geom_boxplot(aes(fill=variable)) + xlab(element_blank()) + ylab("MAF")
+```
+
+
+## Fitting the logistic regression model
+
+We now split the data into training and test set, and then fit the logistic regression model to the training set.
+We have an **unbalanced binomial dataset** (13 cases, 112 controls, tot = 125), therefore we may want to keep the same proportion of cases adn controls when sampling the training and the test sets. To do so, we can use what is called "**stratified sampling**":
+
+
+```{r logistic, echo=FALSE}
+seed = 121
+set.seed(seed)
+
+dogs$id <- paste("id",seq(1,nrow(dogs)), sep="_")
+
+training_set <- dogs %>%
+  group_by(PHENOTYPE) %>%
+  sample_frac(size = 0.7)
+
+test_recs <- !(dogs$id %in% training_set$id)
+test_set <- dogs[test_recs,]
+
+training_set$id <- NULL
+test_set$id <- NULL
+
+table(training_set$PHENOTYPE)
+table(test_set$PHENOTYPE)
+```
+In *R*, you can use the function `glm()` (generalised linear model) that allows you to specify the distribution (binomial in this case) and the link function (logit, in this case).
+
+```{r}
+glm.fit <- glm(PHENOTYPE ~ ., data = training_set, family=binomial(link="logit"))
+```
+
+## Making predictions
+
+To make predictions, we apply the fitted model to the test data. We get probabilities of being a case ($$p(y=1|x)$$), and we need to set a threshold to discriminate between cases (1's) and controls (0's): a common choice for the threshold is **0.5**. 
+
+```{r}
+glm.probs <- predict(glm.fit, newdata = test_set[,-1],type="response") 
+glm.pred <- ifelse(glm.probs > 0.5, 1, 0)
+table(glm.pred,test_set$PHENOTYPE)
+```
+
+```{r}
+error = mean(glm.pred!=test_set$PHENOTYPE)
+accuracy = 1 - error
+print(accuracy)
+```
+
+The error rate is `r round(error,4)`; equivalently we can express this as accuracy (1-error rate) `r round(accuracy,3)`
+
+```{r}
+TER = sum(glm.pred != test_set$PHENOTYPE)/length(glm.pred)
+TP = sum(glm.pred == 1 & test_set$PHENOTYPE == 1)
+FN = sum(glm.pred == 0 & test_set$PHENOTYPE == 1)
+TN = sum(glm.pred == 0 & test_set$PHENOTYPE == 0)
+FP = sum(glm.pred == 1 & test_set$PHENOTYPE == 0)
+FPR = FP/(FP+TN)
+FNR = FN/(FN+TP)
+print(FPR)
+print(FNR)
+```
+
+False postive rate is `r FPR`, false negative rate is `r FNR`
+
+## Exercise 4.1
+
+- implement k-fold cross-validation to assess the performance of the logistic regression model:
+
+```{r}
+n = nrow(dogs)
+k = 0
+```
+
+```{r}
+## continue with your code here
+```
+
+## ROC curves
+
+We use the same training/test split as above:
+
+```{r}
+glm.fit <- glm(PHENOTYPE ~ ., data = training_set, family=binomial(link="logit"))
+
+glm.probs <- predict(glm.fit, newdata = test_set[,-1],type="response") 
+glm.pred <- ifelse(glm.probs > 0.5, 1, 0)
+table(glm.pred,test_set$PHENOTYPE)
+```
+
+```{r label="roc"}
+library("ROCit")
+
+ROCit_logit <- rocit(score=glm.probs,class=test_set$PHENOTYPE)
+plot(ROCit_logit)
+save(ROCit_logit, file = "ROClogit.RData") ## saving results in a local file
+```
+
+
