@@ -22,11 +22,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Introduction to advanced R data libraries [Rmd](scripts/Day_1.Rmd)
 
 **Day 2**
-* More on advanced data libraries: `tidymodels`
-* Multivariate data: Generalities
-* Unsupervised statistical problems
-* Principal Component Analysis & Beyond
-* PCA as a data model, introduction to validation
+* More on advanced data libraries: `tidymodels`[Rmd](scripts/tidymodels.Rmd)
 * Supervised learning: regression and classification
    * [script 1.introduction_to_ml] [(.Rmd)](scripts/1.introduction_to_ml.Rmd) [(html)](scripts/1.introduction_to_ml.html) [(ipynb)](scripts/1.introduction_to_ml.ipynb) 
    * [slides 1.Supervised learning](slides/1.supervised_learning.pdf)  (Filippo) 
