@@ -1,7 +1,7 @@
 ---
 title: "Day_1"
 author: "Pietro Franceschi"
-date: "3/22/2021"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
 ---
 
@@ -34,7 +34,7 @@ library(data.table)    ## a less flexible (bit more fast) approach to the manipu
 
 # Piping
 
-The overall idea behind piping is to make easy to read a chain of functions. Pipes `%>%` have been introduced in the `magrittr` pachage but are now a core tool of tidyverse
+The overall idea behind piping is to make easy to read a chain of functions. Pipes `%>%` have been introduced in the `magrittr` package but are now a core tool of tidyverse
 
 ```{r}
 ## sequence going from 1 to the square root of 100
@@ -277,15 +277,16 @@ As usual the DT syntax is more compact, the TB syntax is more easy to read. But 
 In tidyverse, the combination of selectors and mutate can be used to apply some sort of transformation to a bunch of columns, To do that, `mutate` have to be combined with `across`. The following example clearly shows the idea:
 
 ```{r}
-## Suppose I want to calculate the logarithm of all the numeric colums in the iris dataset ...
+## Suppose I want to calculate the logarithm of all the numeric columns in the iris dataset ...
 
 iris %>% 
-  mutate(across(where(~is.numeric(.x)),~log10(.x)))
+  mutate(across(where(~is.numeric(.x)),~log10(.x), .names = "log_{.col}"))
 
 ## Here:
 ## where is used to select the columns which are numeric
-## across is used to mutete on all these columns
+## across is used to mutate on all these columns
 ## and there is a beautiful ~ and . deluge ;-)
+## the .names argument allows you to specify a set of new names ... {.col} refers to the old names ...
 
 ```
 
@@ -320,7 +321,7 @@ in the case of TB, "by group" operations are performed by using the `group_by` f
 ## this does what we have just done ...
 iris %>% 
   group_by(Species) %>% 
-  summarize(myratio = mean(Sepal.Width), sd = sd(Sepal.Width))
+  summarise(myratio = mean(Sepal.Width), sd = sd(Sepal.Width))
 
 ## note that I have here two summary functions
 ```
@@ -408,7 +409,7 @@ dat %>%
 ing_model <- lm(Sepal.Width ~ Sepal.Length, data = iris)
 ```
 
-The standard way to look to this model is by usin the "summary" function
+The standard way to look to this model is by using the "summary" function
 ```{r}
 summary(ing_model)
 ```
@@ -473,7 +474,7 @@ map(iris_nest$data, ~dim(.x))
 ## Note here that we can use the compact syntax of functions
 ```
 
-In the package you will find a plethora of mapers (map, map_2, pmap, walk, map_dbl, ...)
+In the package you will find a plethora of mappers (map, map_2, pmap, walk, map_dbl, ...)
 
 
 Now let's try to combine tibbles and purr. The objective is organize the output in a tidy way
@@ -522,5 +523,25 @@ iris_long
 But now we have a column with the variable names! ... 
 
 so I could nest the long DF and switch on my modeling machinery ;-)
+
+
+```{r}
+ pippo <- iris %>% 
+  filter(Species != "setosa") %>% 
+  droplevels() %>% 
+  pivot_longer(!(Species), names_to = "mynames", values_to = "myvalues") %>% 
+  nest(data = !mynames) %>% 
+  mutate(mytest = map(data, function(t) t.test( x =t %>% filter(Species == "versicolor") %>% pull(myvalues), 
+                                                y =t %>%  filter(Species == "virginica") %>% pull(myvalues)) 
+                      )
+         ) %>% 
+  mutate(coeff = map(mytest,~tidy(.x)))
+  
+```
+
+
+```{r}
+pippo %>% dplyr::select(!c(mytest,data)) %>% unnest(coeff)
+```
 
 

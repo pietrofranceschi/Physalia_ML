@@ -22,11 +22,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Introduction to advanced R data libraries [Rmd](scripts/Day_1.Rmd)
 
 **Day 2**
-* More on advanced data libraries: `tidymodels`
-* Multivariate data: Generalities
-* Unsupervised statistical problems
-* Principal Component Analysis & Beyond
-* PCA as a data model, introduction to validation
+* More on advanced data libraries: `tidymodels`[Rmd](scripts/tidymodels.Rmd)
 * Supervised learning: regression and classification
    * [script 1.introduction_to_ml] [(.Rmd)](scripts/1.introduction_to_ml.Rmd) [(html)](scripts/1.introduction_to_ml.html) [(ipynb)](scripts/1.introduction_to_ml.ipynb) 
    * [slides 1.Supervised learning](slides/1.supervised_learning.pdf)  (Filippo) 
@@ -49,15 +45,24 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [script 5.lasso] [(.Rmd)](scripts/5.lasso.Rmd) [(html)](scripts/5.lasso.html) [(ipynb)](scripts/5.lasso.ipynb)
    * [slides 6.lasso_regularization]
 * KNN imputation
-   * [script knni.Rmd] 
+   * [script knni] [(.Rmd)](scripts/knni.Rmd) [(html)](scripts/knni.html) [(ipynb)](scripts/knni.ipynb)
 
 **Day 4**
 * Lasso and model tuning
+   * [data lasso 2]
+   * [script 6.lasso_with_tidymodels]
 * Random Forest for regression and classification
+   * [script 7.random_forest]
+   * [script 8.multiclass_random_forest]
+   * [slides 7.random_forest] 
 * Slow learning: the boosting approach
+   * [script 9.boosting]
+   * [slides 8.boosting]
+* Advanced data visualization - part 1 
 
 **Day 5**
 * Data visualization: master ggplot!
+* Final interactive exercise
 * Model and variable selection: the machine learning paradigm
 * Kahoot quiz: let’s test our machine learning skills!
 * Q&A
