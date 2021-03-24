@@ -34,7 +34,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 **Day 3**
 * Machine learning for regression problems
    * [data_reg](data/DNA methylation data.xlsm)
-   * [script 2.linear_regression]
+   * [script 2.linear_regression](scripts/2.linear_regression.Rmd) [(html)](scripts/2.linear_regression.html) [(ipynb)](scripts/2.linear_regression.ipynb) 
    * [slides 2.Regression] (Filippo)
 * Overfitting and resampling techniques
    * [script 3.training_testing.Rmd]
