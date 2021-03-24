@@ -46,7 +46,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [slides 5.classification]
 * Lasso-penalised linear and logistic regression
    * [data_lasso](data/dogs_imputed.raw) 
-   * [script 5.lasso.Rmd]
+   * [script 5.lasso] [(.Rmd)](scripts/5.lasso.Rmd) [(html)](scripts/5.lasso.html) [(ipynb)](scripts/5.lasso.ipynb)
    * [slides 6.lasso_regularization]
 * KNN imputation
    * [script knni.Rmd] 
