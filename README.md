@@ -53,11 +53,20 @@ Code and data will be available at the beginning of each day. Slides will be ava
 
 **Day 4**
 * Lasso and model tuning
+   * [data lasso 2]
+   * [script 6.lasso_with_tidymodels]
 * Random Forest for regression and classification
+   * [script 7.random_forest]
+   * [script 8.multiclass_random_forest]
+   * [slides 7.random_forest] 
 * Slow learning: the boosting approach
+   * [script 9.boosting]
+   * [slides 8.boosting]
+* Advanced data visualization - part 1 
 
 **Day 5**
 * Data visualization: master ggplot!
+* Final interactive exercise
 * Model and variable selection: the machine learning paradigm
 * Kahoot quiz: let’s test our machine learning skills!
 * Q&A
