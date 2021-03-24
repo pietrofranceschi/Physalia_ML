@@ -37,9 +37,9 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [script 2.linear_regression] [(.Rmd)](scripts/2.linear_regression.Rmd) [(html)](scripts/2.linear_regression.html) [(ipynb)](scripts/2.linear_regression.ipynb) 
    * [slides 2.Regression] (Filippo)
 * Overfitting and resampling techniques
-   * [script 3.training_testing.Rmd]
-   * [slides 3.overfitting]
-   * [slides 4.resampling]     
+   * [script 3.training_testing] [(.Rmd)](scripts/3.training_testing.Rmd) [(html)](scripts/3.training_testing.html) [(ipynb)](scripts/3.training_testing.ipynb)
+   * [slides 3.overfitting] (Filippo)
+   * [slides 4.resampling] (filippo)
 * Classification problems
    * [data_class](data/dogs_imputed_reduced.raw) 
    * [script 4.classification.Rmd]
