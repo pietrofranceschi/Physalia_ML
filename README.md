@@ -49,7 +49,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [script 5.lasso] [(.Rmd)](scripts/5.lasso.Rmd) [(html)](scripts/5.lasso.html) [(ipynb)](scripts/5.lasso.ipynb)
    * [slides 6.lasso_regularization]
 * KNN imputation
-   * [script knni.Rmd] 
+   * [script knni] [(.Rmd)](scripts/knni.Rmd) [(html)](scripts/knni.html) [(ipynb)](scripts/knni.ipynb)
 
 **Day 4**
 * Lasso and model tuning
