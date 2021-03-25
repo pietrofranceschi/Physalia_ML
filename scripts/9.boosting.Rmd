@@ -1,0 +1,243 @@
+---
+title: "Boosting: a first encounter"
+author: "Filippo Biscarini"
+date: "7/9/2021"
+output: html_document
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.2'
+      jupytext_version: 1.10.3
+  kernelspec:
+    display_name: R
+    language: R
+    name: ir
+---
+
+## Boosting: the weak learning perspective
+### A basic boosting model
+
+```{r}
+library("gbm")
+library("vip")
+library("caret")
+library("xgboost")
+library("tidymodels")
+library("data.table")
+library("randomForest")
+```
+
+We start by reading in the diabetes data and splitting it into the training and test sets: again, it's a multiclass classification problem (combination of gender and health status)
+
+```{r}
+## read the data
+mtbsl1 <- fread("../data/MTBSL1.tsv")
+names(mtbsl1)[c(4:ncol(mtbsl1))] <- paste("mtbl",seq(1,ncol(mtbsl1)-3), sep = "_")
+mtbsl1$gender_status <- paste(mtbsl1$Gender,mtbsl1$Metabolic_syndrome,sep="_")
+diab_dt <- select(mtbsl1, -c(`Primary ID`, Gender, Metabolic_syndrome))
+```
+
+```{r}
+## DATA SPLITTING
+
+diab_dt$id <- paste("id",seq(1,nrow(diab_dt)), sep="_")
+
+training_set <- diab_dt %>%
+  group_by(gender_status) %>%
+  sample_frac(size = 0.7)
+
+test_recs <- !(diab_dt$id %in% training_set$id)
+test_set <- diab_dt[test_recs,]
+
+training_set$id <- NULL
+test_set$id <- NULL
+
+table(training_set$gender_status)
+table(test_set$gender_status)
+```
+
+```{r}
+boost.diabt = gbm(
+  gender_status ~ ., 
+  data=training_set, 
+  distribution="multinomial",
+  n.trees=1000, ## B parameter
+  shrinkage=0.01, ## (learning rate, or step-size)
+  interaction.depth=2 ## d parameter 
+)
+
+print(boost.diabt)
+```
+
+```{r}
+preds <- predict.gbm(object = boost.diabt,
+                     newdata = test_set,
+                     n.trees = 1000,
+                     type = "response")
+print(preds)
+```
+
+```{r}
+labels <- colnames(preds)[apply(preds, 1, which.max)]
+result <- data.frame(test_set$gender_status, labels)
+result$res <- result$test_set.gender_status == result$labels
+print(result)
+```
+
+```{r}
+accuracy = sum(result$res)/nrow(result)
+print(accuracy)
+```
+
+```{r}
+result %>%
+  mutate(test_set.gender_status = factor(test_set.gender_status),
+         pred.labels = factor(labels)) %>%
+  conf_mat(test_set.gender_status,pred.labels)
+```
+
+## Tuning a boosting model
+
+```{r}
+## data splitting
+diab_dt <- select(mtbsl1, -c(`Primary ID`, Gender, Metabolic_syndrome))
+diab_dt$gender_status <- factor(diab_dt$gender_status)
+mtbsl1_split <- initial_split(diab_dt, strata = gender_status, prop = 0.7)
+mtbsl1_train <- training(mtbsl1_split)
+mtbsl1_test <- testing(mtbsl1_split)
+```
+
+```{r}
+## preprocessing
+preprocessing_recipe <-
+  recipes::recipe(gender_status ~ ., data = mtbsl1_train) %>%
+  step_corr(all_predictors(), threshold = 0.9) %>%
+  step_zv(all_numeric(), -all_outcomes()) %>%
+  step_normalize(all_numeric(), -all_outcomes()) %>%
+  step_knnimpute(all_numeric(), neighbors = 5) %>%
+  prep()
+```
+
+```{r}
+## k-fold cross-validation for tuning
+diab_cv <- vfold_cv(mtbsl1_train, v=5, repeats = 5, strata = gender_status)
+```
+
+```{r}
+# XGBoost model specification
+xgboost_model <- 
+  boost_tree(
+    mode = "classification",
+    trees = 100, ## B parameter
+    min_n = tune(),
+    tree_depth = tune(), ## d parameter
+    learn_rate = tune() 
+  ) %>%
+  set_engine("xgboost", objective = "multi:softprob", num_class = 4, lambda=0, alpha=1, verbose=0)
+```
+
+```{r}
+# grid specification
+xgboost_params <- 
+  parameters(
+    min_n(),
+    tree_depth(),
+    learn_rate()
+  )
+
+xgboost_grid <- 
+  grid_max_entropy(
+    xgboost_params, 
+    size = 15
+  )
+
+print(xgboost_grid)
+```
+
+```{r}
+## workflow
+xgboost_wf <- 
+  workflows::workflow() %>%
+  add_model(xgboost_model) %>% 
+  add_formula(gender_status ~ .)
+```
+
+```{r}
+# hyperparameter tuning
+xgboost_tuned <- tune_grid(
+  object = xgboost_wf,
+  resamples = diab_cv,
+  grid = xgboost_grid,
+  # metrics = yardstick::metric_set(rmse, rsq, mae),
+  control = control_grid(verbose = FALSE)
+)
+```
+
+```{r}
+## explore tuning results
+collect_metrics(xgboost_tuned)
+```
+
+```{r}
+library("repr")
+options(repr.plot.width=14, repr.plot.height=8)
+
+xgboost_tuned %>%
+  collect_metrics() %>%
+  filter(.metric == "accuracy") %>%
+  select(mean, min_n:learn_rate) %>%
+  pivot_longer(min_n:learn_rate,
+               values_to = "value",
+               names_to = "parameter"
+  ) %>%
+  ggplot(aes(value, mean, color = parameter)) +
+  geom_point(alpha = 0.8, show.legend = FALSE) +
+  facet_wrap(~parameter, scales = "free_x") +
+  labs(x = NULL, y = "accuracy")
+```
+
+```{r}
+xgboost_tuned %>%
+  show_best(metric = "roc_auc")
+```
+
+```{r}
+xgboost_best_params <- xgboost_tuned %>%
+  select_best("accuracy")
+
+final_xgb <- finalize_workflow(
+  xgboost_wf,
+  xgboost_best_params
+)
+```
+
+```{r}
+library("vip")
+
+final_xgb %>%
+  fit(data = juice(preprocessing_recipe)) %>%
+  pull_workflow_fit() %>%
+  vip(geom = "point")
+```
+
+```{r}
+final_res <- last_fit(final_xgb, mtbsl1_split)
+collect_metrics(final_res)
+
+collect_predictions(final_res) %>%
+  metrics(gender_status, .pred_class)
+
+```
+
+```{r}
+cm <- collect_predictions(final_res) %>%
+  conf_mat(gender_status, .pred_class)
+
+print(cm)
+```
+
+```{r}
+autoplot(cm, type="heatmap")
+```
