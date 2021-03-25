@@ -50,7 +50,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 **Day 4**
 * Lasso and model tuning
    * [data lasso 2]
-   * [script 6.lasso_with_tidymodels]
+   * [script 6.lasso_with_tidymodels] [(.Rmd)](scripts/6.lasso_with_tidymodels.Rmd) [(html)](scripts/5.lasso_with_tidymodels.html) [(ipynb)](scripts/5.lasso_with_tidymodels.ipynb)
 * Random Forest for regression and classification
    * [script 7.random_forest]
    * [script 8.multiclass_random_forest]
