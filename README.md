@@ -53,10 +53,10 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [script 6.lasso_with_tidymodels] [(.Rmd)](scripts/6.lasso_with_tidymodels.Rmd) [(html)](scripts/6.lasso_with_tidymodels.html) [(ipynb)](scripts/6.lasso_with_tidymodels.ipynb)
 * Random Forest for regression and classification
    * [script 7.random_forest] [(.Rmd)](scripts/7.random_forest.Rmd) [(html)](scripts/7.random_forest.html) [(ipynb)](scripts/7.random_forest.ipynb)
-   * [script 8.multiclass_random_forest]
+   * [script 8.multiclass_random_forest] [(.Rmd)](scripts/8.multiclass_random_forest.Rmd) [(html)](scripts/8.multiclass_random_forest.html) [(ipynb)](scripts/8.multiclass_random_forest.ipynb)
    * [slides 7.random_forest] 
 * Slow learning: the boosting approach
-   * [script 9.boosting]
+   * [script 9.boosting] [(.Rmd)](scripts/9.boosting.Rmd) [(html)](scripts/9.boosting.html) [(ipynb)](scripts/9.boosting.ipynb)
    * [slides 8.boosting]
 * Advanced data visualization - part 1 
 
