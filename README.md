@@ -31,15 +31,15 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Machine learning for regression problems
    * [data_reg](data/DNA methylation data.xlsm)
    * [script 2.linear_regression] [(.Rmd)](scripts/2.linear_regression.Rmd) [(html)](scripts/2.linear_regression.html) [(ipynb)](scripts/2.linear_regression.ipynb) 
-   * [slides 2.Regression] (Filippo)
+   * [slides 2.Regression](slides/2.regression.pdf) (Filippo)
 * Overfitting and resampling techniques
    * [script 3.training_testing] [(.Rmd)](scripts/3.training_testing.Rmd) [(html)](scripts/3.training_testing.html) [(ipynb)](scripts/3.training_testing.ipynb)
-   * [slides 3.overfitting] (Filippo)
-   * [slides 4.resampling] (filippo)
+   * [slides 3.overfitting](slides/3.overfitting.pdf) (Filippo)
+   * [slides 4.resampling](slides/4.resampling.pdf) (Filippo)
 * Classification problems
    * [data_class](data/dogs_imputed_reduced.raw) 
    * [script 4.classification] [(.Rmd)](scripts/4.classification.Rmd) [(html)](scripts/4.classification.html) [(ipynb)](scripts/4.classification.ipynb)
-   * [slides 5.classification]
+   * [slides 5.classification](slides/5.classification.pdf) (Filippo)
 * Lasso-penalised linear and logistic regression
    * [data_lasso](data/dogs_imputed.raw) 
    * [script 5.lasso] [(.Rmd)](scripts/5.lasso.Rmd) [(html)](scripts/5.lasso.html) [(ipynb)](scripts/5.lasso.ipynb)
