@@ -1,0 +1,255 @@
+---
+title: "Random Forest for multiclass classification"
+author: "Filippo Biscarini"
+date: "7/9/2020"
+output: html_document
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .Rmd
+      format_name: rmarkdown
+      format_version: '1.2'
+      jupytext_version: 1.10.3
+  kernelspec:
+    display_name: R
+    language: R
+    name: ir
+---
+
+## Random Forest for multiclass classification (tidymodels inside)
+
+We now move on from binary to multiclass classification, and put together also the use of `tidymodels`. We use the same dataset on diabetes and metabolomics that we used for the Lasso model using `tidymodels`
+
+```{r}
+library("vip")
+library("ggplot2")
+library("tidyverse")
+library("tidymodels")
+library("data.table")
+library("randomForest")
+```
+
+```{r}
+mtbsl1 <- fread("../data/MTBSL1.tsv")
+names(mtbsl1)[c(4:ncol(mtbsl1))] <- paste("mtbl",seq(1,ncol(mtbsl1)-3), sep = "_")
+```
+
+We combine the variables `Gender` and `Metabolic_syndrom` to create a synthetic outcome variable with four classes:
+
+```{r}
+mtbsl1$gender_status <- paste(mtbsl1$Gender,mtbsl1$Metabolic_syndrome,sep="_")
+mtbsl1 %>% group_by(gender_status) %>%
+    summarise(N=n())
+```
+
+#### Data splitting
+
+We first split the data in the training and test sets (stratifying by the categorical outcome):
+
+```{r}
+diab_dt <- select(mtbsl1, -c(`Primary ID`, Gender, Metabolic_syndrome))
+mtbsl1_split <- initial_split(diab_dt, strata = gender_status, prop = 0.75)
+mtbsl1_train <- training(mtbsl1_split)
+mtbsl1_test <- testing(mtbsl1_split)
+
+nrow(mtbsl1_train)
+nrow(mtbsl1_test)
+```
+
+#### Preprocessing
+
+We use tidymodels to build a recipe for data preprocessing:
+
+- remove correlated variables
+- remove non informative variables (zero variance)
+- standardize all variables
+- impute missing data (Random Forest does not handle missing data)
+
+```{r}
+diab_recipe <- mtbsl1_train %>%
+  recipe(gender_status ~ .) %>%
+  step_corr(all_predictors(), threshold = 0.9) %>%
+  step_zv(all_numeric(), -all_outcomes()) %>%
+  step_normalize(all_numeric(), -all_outcomes()) %>%
+  step_knnimpute(all_numeric(), neighbors = 5)
+```
+
+```{r}
+prep_diab <- prep(diab_recipe)
+print(prep_diab)
+```
+
+```{r}
+training_set <- juice(prep_diab)
+head(training_set)
+```
+
+#### Model building
+
+We now specify the structure of our model:
+
+- hyperparameters to tune: `mtry` (number of features to sample for each tree) and `min_n` (minimum number of data points in a node to allow further splitting)
+- number of trees in the forest
+- the problem at hand (classification)
+- the engine (R package)
+
+Then we put this in a workflow together with the preprocessing recipe
+
+```{r}
+tune_spec <- rand_forest(
+  mtry = tune(),
+  trees = 100,
+  min_n = tune()
+) %>%
+  set_mode("classification") %>%
+  set_engine("randomForest")
+```
+
+```{r}
+tune_wf <- workflow() %>%
+  add_formula(gender_status ~ .) %>%
+  add_model(tune_spec)
+```
+
+#### Tuning the hyperparameters
+
+We use k-fold cross-validation to tune the hyperparameters in the training set
+
+```{r}
+trees_folds <- vfold_cv(training_set, v = 5, repeats = 5)
+```
+
+```{r}
+print(trees_folds)
+```
+
+```{r}
+doParallel::registerDoParallel()
+
+tune_res <- tune_grid(
+  tune_wf,
+  resamples = trees_folds,
+  grid = 20
+)
+
+```
+
+```{r}
+print(tune_res)
+```
+
+```{r}
+library("repr")
+options(repr.plot.width=14, repr.plot.height=8)
+
+tune_res %>%
+  collect_metrics() %>%
+  filter(.metric == "roc_auc") %>%
+  select(mean, min_n, mtry) %>%
+  pivot_longer(min_n:mtry,
+               values_to = "value",
+               names_to = "parameter"
+  ) %>%
+  ggplot(aes(value, mean, color = parameter)) +
+  geom_point(show.legend = FALSE) +
+  facet_wrap(~parameter, scales = "free_x") +
+  labs(x = NULL, y = "AUC")
+```
+
+```{r}
+m <- round(sqrt(ncol(training_set)-1),0)
+print(m)
+rf_grid <- grid_regular(
+  mtry(range = c(m-2, m+2)),
+  min_n(range = c(8, 12)),
+  levels = 3
+)
+
+```
+
+```{r}
+print(rf_grid)
+```
+
+```{r}
+regular_res <- tune_grid(
+  tune_wf,
+  resamples = trees_folds,
+  grid = rf_grid
+)
+```
+
+```{r}
+print(regular_res)
+```
+
+```{r}
+regular_res %>%
+  collect_metrics() %>%
+  filter(.metric == "roc_auc") %>%
+  mutate(min_n = factor(min_n)) %>%
+  ggplot(aes(mtry, mean, color = min_n)) +
+  geom_line(alpha = 0.5, size = 1.5) +
+  geom_point() +
+  labs(y = "AUC")
+```
+
+#### Final model
+
+We now select the best model from the hyperparameters tuning, and fit it to the training set:
+
+```{r}
+best_auc <- select_best(tune_res, "roc_auc")
+print(best_auc)
+```
+
+```{r}
+final_rf <- finalize_model(
+  tune_spec,
+  best_auc
+)
+
+print(final_rf)
+```
+
+```{r}
+final_wf <- workflow() %>%
+  add_recipe(diab_recipe) %>%
+  add_model(final_rf)
+
+final_res <- final_wf %>%
+  last_fit(mtbsl1_split)
+```
+
+```{r}
+print(final_res)
+final_res %>%
+  collect_metrics()
+```
+
+```{r}
+final_res %>% 
+  pluck(".workflow", 1) %>%   
+  pull_workflow_fit() %>% 
+  #vip(num_features = 20, geom = "point")
+  vip(num_features = 25)
+```
+
+#### Predictions
+
+```{r}
+final_res %>%
+  collect_predictions()
+```
+
+```{r}
+cm <- final_res %>%
+  collect_predictions() %>%
+  conf_mat(gender_status, .pred_class)
+
+print(cm)
+```
+
+```{r}
+autoplot(cm, type = "heatmap")
+```
