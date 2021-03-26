@@ -66,7 +66,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Final interactive exercise
 * Model and variable selection: the machine learning paradigm
 * Kahoot quiz: let’s test our machine learning skills!
-   * [test page](http://www.kahoot.it) 
+   * [Go to test!](http://www.kahoot.it) 
 * Q&A
 
 **R Libraries**
