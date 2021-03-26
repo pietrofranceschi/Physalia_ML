@@ -62,6 +62,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 
 **Day 5**
 * Data visualization: master ggplot!
+   * [dataset 1 (rubus)](data/rubusTable.txt) [dataset 2 (komp)](data/KOMP.tsv) [dataset 3 (komp reduced)](data/KOMP_data_targeted.RData)
 * Final interactive exercise
 * Model and variable selection: the machine learning paradigm
 * Kahoot quiz: let’s test our machine learning skills!
