@@ -43,7 +43,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Lasso-penalised linear and logistic regression
    * [data_lasso](data/dogs_imputed.raw) 
    * [script 5.lasso] [(.Rmd)](scripts/5.lasso.Rmd) [(html)](scripts/5.lasso.html) [(ipynb)](scripts/5.lasso.ipynb)
-   * [slides 6.lasso_regularization]
+   * [slides 6.lasso_regularization](slides/6.lasso_regularization.pdf) (Filippo)
 * KNN imputation
    * [script knni] [(.Rmd)](scripts/knni.Rmd) [(html)](scripts/knni.html) [(ipynb)](scripts/knni.ipynb)
 
@@ -66,6 +66,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Final interactive exercise
 * Model and variable selection: the machine learning paradigm
 * Kahoot quiz: let’s test our machine learning skills!
+   * [test page](www.kahoot.it) 
 * Q&A
 
 **R Libraries**
