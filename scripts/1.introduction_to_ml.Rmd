@@ -14,7 +14,7 @@ library("ggplot2")
 
 ## 1.1 Linear regression: a basic model for parameter estimation
 
-Here we look more in detail to how the estimation of model parameters works. <br> We have a generating model of the following form:
+Here we look more in detail at how the estimation of model parameters works. <br> We have a generating model of the following form:
 
 $$
 y = 1.25 \cdot x
@@ -92,13 +92,13 @@ Try to estimate your own model coefficient:
 1. Create your generating (true) model (dare try with the intercept, too?):
 
 ```{r results="asis"}
-lin_reg.1 <- function(x) {x}
+lin_reg.1 <- function() {}
 ```
 
 2. Define your own loss function:
 
 ```{r results="asis"}
-loss_function.1 <- function(x) {x}
+loss_function.1 <- function() {}
 ```
 
 3. Create your dataset:
