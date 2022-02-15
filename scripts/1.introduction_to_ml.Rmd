@@ -48,7 +48,7 @@ p
 
 ### The loss function
 
-For linear regression (simple or multiple, as long as $n > p$), the least squares method can be used, where the residul sum of squares is minimised through differentiation of vector and matrix expressions (linear algebra $\rightarrow$ *normal equations*).
+For linear regression (simple or multiple, as long as $n > p$), the least squares method can be used, where the residual sum of squares is minimised through differentiation of vector and matrix expressions (linear algebra $\rightarrow$ *normal equations*).
 
 However, from the perspective of machine learning a different approach is taken. First, a **loss function** is chosen: a common choice for (multiple) linear regression is the **normalised squared error function**:
 
