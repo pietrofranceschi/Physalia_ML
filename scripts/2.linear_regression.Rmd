@@ -1,7 +1,7 @@
 ---
 title: "Let's build our first predictive machine!"
 author: "Filippo Biscarini"
-date: "6/9/2020"
+date: "6/9/2021"
 output: html_document
 ---
 
@@ -228,7 +228,7 @@ print(round(NDCG,4))
 ```
 
 
-## Exercise 2.1
+## Exercise 2.1 (optional)
 
 - write your own model: remove variables, add interactions, quadratic effects etc.
 - measure the performance of your model
