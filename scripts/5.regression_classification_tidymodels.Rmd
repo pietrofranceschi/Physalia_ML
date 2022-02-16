@@ -49,6 +49,7 @@ lm_wf <-
   add_model(lm_mod) %>%
   add_formula(Age ~ .)
 ```
+
 #### 3. fitting the model on the resampled data 
 
 Now we apply the workflow to the partitions of the data that we prepared before (our 5-fold partitions: 4 folds for training, 1 fold for validation, in turns $\rightarrow$ 5 different partitions of the data)
@@ -108,3 +109,113 @@ collect_predictions(lm_fit) %>% group_by(id) %>% summarise(pearson = cor(.pred,A
 ```
 ## Classification
 
+We now see how we can apply `tidymodels` to a classification problem.
+We use our `dogs` dataset (reduced: only 45 SNPs):
+
+```{r label="reading_data"}
+dogs <- fread("../data/dogs_imputed_reduced.raw")
+dogs <- dogs %>%
+  select(-c(IID,FID,PAT,MAT,SEX))
+
+## values for logistic regression in glm() must be 0 - 1
+dogs$PHENOTYPE = dogs$PHENOTYPE-1
+head(dogs)
+print(nrow(dogs))
+print(ncol(dogs)-1)
+```
+
+This dataset is unbalanced: we have far fewer cases than controls:
+
+```{r}
+dogs %>%
+  group_by(PHENOTYPE) %>%
+  summarise(N=n())
+```
+
+When data are unbalanced, one possible approach to improve the performance of the predictive model is to **subsample** the data:
+
+- **downsampling** or **undersampling**: *sample down* the *majority* class until it has the same frequency of the *minority* class
+- **oversample** the data: generate new samples of the *minority* class based on its *neighbourhood* (determined by a similarity matrix)
+
+Subsampling usually improves model performance (see for instance [Menardi and Torelli, 2012](https://link.springer.com/article/10.1007/s10618-012-0295-5)).
+
+It is important that subsampling is **applied only to the training data** (e.g. when doing k-fold cross-validation, under- or over-sampling must happen only in the k-1 folds used for training).
+
+#### 1. subsampling the data
+
+In this case, data will be oversampled (the dataset is small):
+
+```{r}
+library("themis")
+imbal_rec <- 
+  recipe(PHENOTYPE ~ ., data = dogs) %>%
+  step_bin2factor(PHENOTYPE) %>%
+  step_rose(PHENOTYPE, skip = TRUE) ## skip == TRUE is important to make sure that subsampling happens only in the training data
+```
+
+```{r}
+prep(imbal_rec) %>% juice() %>% group_by(PHENOTYPE) %>% summarise(N=n())
+```
+
+#### 2. partitioning the data
+
+```{r}
+folds <- vfold_cv(dogs, v = 5, strata = "PHENOTYPE", repeats = 5)
+```
+
+#### 3. specifying the logistic regression model and workflow
+
+```{r}
+log_mod = logistic_reg(
+  mode = "classification",
+  engine = "glm"
+)
+
+log_wf <- 
+  workflow() %>%
+  add_model(log_mod) %>%
+  add_recipe(imbal_rec)
+```
+
+#### 4. defining performance metrics
+
+```{r}
+cls_metrics <- metric_set(roc_auc,sens,spec)
+```
+
+#### 5. fitting the model on the resampled data 
+
+```{r, warning=FALSE, message=FALSE}
+log_res <- fit_resamples(
+  log_wf, 
+  resamples = folds, 
+  metrics = cls_metrics,
+  control = control_resamples(save_pred = TRUE)
+)
+```
+
+#### 6. evaluating the performance of the model
+
+We look at the average:
+
+- `AUC`: area under the ROC curve
+- `sens`: TPR (true positive rate)
+- `spec`: TNR (true negative rate)
+
+```{r}
+collect_metrics(log_res)
+```
+
+Then we can look at predictions and calculate the overall error rate:
+
+```{r}
+collect_predictions(log_res) %>% group_by(id,id2) %>% summarise(errors = sum(.pred_class != PHENOTYPE), tot = length(PHENOTYPE), error_rate = errors/tot)
+```
+
+```{r}
+collect_predictions(log_res) %>% 
+  group_by(id,id2) %>% 
+  summarise(errors = sum(.pred_class != PHENOTYPE), tot = length(PHENOTYPE), error_rate = errors/tot) %>%
+  ungroup() %>%
+  summarise(avg_er = mean(error_rate), std = sd(error_rate))
+```
