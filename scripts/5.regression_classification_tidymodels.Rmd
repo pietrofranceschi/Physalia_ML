@@ -5,7 +5,7 @@ date: "2/16/2022"
 output: html_document
 ---
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library("knitr")
 library("glmnet")
 library("ggplot2")
@@ -18,20 +18,27 @@ library("data.table")
 
 Here we use the `bats` dataset to build a regression model using the programming framework provided by the R package `tidymodels`.
 
-```{r label="reading_data", echo=TRUE}
-ch4 <- read.xlsx("../data/DNA methylation data.xlsm", sheetIndex = 1)
+```{r label="bat_data", echo=TRUE}
+ch4 <- readxl::read_excel("../data/DNA methylation data.xlsm", sheet = 1)
 ch4 <- na.omit(ch4[,-c(1,3)])
 head(ch4)
 ```
 
-## Including Plots
+#### 1. partitioning the data
 
-You can also embed plots, for example:
+We now use `k-fold` cross-validation to estimate the performance of our linear regresdsion model for the prediction of the age of bats based on epigenetics data.
+The dataset is small, and therefore we apply 5-fold cross-validation.
+
+The objective is to get a **robust estimate** of the model **predictive ability**.
 
 ```{r pressure, echo=FALSE}
 folds <- vfold_cv(ch4, v = 5)
 folds
 ```
+
+#### 2. specifying the model and workflow
+
+We use `tidymodels` syntax to specify our linear regression model, and put everything into a *workflow*: 
 
 ```{r}
 lm_mod = linear_reg() %>%
@@ -42,6 +49,9 @@ lm_wf <-
   add_model(lm_mod) %>%
   add_formula(Age ~ .)
 ```
+#### 3. fitting the model on the resampled data 
+
+Now we apply the workflow to the partitions of the data that we prepared before (our 5-fold partitions: 4 folds for training, 1 fold for validation, in turns $\rightarrow$ 5 different partitions of the data)
 
 ```{r}
 lm_fit <- 
@@ -51,16 +61,31 @@ lm_fit <-
     control = control_resamples(save_pred = TRUE))
 ```
 
+#### 4. evaluating the performance of the model
+
+To evaluate the performance of the model we first collect the error metrics: RMSE and $R^2$. These are averages over the 5 validation folds, together with the standard error:
+
 ```{r}
 collect_metrics(lm_fit)
 ```
 
 ```{r}
-collect_predictions(lm_fit) %>% group_by(id) %>% summarise(cor(.pred,Age))
+metrs <- collect_metrics(lm_fit)
+error_pct = metrs$mean[1]/mean(ch4$Age)
+print(error_pct)
+```
+
+We see the error is **`r round(error_pct,2)*100`%** of the average age of bats in the dataset. 
+We then look at predictions in the validation folds, and measure the Pearson linear correlation between predicted and observed age values:
+
+```{r}
+collect_predictions(lm_fit) %>% group_by(id) %>% summarise(pearson = cor(.pred,Age))
 ```
 ### Repeated cross-validation
 
-```{r}
+This was one single 5-fold cross-validation partition. However, to really take advantage of the full power of resampling methods and get robust estimates of the model performance, it is better (and usually done) to replicate the k-fold cross-validation **n times** (thereby resampling at each of the *n* replicates a different 5-fold partition):
+
+```{r 'repeated_cv'}
 folds = vfold_cv(ch4, v = 5, repeats = 10)
 ```
 
@@ -76,8 +101,10 @@ lm_fit <-
 collect_metrics(lm_fit)
 ```
 
+We see that the standard errors of the estimated RMSE and $R^2$ are now smaller (averages of 50 values instead of 5 values!). We finally get the average Pearson correlation between predicted and observed ages, and its standard deviation:
+
 ```{r}
 collect_predictions(lm_fit) %>% group_by(id) %>% summarise(pearson = cor(.pred,Age)) %>% summarise(avg = mean(pearson), std = sd(pearson))
 ```
-
+## Classification
 
