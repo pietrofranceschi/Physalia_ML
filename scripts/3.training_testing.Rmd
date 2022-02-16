@@ -1,7 +1,7 @@
 ---
 title: "training and test sets"
 author: "Filippo Biscarini"
-date: "7/6/2020"
+date: "7/6/2021"
 output: html_document
 ---
 

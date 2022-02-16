@@ -1,0 +1,83 @@
+---
+title: "Regression and Classification with Tidymodels"
+author: "Filippo"
+date: "2/16/2022"
+output: html_document
+---
+
+```{r}
+library("knitr")
+library("glmnet")
+library("ggplot2")
+library("tidyverse")
+library("tidymodels")
+library("data.table")
+```
+
+## Regression
+
+Here we use the `bats` dataset to build a regression model using the programming framework provided by the R package `tidymodels`.
+
+```{r label="reading_data", echo=TRUE}
+ch4 <- read.xlsx("../data/DNA methylation data.xlsm", sheetIndex = 1)
+ch4 <- na.omit(ch4[,-c(1,3)])
+head(ch4)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+folds <- vfold_cv(ch4, v = 5)
+folds
+```
+
+```{r}
+lm_mod = linear_reg() %>%
+  set_engine("lm")
+
+lm_wf <- 
+  workflow() %>%
+  add_model(lm_mod) %>%
+  add_formula(Age ~ .)
+```
+
+```{r}
+lm_fit <- 
+  lm_wf %>% 
+  fit_resamples(
+    folds,
+    control = control_resamples(save_pred = TRUE))
+```
+
+```{r}
+collect_metrics(lm_fit)
+```
+
+```{r}
+collect_predictions(lm_fit) %>% group_by(id) %>% summarise(cor(.pred,Age))
+```
+### Repeated cross-validation
+
+```{r}
+folds = vfold_cv(ch4, v = 5, repeats = 10)
+```
+
+```{r}
+lm_fit <- 
+  lm_wf %>% 
+  fit_resamples(
+    folds,
+    control = control_resamples(save_pred = TRUE))
+```
+
+```{r}
+collect_metrics(lm_fit)
+```
+
+```{r}
+collect_predictions(lm_fit) %>% group_by(id) %>% summarise(pearson = cor(.pred,Age)) %>% summarise(avg = mean(pearson), std = sd(pearson))
+```
+
+
