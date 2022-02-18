@@ -42,17 +42,18 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [data_class](data/dogs_imputed_reduced.raw) 
    * [script 4.classification] [(.Rmd)](scripts/4.classification.Rmd) [(html)](scripts/4.classification.html) [(ipynb)](scripts/4.classification.ipynb)
    * [slides 5.classification](slides/5.classification.pdf) (Filippo)
+* Regression and classification with tidymodels
 * Lasso-penalised linear and logistic regression
    * [data_lasso](data/dogs_imputed.raw) 
    * [script 5.lasso] [(.Rmd)](scripts/5.lasso.Rmd) [(html)](scripts/5.lasso.html) [(ipynb)](scripts/5.lasso.ipynb)
    * [slides 6.lasso_regularization](slides/6.lasso_regularization.pdf) (Filippo)
+* Lasso and model tuning
+   * [data lasso 2](data/MTBSL1.tsv)
+   * [script 6.lasso_with_tidymodels] [(.Rmd)](scripts/6.lasso_with_tidymodels.Rmd) [(html)](scripts/6.lasso_with_tidymodels.html) [(ipynb)](scripts/6.lasso_with_tidymodels.ipynb)
 * KNN imputation
    * [script knni] [(.Rmd)](scripts/knni.Rmd) [(html)](scripts/knni.html) [(ipynb)](scripts/knni.ipynb)
 
 **Day 4**
-* Lasso and model tuning
-   * [data lasso 2](data/MTBSL1.tsv)
-   * [script 6.lasso_with_tidymodels] [(.Rmd)](scripts/6.lasso_with_tidymodels.Rmd) [(html)](scripts/6.lasso_with_tidymodels.html) [(ipynb)](scripts/6.lasso_with_tidymodels.ipynb)
 * Random Forest for regression and classification
    * [script 7.random_forest] [(.Rmd)](scripts/7.random_forest.Rmd) [(html)](scripts/7.random_forest.html) [(ipynb)](scripts/7.random_forest.ipynb)
    * [script 8.multiclass_random_forest] [(.Rmd)](scripts/8.multiclass_random_forest.Rmd) [(html)](scripts/8.multiclass_random_forest.html) [(ipynb)](scripts/8.multiclass_random_forest.ipynb)
