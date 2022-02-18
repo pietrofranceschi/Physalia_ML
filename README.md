@@ -30,7 +30,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [script 1.introduction_to_ml] [(.Rmd)](scripts/1.introduction_to_ml.Rmd) [(html)](scripts/1.introduction_to_ml.html) [(ipynb)](scripts/1.introduction_to_ml.ipynb) 
    * [slides 2.Supervised learning](slides/2.supervised_learning.pdf)  (Filippo) 
  * Machine learning for regression problems
-   * [data_reg](data/`DNA methylation data.xlsm`)
+   * [data_reg](data/DNA methylation data.xlsm)
    * [script 2.linear_regression] [(.Rmd)](scripts/2.linear_regression.Rmd) [(html)](scripts/2.linear_regression.html) [(ipynb)](scripts/2.linear_regression.ipynb) 
    * [slides 3.Regression](slides/3.regression.pdf) (Filippo)
 
