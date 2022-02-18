@@ -22,16 +22,19 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Introduction to advanced R data libraries [Rmd](scripts/Day_1.Rmd)
 
 **Day 2**
-* More on advanced data libraries: `tidymodels`[Rmd](scripts/tidymodels.Rmd)
+* More on advanced data libraries: `tidymodels`[Rmd] (scripts/tidymodels.Rmd)
+* Multivariate data and generalities:
+* Model and variable selection: the machine learning paradigm
+   * [slides 1.variable_selection](slides/1.variable_selection.pdf)  (Filippo)  
 * Supervised learning: regression and classification
    * [script 1.introduction_to_ml] [(.Rmd)](scripts/1.introduction_to_ml.Rmd) [(html)](scripts/1.introduction_to_ml.html) [(ipynb)](scripts/1.introduction_to_ml.ipynb) 
-   * [slides 1.Supervised learning](slides/1.supervised_learning.pdf)  (Filippo) 
-
-**Day 3**
-* Machine learning for regression problems
+   * [slides 2.Supervised learning](slides/2.supervised_learning.pdf)  (Filippo) 
+ * Machine learning for regression problems
    * [data_reg](data/DNA methylation data.xlsm)
    * [script 2.linear_regression] [(.Rmd)](scripts/2.linear_regression.Rmd) [(html)](scripts/2.linear_regression.html) [(ipynb)](scripts/2.linear_regression.ipynb) 
-   * [slides 2.Regression](slides/2.regression.pdf) (Filippo)
+   * [slides 3.Regression](slides/3.regression.pdf) (Filippo)
+
+**Day 3**
 * Overfitting and resampling techniques
    * [script 3.training_testing] [(.Rmd)](scripts/3.training_testing.Rmd) [(html)](scripts/3.training_testing.html) [(ipynb)](scripts/3.training_testing.ipynb)
    * [slides 3.overfitting](slides/3.overfitting.pdf) (Filippo)
@@ -40,17 +43,18 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [data_class](data/dogs_imputed_reduced.raw) 
    * [script 4.classification] [(.Rmd)](scripts/4.classification.Rmd) [(html)](scripts/4.classification.html) [(ipynb)](scripts/4.classification.ipynb)
    * [slides 5.classification](slides/5.classification.pdf) (Filippo)
+* Regression and classification with tidymodels
 * Lasso-penalised linear and logistic regression
    * [data_lasso](data/dogs_imputed.raw) 
    * [script 5.lasso] [(.Rmd)](scripts/5.lasso.Rmd) [(html)](scripts/5.lasso.html) [(ipynb)](scripts/5.lasso.ipynb)
    * [slides 6.lasso_regularization](slides/6.lasso_regularization.pdf) (Filippo)
+* Lasso and model tuning
+   * [data lasso 2](data/MTBSL1.tsv)
+   * [script 6.lasso_with_tidymodels] [(.Rmd)](scripts/6.lasso_with_tidymodels.Rmd) [(html)](scripts/6.lasso_with_tidymodels.html) [(ipynb)](scripts/6.lasso_with_tidymodels.ipynb)
 * KNN imputation
    * [script knni] [(.Rmd)](scripts/knni.Rmd) [(html)](scripts/knni.html) [(ipynb)](scripts/knni.ipynb)
 
 **Day 4**
-* Lasso and model tuning
-   * [data lasso 2](data/MTBSL1.tsv)
-   * [script 6.lasso_with_tidymodels] [(.Rmd)](scripts/6.lasso_with_tidymodels.Rmd) [(html)](scripts/6.lasso_with_tidymodels.html) [(ipynb)](scripts/6.lasso_with_tidymodels.ipynb)
 * Random Forest for regression and classification
    * [script 7.random_forest] [(.Rmd)](scripts/7.random_forest.Rmd) [(html)](scripts/7.random_forest.html) [(ipynb)](scripts/7.random_forest.ipynb)
    * [script 8.multiclass_random_forest] [(.Rmd)](scripts/8.multiclass_random_forest.Rmd) [(html)](scripts/8.multiclass_random_forest.html) [(ipynb)](scripts/8.multiclass_random_forest.ipynb)
@@ -58,13 +62,12 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Slow learning: the boosting approach
    * [script 9.boosting] [(.Rmd)](scripts/9.boosting.Rmd) [(html)](scripts/9.boosting.html) [(ipynb)](scripts/9.boosting.ipynb)
    * [slides 8.boosting](slides/8.boosting.pdf) (Filippo)
-* Advanced data visualization - part 1 
+* Unsupervised learning: PCA, Umap, Self-organizing maps (Pietro)
 
 **Day 5**
-* Data visualization: master ggplot!
+* Advanced data visualization: master ggplot! (Pietro)
    * [dataset 1 (rubus)](data/rubusTable.txt) [dataset 2 (komp)](data/KOMP.tsv) [dataset 3 (komp reduced)](data/KOMP_data_targeted.RData)
 * Final interactive exercise
-* Model and variable selection: the machine learning paradigm
 * Kahoot quiz: let’s test our machine learning skills!
    * [Go to test!](http://www.kahoot.it) 
 * Q&A
