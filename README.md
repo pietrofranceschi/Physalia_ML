@@ -61,13 +61,12 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Slow learning: the boosting approach
    * [script 9.boosting] [(.Rmd)](scripts/9.boosting.Rmd) [(html)](scripts/9.boosting.html) [(ipynb)](scripts/9.boosting.ipynb)
    * [slides 8.boosting](slides/8.boosting.pdf) (Filippo)
-* Advanced data visualization - part 1 
+* Unsupervised learning: PCA, Umap, Self-organizing maps (Pietro)
 
 **Day 5**
-* Data visualization: master ggplot!
+* Advanced data visualization: master ggplot! (Pietro)
    * [dataset 1 (rubus)](data/rubusTable.txt) [dataset 2 (komp)](data/KOMP.tsv) [dataset 3 (komp reduced)](data/KOMP_data_targeted.RData)
 * Final interactive exercise
-* Model and variable selection: the machine learning paradigm
 * Kahoot quiz: let’s test our machine learning skills!
    * [Go to test!](http://www.kahoot.it) 
 * Q&A
