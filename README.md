@@ -23,15 +23,16 @@ Code and data will be available at the beginning of each day. Slides will be ava
 
 **Day 2**
 * More on advanced data libraries: `tidymodels`[Rmd](scripts/tidymodels.Rmd)
-* Multivariate data and generalities
+* Multivariate data and generalities:
+   * [slides 1.variable_selection](slides/1.variable_selection.pdf)  (Filippo)  
 * Model and variable selection: the machine learning paradigm
 * Supervised learning: regression and classification
    * [script 1.introduction_to_ml] [(.Rmd)](scripts/1.introduction_to_ml.Rmd) [(html)](scripts/1.introduction_to_ml.html) [(ipynb)](scripts/1.introduction_to_ml.ipynb) 
-   * [slides 1.Supervised learning](slides/1.supervised_learning.pdf)  (Filippo) 
+   * [slides 2.Supervised learning](slides/2.supervised_learning.pdf)  (Filippo) 
  * Machine learning for regression problems
    * [data_reg](data/DNA methylation data.xlsm)
    * [script 2.linear_regression] [(.Rmd)](scripts/2.linear_regression.Rmd) [(html)](scripts/2.linear_regression.html) [(ipynb)](scripts/2.linear_regression.ipynb) 
-   * [slides 2.Regression](slides/2.regression.pdf) (Filippo)
+   * [slides 3.Regression](slides/3.regression.pdf) (Filippo)
 
 **Day 3**
 * Overfitting and resampling techniques
