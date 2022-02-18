@@ -22,10 +22,10 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Introduction to advanced R data libraries [Rmd](scripts/Day_1.Rmd)
 
 **Day 2**
-* More on advanced data libraries: `tidymodels`[Rmd](scripts/tidymodels.Rmd)
+* More on advanced data libraries: `tidymodels`[Rmd] (scripts/tidymodels.Rmd)
 * Multivariate data and generalities:
-   * [slides 1.variable_selection](slides/1.variable_selection.pdf)  (Filippo)  
 * Model and variable selection: the machine learning paradigm
+   * [slides 1.variable_selection](slides/1.variable_selection.pdf)  (Filippo)  
 * Supervised learning: regression and classification
    * [script 1.introduction_to_ml] [(.Rmd)](scripts/1.introduction_to_ml.Rmd) [(html)](scripts/1.introduction_to_ml.html) [(ipynb)](scripts/1.introduction_to_ml.ipynb) 
    * [slides 2.Supervised learning](slides/2.supervised_learning.pdf)  (Filippo) 
