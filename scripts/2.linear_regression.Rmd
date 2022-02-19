@@ -28,10 +28,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 For this practical session on linear regression we are using a dataset on the relationship between the age of wild bats and DNA methylation at specific CpG sites ([data](https://datadryad.org/stash/dataset/doi:10.5061/dryad.rn0198d); [paper](https://onlinelibrary.wiley.com/doi/abs/10.1111/1755-0998.12925)).
 
-The public dataset downloaded from Dryad is an `.xlsm` file, and can be read into *R* using the `read.xlsx()` function from the **xlsx** package.
+The public dataset downloaded from Dryad is an `.xlsm` file, and can be read into *R* using the `read_xlsx()` function from the **readxl** package.
 
 ```{r label="reading_data"}
-ch4 <- read.xlsx("../data/DNA methylation data.xlsm", sheetIndex = 1)
+ch4 <- readxl::read_xlsx("../data/DNA methylation data.xlsm", sheet = 1)
 ch4 %>%
   head()
 ```
@@ -41,7 +41,7 @@ ch4 %>%
 The dataset contains the age of bats in years and the percentage methylation at 7 CpG sites (epigenetic modifications).
 
 ```{r}
-mCH4 <- reshape2::melt(ch4, id.vars = c("Sample","Age.category"), variable.name = "var")
+mCH4 <- reshape2::melt(ch4, id.vars = c("Sample","Age category"), variable.name = "var")
 mCH4 %>%
   group_by(var) %>%
   summarise(N = n(),
@@ -56,7 +56,9 @@ mCH4 %>%
 ggplot(data = ch4, aes(Age)) + geom_histogram(binwidth = 1)
 ```
 
-The columns `Sample` and `Age.category` will not be used for the analysis:
+The columns `Sample` and `Age category` will not be used for the analysis:
+
+##### Plotting all variables against each other
 
 ```{r}
 ch4 <- na.omit(ch4[,-c(1,3)])
