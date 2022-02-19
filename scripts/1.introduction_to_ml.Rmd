@@ -73,7 +73,10 @@ beta <- seq(0.25,2.25,0.05)
 cost <- sapply(beta, function(z) loss_function(x,z))
 res <- data.frame("x" = x, "beta" = beta, "loss" = cost)
 beta_min = res[which.min(res$loss),"beta"]
+print(res)
+```
 
+```{r}
 print(paste("parameter value for which the cost function is minimised:", beta_min))
 ```
 
