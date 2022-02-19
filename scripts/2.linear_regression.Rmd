@@ -112,9 +112,10 @@ print(paste("estimated model coefficients:", paste(round(coefs,3), collapse = " 
 
 ```{r}
 y_hat = t(coefs) %*% x
-print(c(y,y_hat))
+print(paste("predicted age is:",y_hat))
+# print(c(y,y_hat))
 error = y - y_hat
-print(error)
+print(paste("the prediction error is:",error))
 ```
 
 Our prediction is `r y_hat`; the corresponding observation is `r y`; hence the prediction error is `r error`.
@@ -232,7 +233,7 @@ print(round(NDCG,4))
 
 ## Exercise 2.1 (optional)
 
-- write your own model: remove variables, add interactions, quadratic effects etc.
+- write your own model: remove variables (e.g. collinearity), add interactions, quadratic effects etc.
 - measure the performance of your model
 
 ```{r}
