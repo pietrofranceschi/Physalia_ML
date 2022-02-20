@@ -235,6 +235,7 @@ print(round(NDCG,4))
 
 - write your own model: remove variables (e.g. collinearity), add interactions, quadratic effects etc.
 - measure the performance of your model
+- try to improve the model performance! (e.g. higher correlation between predictions and observations or lower RMSE)
 
 ```{r}
 ## write your code here
