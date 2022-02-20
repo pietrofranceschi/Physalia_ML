@@ -131,7 +131,7 @@ ggplot(data.frame("training_y"=training_set$Age,"predictions"=predictions), aes(
 ## Validation set approach
 
 We now implement the validation set approach. First, we choose the relative proportions for the training and test sets, e.g. $70\%$ and $30\%$.
-We feed the original dataset and the chose proportions in a function to implement the validation set approach for our regression problem, and then we repeat this 10 times, to get an estimate of the variability of the predictor $\hat{f}(x)$.
+We feed the original dataset and the chose proportions in a function to implement the validation set approach for our regression problem, and then we repeat this 20 times, to get an estimate of the variability of the predictor $\hat{f}(x)$.
 
 ```{r validation_set, echo=FALSE}
 validation_approach <- function(dataset,proportion) {
@@ -164,7 +164,8 @@ validation_approach <- function(dataset,proportion) {
   return(res)
 }
 
-results <- replicate(n=20, validation_approach(ch4,0.7),simplify = FALSE)
+n_replicates = 20
+results <- replicate(n=n_replicates, validation_approach(ch4,0.7),simplify = FALSE)
 
 df <- do.call(cbind.data.frame, results)
 df <- transpose(df)
