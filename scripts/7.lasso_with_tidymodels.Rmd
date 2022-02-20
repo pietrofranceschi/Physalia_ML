@@ -40,17 +40,32 @@ head(mtbsl1)
 
 ```{r}
 names(mtbsl1)[c(4:ncol(mtbsl1))] <- paste("mtbl",seq(1,ncol(mtbsl1)-3), sep = "_")
+print(paste("N. of columns;", ncol(mtbsl1)))
+```
+
+We have **132 records** and **189 variables** (191 - 2 (`ID` and `Metabolic_syndrome`)): still, $p > n$.
+We see now the distribution of classes (control, diabetes) per sex (not dramatically unbalanced):
+
+```{r}
 table(mtbsl1$Metabolic_syndrome,mtbsl1$Gender)
 ```
 
-We see that the metabolites abundances have largely different scales/magnitudes, and it could be a good idea to normalise them before running the model (remember that Lasso constraints the size of the coefficients, and these depends on the magnitude of each variable $\rightarrow$ same $\lambda$ applied to all variables)  
+
+We see that the metabolites abundances have largely different scales/magnitudes, and it could be a good idea to normalise them before running the model (remember that Lasso constraints the size of the coefficients, and these depend on the magnitude of each variable $\rightarrow$ same $\lambda$ applied to all variables).
+This is the range between maximum values across metabolites:
+
+```{r}
+mm_diab <- mtbsl1 %>%
+  gather(key = "metabolite", value = "abundance", -c(`Primary ID`,Gender,Metabolic_syndrome))
+
+group_by(mm_diab, metabolite) %>% summarise(max_each=max(abundance)) %>% summarise(min = min(max_each), max = max(max_each))
+```
+
+Below the boxplots of the distributions of values for all metabolites:
 
 ```{r}
 library("repr")
 options(repr.plot.width=14, repr.plot.height=8)
-
-mm_diab <- mtbsl1 %>%
-  gather(key = "metabolite", value = "abundance", -c(`Primary ID`,Gender,Metabolic_syndrome))
 
 mm_diab %>%
   ggplot(aes(metabolite, abundance, fill = as.factor(metabolite))) +
@@ -59,10 +74,10 @@ mm_diab %>%
 
 ### Training and test sets
 
-We now split the data in the training and test sets:
+We now split the data in the training and test sets using `tidymodels` functions: we now split in a stratified way, because we want to keep a similar proportion of cases and controls in both the training and test sets. 
 
 ```{r}
-diab_dt <- select(mtbsl1, -c(`Primary ID`, Gender)) ## remove gender for the moment, and keep only mìnumeric features for convinience
+diab_dt <- select(mtbsl1, -c(`Primary ID`, Gender)) ## remove gender for the moment, and keep only numeric features for convinience
 mtbsl1_split <- initial_split(diab_dt, strata = Metabolic_syndrome)
 mtbsl1_train <- training(mtbsl1_split)
 mtbsl1_test <- testing(mtbsl1_split)
@@ -70,7 +85,11 @@ mtbsl1_test <- testing(mtbsl1_split)
 
 ### Preprocessing
 
-We remove variables with zero variance (no variability, not informative) and normalise all numeric variables:
+We remove variables with zero variance (no variability, not informative) and normalise all numeric variables: to do so, we build a preprocessing "recipe", where we specify:
+
+- the model equation: diabetes/control as a function of all metabolites
+- remove all predictors (non-outcome variables) that don't have variance
+- normalize all numeric predictors (standard deviation of one and a mean of zero)
 
 ```{r}
 ## build a recipe for preprocessing
@@ -82,6 +101,8 @@ mtbsl1_rec <- recipe(Metabolic_syndrome ~ ., data = mtbsl1_train) %>%
 print(mtbsl1_rec)
 ```
 
+Now we use the `tidymodels` functions `prep()` and `juice()` to obtain the preprocessed training set:
+
 ```{r}
 mtbsl1_prep <- mtbsl1_rec %>%
   prep(strings_as_factors = FALSE)
@@ -89,6 +110,18 @@ mtbsl1_prep <- mtbsl1_rec %>%
 print(mtbsl1_prep)
 mtbsl1_train <- juice(mtbsl1_prep)
 ```
+
+```{r}
+options(repr.plot.width=14, repr.plot.height=8)
+mm_train <- mtbsl1_train %>%
+  gather(key = "metabolite", value = "abundance", -c(Metabolic_syndrome))
+
+group_by(mm_train, metabolite) %>% summarise(mean(abundance),sd(abundance))
+mm_train %>%
+  ggplot(aes(metabolite, abundance, fill = as.factor(metabolite))) +
+  geom_boxplot(show.legend = FALSE)
+```
+
 
 ## The Lasso model
 
@@ -104,16 +137,19 @@ Then we add everything to a workflow object, piecewise, and fit the Lasso model:
 ```{r}
 lasso_spec <- logistic_reg(mode = "classification", penalty = 0.1, mixture = 1) %>%
   set_engine("glmnet")
+print(lasso_spec)
 ```
 
 ```{r}
 wf <- workflow() %>%
-  add_recipe(mtbsl1_rec)
+  add_recipe(mtbsl1_rec) %>%
+  add_model(lasso_spec)
+
+print(wf)
 ```
 
 ```{r}
 lasso_fit <- wf %>%
-  add_model(lasso_spec) %>%
   fit(data = mtbsl1_train)
 ```
 
@@ -134,6 +170,10 @@ lasso_fit %>%
 
 We use k-fold cross-validation to tune the hyperparameters ($\lambda$ penalty in this case) in the training set:
 
+- `vfold_cv`: to specify n. of folds (stratified) and replicates
+- `logistic_reg`: to specify that we want a logistic regression model for classification, we want to use Lasso penalization, and we are fine-tuning the penalty parameter
+- `grid_regular`: defines the range of penalty parameter values to try
+
 ```{r}
 diab_cv <- vfold_cv(mtbsl1_train, v=5, repeats = 10, strata = Metabolic_syndrome)
 
@@ -142,23 +182,36 @@ tune_spec <- logistic_reg(penalty = tune(), mixture = 1) %>%
 
 lambda_grid <- grid_regular(penalty(), levels = 50, filter = penalty <= .05)
 print(lambda_grid)
-
 ```
+
+We build a **new workflow** object:
+
+```{r}
+wf1 <- workflow() %>%
+  add_recipe(mtbsl1_rec) %>%
+  add_model(tune_spec) ## remember: the model equation was specified in the recipe (top of this document)
+```
+
+We are now ready to **fine-tune the model**!!
 
 ```{r}
 doParallel::registerDoParallel()
 
 lasso_grid <- tune_grid(
-  wf %>% add_model(tune_spec),
+  wf1,
   resamples = diab_cv,
   grid = lambda_grid
 )
 ```
 
+Here we can see the results for each value of the penalty parmeter that was tried in the fine-tuning process:
+
 ```{r}
 lasso_grid %>%
   collect_metrics()
 ```
+
+Plotting the results will help us see what happened during fine-tuning of the model, and then select the best value for $\lambda$ (the penalty parameter) based on the maximum AUC (binary classification problem):
 
 ```{r}
 lasso_grid %>%
@@ -183,9 +236,11 @@ lowest_roc <- lasso_grid %>%
 print(lowest_roc)
 ```
 
+With the selected penalty parameter from fine-tuning, we can (finally!)  finalize our workflow: 
+
 ```{r}
 final_lasso <- finalize_workflow(
-  wf %>% add_model(tune_spec),
+  wf1,
   lowest_roc
 )
 
