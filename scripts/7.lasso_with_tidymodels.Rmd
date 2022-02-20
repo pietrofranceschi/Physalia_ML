@@ -247,27 +247,9 @@ final_lasso <- finalize_workflow(
 print(final_lasso)
 ```
 
-### Variable importance
-
-```{r}
-library("vip")
-
-final_lasso %>%
-  fit(mtbsl1_train) %>%
-  pull_workflow_fit() %>%
-  vi(lambda = lowest_roc$penalty) %>%
-  mutate(
-    Importance = abs(Importance),
-    Variable = fct_reorder(Variable, Importance)
-  ) %>%
-  filter(Importance > 0) %>%
-  ggplot(aes(x = Importance, y = Variable, fill = Sign)) +
-  geom_col() +
-  scale_x_continuous(expand = c(0, 0)) +
-  labs(y = NULL)
-```
-
 ## Testing the model
+
+We are now ready to test our fine-tuned Lasso model on the test partition:
 
 ```{r}
 lr_res <- last_fit(
@@ -277,7 +259,6 @@ lr_res <- last_fit(
 
 lr_res %>%
   collect_metrics()
-
 ```
 
 ```{r}
@@ -286,6 +267,12 @@ lr_res %>% collect_predictions() %>%
   summarise(N=n()) %>%
   spread(key = ".pred_class", value = N)
 ```
+
+we can also do it step-by-step:
+
+1. preprocess the test data
+2. fit the final Lasso model to the training data
+3. make predictions on the test data
 
 ```{r}
 mtbsl1_testing <- mtbsl1_prep %>% bake(testing(mtbsl1_split)) ## preprocess test data
@@ -309,6 +296,28 @@ lr_auc <-
   mutate(model = "Logistic Regression")
 
 autoplot(lr_auc)
+```
+
+### Variable importance
+
+Lasso models have a nice side feature: they naturally select variables, based on the shrinking of some coefficients exactly to zero. Based on this, Lasso models can return the importance of the variables used to fit the model:
+
+```{r}
+library("vip")
+
+final_lasso %>%
+  fit(mtbsl1_train) %>%
+  pull_workflow_fit() %>%
+  vi(lambda = lowest_roc$penalty) %>%
+  mutate(
+    Importance = abs(Importance),
+    Variable = fct_reorder(Variable, Importance)
+  ) %>%
+  filter(Importance > 0) %>%
+  ggplot(aes(x = Importance, y = Variable, fill = Sign)) +
+  geom_col() +
+  scale_x_continuous(expand = c(0, 0)) +
+  labs(y = NULL)
 ```
 
 ## Add gender (factor) to the Lasso model
