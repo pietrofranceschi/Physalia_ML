@@ -158,4 +158,10 @@ plot(ROCit_logit)
 save(ROCit_logit, file = "ROClogit.RData") ## saving results in a local file
 ```
 
+We can also have a look at the AUC (Area Under the ROC Curve):
+
+```{r}
+paste("AUC is:",print(ROCit_logit$AUC))
+```
+
 
