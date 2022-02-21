@@ -17,7 +17,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 
 * General Introduction 
 * Data mining, -omics and machine learning
-    * [slides 0.Introduction to ML](slides/0.introduction_to_machine_learning.pdf) (Filippo) 
+    * [slides 0: Hands-off introduction to ML](slides/0.introduction_to_machine_learning.pdf) (Filippo) 
     * [Omics meet ML](slides/Omics_meet_ML.pdf) (Pietro) 
 * Introduction to advanced R data libraries [Rmd](scripts/Day_1.Rmd)
 
