@@ -1,7 +1,7 @@
 ---
 title: "Random Forest for multiclass classification"
 author: "Filippo Biscarini"
-date: "7/9/2020"
+date: "20/02/2022"
 output: html_document
 jupyter:
   jupytext:
@@ -33,6 +33,8 @@ library("randomForest")
 mtbsl1 <- fread("../data/MTBSL1.tsv")
 names(mtbsl1)[c(4:ncol(mtbsl1))] <- paste("mtbl",seq(1,ncol(mtbsl1)-3), sep = "_")
 ```
+
+#### Creating the multinomial variable 
 
 We combine the variables `Gender` and `Metabolic_syndrom` to create a synthetic outcome variable with four classes:
 
@@ -71,7 +73,7 @@ diab_recipe <- mtbsl1_train %>%
   step_corr(all_predictors(), threshold = 0.9) %>%
   step_zv(all_numeric(), -all_outcomes()) %>%
   step_normalize(all_numeric(), -all_outcomes()) %>%
-  step_knnimpute(all_numeric(), neighbors = 5)
+  step_impute_knn(all_numeric(), neighbors = 5) ## there are no missing data here, but in case!
 ```
 
 ```{r}
@@ -129,7 +131,7 @@ doParallel::registerDoParallel()
 tune_res <- tune_grid(
   tune_wf,
   resamples = trees_folds,
-  grid = 20
+  grid = 20 ## n. of tuning combinations
 )
 
 ```
@@ -156,6 +158,8 @@ tune_res %>%
   labs(x = NULL, y = "AUC")
 ```
 
+We now try to start from $\sqrt{p}$  (classification problem)
+
 ```{r}
 m <- round(sqrt(ncol(training_set)-1),0)
 print(m)
@@ -164,7 +168,6 @@ rf_grid <- grid_regular(
   min_n(range = c(8, 12)),
   levels = 3
 )
-
 ```
 
 ```{r}
@@ -198,10 +201,14 @@ regular_res %>%
 
 We now select the best model from the hyperparameters tuning, and fit it to the training set:
 
+1. selecting the best model based on AUC:
+
 ```{r}
 best_auc <- select_best(tune_res, "roc_auc")
 print(best_auc)
 ```
+
+2. finalise the model
 
 ```{r}
 final_rf <- finalize_model(
@@ -212,6 +219,8 @@ final_rf <- finalize_model(
 print(final_rf)
 ```
 
+3. finalise the workflow and fit it to the initial split (training and test data):
+
 ```{r}
 final_wf <- workflow() %>%
   add_recipe(diab_recipe) %>%
@@ -220,6 +229,8 @@ final_wf <- workflow() %>%
 final_res <- final_wf %>%
   last_fit(mtbsl1_split)
 ```
+
+4. evaluate the fine-tuned RF model:
 
 ```{r}
 print(final_res)
