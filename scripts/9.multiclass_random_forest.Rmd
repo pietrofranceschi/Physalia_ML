@@ -208,7 +208,7 @@ best_auc <- select_best(tune_res, "roc_auc")
 print(best_auc)
 ```
 
-2. finalise the model
+2. finalise the model:
 
 ```{r}
 final_rf <- finalize_model(
@@ -238,6 +238,8 @@ final_res %>%
   collect_metrics()
 ```
 
+5. get variable importance:
+
 ```{r}
 final_res %>% 
   pluck(".workflow", 1) %>%   
@@ -247,6 +249,8 @@ final_res %>%
 ```
 
 #### Predictions
+
+We collect the predictions on the test set: for each test observations we get the probabilities of belonging to each of the four classes.
 
 ```{r}
 final_res %>%
