@@ -46,6 +46,9 @@ dogs$PHENOTYPE = dogs$PHENOTYPE-1
 Let's start with a classification tree. We split the data in training and testing sets:
 
 ```{r subset, echo=FALSE}
+seed = 157
+set.seed(seed)
+
 ##Training data
 n = nrow(dogs) ## sample size
 n_training = round(0.75*n,0)
@@ -57,7 +60,16 @@ y_test <- as.factor(dogs[-training_records,]$PHENOTYPE)
 print(y_test)
 ```
 
+```{r}
+table(x_train$PHENOTYPE)
+```
+
+
 Then fit the classification tree model to the training set:
+
+- function `rpart` (from the *rpart* package)
+- method = "class" (classification)
+- `minsplit`: minimum number of observations (records) in a split (splits with fewer than 3 records will not be considered/attempted)
 
 ```{r classification_tree}
 ##Model without bagging
@@ -65,6 +77,12 @@ no_bag_model <- rpart(PHENOTYPE ~ ., data = x_train, method = "class", control =
 
 rpart.plot(no_bag_model)
 ```
+
+In the *tree-plot* we see:
+
+- the **classification**
+- the modelled class probability $\rightarrow$ $P(y=1|x)$ (i.e. the probability of the class conditioned on the node)
+- the percentage of observations used at that node
 
 With the trained model we can make predictions in the test set:
 
@@ -90,22 +108,27 @@ for (i in 1:n_model) {
     bagged_models,
     list(rpart(PHENOTYPE ~ ., dogs[new_sample,], control = rpart.control(minsplit=3))))
 }
+```
 
+```{r}
 ##Getting estimate from the bagged model
 oob_results = data.frame("rep"=NULL, "error"=NULL)
 i = 1
 for (bag_model in bagged_models) {
 
-  preds = predict(bag_model, dogs[oob[[i]],-1])
+  preds = predict(bag_model, dogs[oob[[i]],-1]) ## predict by applying the trained model on the OBB data
   obs = dogs$PHENOTYPE[oob[[i]]]
-  oob_results = rbind.data.frame(oob_results, data.frame("rep"=i, "error"=1-sum(preds == obs)/length(preds)))
+  oob_results = rbind.data.frame(oob_results, data.frame("rep"=i, "error"=1-sum(preds == obs)/length(preds))) ## check obs == preds
   i = i+1
 }
 ```
 
 ```{r}
 kable(oob_results)
-print(mean(oob_results$error))
+```
+
+```{r}
+print(paste("average OOB error:" , mean(oob_results$error)))
 ```
 
 The average OOB error is `r mean(oob_results$error)`.
@@ -137,12 +160,13 @@ for (bag_model in bagged_models) {
   if (is.null(bagged_result)) {
     bagged_result = predict(bag_model, x_test)
   } else {
-   bagged_result=(i*bagged_result+predict(bag_model, x_test))/(i+1)
+   bagged_result=(i*bagged_result+predict(bag_model, x_test))/(i+1) ## % of times each observation was classified as 1
   }
 i = i+1
 }
 
-error = sum(10*abs(bagged_result - (as.integer(y_test)-1)))/(length(y_test)*10)
+diff = abs(bagged_result - (as.integer(y_test)-1)) ## absolute differences between predictions and observations (averaged over the n replicates of the model)
+error = sum(n_model*diff)/(length(y_test)*n_model) ## average error over number of predictions (size of test set time n. of replicates)
 print(error)
 ```
 
