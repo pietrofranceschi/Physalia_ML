@@ -186,6 +186,7 @@ We can now make the next step from bagging (averaging over bootstrapped trees) t
 
 - first, split the data in training and test sets (we keep y and x separate here)
 - then we fit a RF model to the training set, without tuning any hyperparameters (for now)
+- the function `randomForest` internally evaluates the model on OOB data
 
 ```{r rf, echo=FALSE}
 ##Training data
@@ -207,15 +208,21 @@ rf.dogs
 
 #### Let's tune it up a little!
 
-Now we use a convenient built-in function to tune hyperparameters in random forest: the `tuneRF` function:
+Now we use a convenient built-in function to tune hyperparameters in random forest: the `tuneRF` function, from the *randomForest* package:
 
 - we tune just the number of variables to sample in each tree, `mtry`
+- mtryStart: starting value of `mtry` (usually: $\sqrt{p}$ for classification; $p/3$ for regression)
+- stepFactor: at each iteration, `mtry` is inflated (or deflated) by this value
+- improve: the (relative) improvement in OOB error must be by this much for the search to continue
 
 ```{r}
-tuned_rf <- tuneRF(x_train, y_train, mtryStart = 25, ntreeTry=50, stepFactor=1.5, improve=0.01,
-       trace=TRUE, plot=TRUE)
+tuned_rf <- tuneRF(x_train, y_train, mtryStart = 25, ntreeTry=50, stepFactor=2, improve=0.01,
+       trace=TRUE, plot=TRUE) ## we take a smaller starting mtry to better see the plot
 
 head(tuned_rf)
+```
+
+```{r}
 num_row <- which(tuned_rf[,2] == min(tuned_rf[,2])) ## row corresponding to min OOB error
 num_vars <- tuned_rf[num_row,1]  ## mtry value corresponding to min OOB error
 print(num_vars)
@@ -225,7 +232,14 @@ Now we fit a final RF model with the tuned value for `mtry` (number of variables
 
 ```{r}
 rf.dogs <- randomForest(x = x_train, y = y_train, ntree = 100, mtry = num_vars, importance = TRUE)
+rf.dogs
+```
 
+#### Variable importance
+
+From RF models, we can extract variable importance (here we take the top 20 variables ordered for importance):
+
+```{r}
 imp <- as.data.frame(importance(rf.dogs))
 summary(imp)
 top_vars <- imp %>%
@@ -237,8 +251,6 @@ top_vars <- imp %>%
 top_vars$name_var <- factor(top_vars$name_var, levels = rev(top_vars$name_var))
 ```
 
-#### Variable importance
-
 ```{r varimp}
 p <- ggplot(top_vars, aes(x=name_var,y=MeanDecreaseGini)) + geom_bar(stat="identity")
 p <- p + theme(axis.text.x = element_text(angle = 90, hjust = 1))
@@ -247,6 +259,8 @@ p
 ```
 
 #### Predictions
+
+We are now ready to evaluate our tuned RF model on the **test data**:
 
 ```{r}
 probs <- predict(rf.dogs, newdata = x_test, type = "prob")
