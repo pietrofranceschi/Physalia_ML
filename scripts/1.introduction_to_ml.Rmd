@@ -10,6 +10,7 @@ library("knitr")
 library("dplyr")
 library("plotly")
 library("ggplot2")
+library("tidyverse")
 ```
 
 ## 1.1 Linear regression: a basic model for parameter estimation
@@ -135,13 +136,11 @@ In practice, we are not going to manually minimise the loss function to estimate
 
 An important aspect of predictive statistics is to measure the performance of the developed predictive model (predictive machine).
 
-Let's start by creating an artificial dataset sampling from a normal distribution:
+Let's start by using an example dataset from base R: the ChickWeight dataset, with weight and age of chicks.
 
 ```{r}
-y <- rnorm(n = 100, mean = 0, sd = 1)
-x <- rnorm(n = 100, mean = 0, sd = 1)
-
-dataset <- data.frame("y"=y, "x"=x)
+data(ChickWeight) ##
+dataset <- rename(ChickWeight, y = weight, x = Time) %>% select(y,x)
 kable(head(dataset))
 ```
 
@@ -157,8 +156,7 @@ coef(fit)
 ```
 
 ```{r}
-plot(dataset$x, dataset$y, ylab = "y (target variable)", xlab = "x (predictive variable)")
-abline(fit)
+ggplot(dataset, aes(x = x, y = y)) + geom_jitter() + geom_smooth(method = "lm", se = FALSE)
 ```
 
 We now have all the ingredients to obtain predictions: either by explicitly using the estimated coefficients:
@@ -196,7 +194,6 @@ dataset$predictions <- predictions
 plot(dataset$y, dataset$predictions, xlab = "observations", ylab = "predictions")
 #abline(fit)
 ```
-
 
 Besides visualizing how predictions relate to observations, we need also to measure (quantify) the predictive performance of the model.
 
@@ -264,12 +261,20 @@ print(r_spearman)
 
 ## Exercise 1.2
 
+```{r}
+ggplot(dataset, aes(x = x, y = y)) + geom_jitter() + geom_smooth(method = "lm", formula = y ~ poly(x,2), se = FALSE)
+```
+
 Generate a dataset, fit a linear model and measure the accuracy of predictions:
 
-1. Generate a dataset (you can pick a different distribution e.g. t-student, chi-square etc., or you can choose one of the many built-in R datasets, using the function `data()`):
+1. you can choose one of the many built-in R datasets, using the function `data()`:
+2. or you can generate a dataset (e.g. sampling from a Gaussian distribution)
 
 ```{r results="asis"}
-data()
+#data()
+
+#y <- rnorm(n = 100, mean = 0, sd = 1)
+#x <- rnorm(n = 100, mean = 0, sd = 1)
 
 y = NULL # target variable
 x = NULL # feature 1
