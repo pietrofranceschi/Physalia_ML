@@ -1,7 +1,7 @@
 ---
 title: "Boosting: a first encounter"
 author: "Filippo Biscarini"
-date: "7/9/2021"
+date: "17/01/2022"
 output: html_document
 jupyter:
   jupytext:
@@ -29,7 +29,7 @@ library("data.table")
 library("randomForest")
 ```
 
-We start by reading in the diabetes data and splitting it into the training and test sets: again, it's a multiclass classification problem (combination of gender and health status)
+We start by reading in the diabetes data and splitting it into the training and test sets: again, it's a **multiclass classification problem** (combination of gender and health status)
 
 ```{r}
 ## read the data
@@ -41,7 +41,6 @@ diab_dt <- select(mtbsl1, -c(`Primary ID`, Gender, Metabolic_syndrome))
 
 ```{r}
 ## DATA SPLITTING
-
 diab_dt$id <- paste("id",seq(1,nrow(diab_dt)), sep="_")
 
 training_set <- diab_dt %>%
@@ -57,6 +56,14 @@ test_set$id <- NULL
 table(training_set$gender_status)
 table(test_set$gender_status)
 ```
+
+We now use the `gbm` function from the *gbm* package:
+
+- equation: gender_status as a function of all metabolites
+- distribution: **multinomial** (4 classes)
+- n.trees: total number of trees (n. of sequential models to be combined/added)
+- shrinkage: $\lambda$ (shrinkage) parameter
+- interaction.depth: maximum depth of trees
 
 ```{r}
 boost.diabt = gbm(
@@ -100,6 +107,21 @@ result %>%
 
 ## Tuning a boosting model
 
+We now use `tidymodels` to build a recipe and workflow to tune our boosting model:
+
+1. splitting the data in training and test sets
+2. specify the preprocessing recipe (remove collinear/correlated variables, remove variables with no variance, normalize variables, impute missing data)
+3. partition the training set in k-folds for cross-validation to tune hyperparameter
+4. specify the boosting model:
+    - "classification" mode
+    - n. of trees (sequential models to combine)
+    - min. n. of obs per node $\rightarrow$ tuning parameter
+    - tree depth $\rightarrow$ tuning parameter
+    - shrinkage parameter (learning rate) $\rightarrow$ tuning parameter
+5. define the grid (combinations) of hyperparameters to test
+6. put everything in a workflow
+7. run the fine-tuning of hyperparameters
+
 ```{r}
 ## data splitting
 diab_dt <- select(mtbsl1, -c(`Primary ID`, Gender, Metabolic_syndrome))
@@ -113,10 +135,10 @@ mtbsl1_test <- testing(mtbsl1_split)
 ## preprocessing
 preprocessing_recipe <-
   recipes::recipe(gender_status ~ ., data = mtbsl1_train) %>%
-  step_corr(all_predictors(), threshold = 0.9) %>%
+  step_corr(all_predictors(), threshold = 0.9) %>% ## we remove collinear variables
   step_zv(all_numeric(), -all_outcomes()) %>%
   step_normalize(all_numeric(), -all_outcomes()) %>%
-  step_knnimpute(all_numeric(), neighbors = 5) %>%
+  step_impute_knn(all_numeric(), neighbors = 5) %>%
   prep()
 ```
 
@@ -198,6 +220,17 @@ xgboost_tuned %>%
   labs(x = NULL, y = "accuracy")
 ```
 
+### Select and evaluate the best model
+
+We show the best models in terms of ROC AUC. then:
+
+- we select the most accurate model
+- we add the best model to the workflow $\rightarrow$ final workflow
+- fit the final model on the data split (fit on training data, evaluate on test data)
+- collect results and look at key metrics
+- calculate the accuracy of predictions (confusion matrix)
+- finally, extract variable importance
+
 ```{r}
 xgboost_tuned %>%
   show_best(metric = "roc_auc")
@@ -205,21 +238,16 @@ xgboost_tuned %>%
 
 ```{r}
 xgboost_best_params <- xgboost_tuned %>%
-  select_best("accuracy")
+  select_best("roc_auc")
 
-final_xgb <- finalize_workflow(
-  xgboost_wf,
-  xgboost_best_params
-)
+print(xgboost_best_params)
 ```
 
 ```{r}
-library("vip")
-
-final_xgb %>%
-  fit(data = juice(preprocessing_recipe)) %>%
-  pull_workflow_fit() %>%
-  vip(geom = "point")
+final_xgb <- finalize_workflow(
+  xgboost_wf, ## built workflow
+  xgboost_best_params ## selected best model after finetuning
+)
 ```
 
 ```{r}
@@ -228,7 +256,6 @@ collect_metrics(final_res)
 
 collect_predictions(final_res) %>%
   metrics(gender_status, .pred_class)
-
 ```
 
 ```{r}
@@ -240,4 +267,13 @@ print(cm)
 
 ```{r}
 autoplot(cm, type="heatmap")
+```
+
+```{r}
+library("vip")
+
+final_xgb %>%
+  fit(data = juice(preprocessing_recipe)) %>%
+  pull_workflow_fit() %>%
+  vip(geom = "point")
 ```
