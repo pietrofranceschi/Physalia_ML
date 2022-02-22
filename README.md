@@ -26,7 +26,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Recap of Day_1: DIY!
 * Multivariate data: things to always remember
 * Model and variable selection: the machine learning paradigm
-   * [slides 1.variable_selection](slides/1.variable_selection.pdf)  (Filippo)  
+   * [slides 1.variable_selection](slides/1.variable_selection.pdf)  (Filippo)
 * Supervised learning: regression and classification
    * [script 1.introduction_to_ml] [(.Rmd)](scripts/1.introduction_to_ml.Rmd) [(html)](scripts/1.introduction_to_ml.html) [(ipynb)](scripts/1.introduction_to_ml.ipynb) 
    * [slides 2.Supervised learning](slides/2.supervised_learning.pdf)  (Filippo) 
