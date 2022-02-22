@@ -18,12 +18,13 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * General Introduction 
 * Data mining, -omics and machine learning
     * [slides 0: Hands-off introduction to ML](slides/0.introduction_to_machine_learning.pdf) (Filippo) 
-    * [Omics meet ML](slides/Omics_meet_ML.pdf) (Pietro) 
-* Introduction to advanced R data libraries [Rmd](scripts/Day_1.Rmd)
+    * [Omics meet ML](slides/omics_meet_ML.pdf) (Pietro) 
+* Introduction to advanced R data libraries [Rmd](scripts/R_advanced_libraries.Rmd)
+* Introduction to `tidymodels` [Rmd](scripts/Introduction_to_tidymodels.Rmd)
 
 **Day 2**
-* More on advanced data libraries: `tidymodels`[Rmd] (scripts/tidymodels.Rmd)
-* Multivariate data and generalities:
+* Recap of Day_1: DIY!
+* Multivariate data: things to always remember
 * Model and variable selection: the machine learning paradigm
    * [slides 1.variable_selection](slides/1.variable_selection.pdf)  (Filippo)  
 * Supervised learning: regression and classification
