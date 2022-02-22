@@ -21,8 +21,8 @@ In particular:
   * `data.frame`, `tibble`, `data.table`
   * data carpentry (`tidyverse`, `data.table`)
   * *long* and *wide* tables 
-  * modeling (`broom`)
-* Writing R functions
+  * modelling (`broom`)
+* Writing R functions (maybe ...)
 * Vectorizing operations (`purrr`)
  
 
@@ -43,8 +43,8 @@ one_old <-seq(1,sqrt(100))
 
 ## The old style work have to be read in an "onion" fashion
 
-one_pipe <- sqrt(100) %>% 
-  seq(1,.)
+one_pipe <- sqrt(100) %>%  ## calculate the square root of 100
+  seq(1,.) ## make the sqrt
 
 ## one_old and one_pipe are exactly equivalent, but the second is by far more easy to read
 ## in addition, whan used in data manipulation tasks, pipes do not save intermediate objects
@@ -87,17 +87,17 @@ These three box of code allow to benchmark the efficiency of the three solution 
 
 ```{r}
 ## Base R
-system.time(read.csv("../data/athlete_events.csv"))
+system.time(read.csv("athlete_events.csv"))
 ```
 
 ```{r}
 # data.table
-system.time(fread("../data/athlete_events.csv"))
+system.time(fread("athlete_events.csv"))
 ```
 
 ```{r}
 # tidyverse
-system.time(read_csv("../data/athlete_events.csv"))
+system.time(read_csv("athlete_events.csv"))
 ```
 
 As it can be seen data.table is almost ten times faster than base R, while tidyverse stays somehow in the middle
@@ -107,9 +107,9 @@ tibbles and data.tables also own an improved print method that allows for a more
 ```{r}
 ## read the three tables
 
-baseR <- read.csv("../data/athlete_events.csv")
-datat <- fread("../data/athlete_events.csv")
-tidyv <- read_csv("../data/athlete_events.csv")
+baseR <- read.csv("athlete_events.csv")
+datat <- fread("athlete_events.csv")
+tidyv <- read_csv("athlete_events.csv")
 ```
 
 
@@ -151,7 +151,7 @@ The syntax of tidyverse is slightly more verbose but extremely easy to read
 
 ```{r}
 iris %>% 
-  tibble() %>% 
+  tibble() %>%         ## here I'm casting my data frame into a tibble
   filter(Species == "setosa") ## the function filter selects rows on condition
 
 ## Note: the tibble() call is not necessary, since the coercion to a tibble object
@@ -168,7 +168,14 @@ If you consider the previous general syntax, you see that selecting columns in d
 ## Extracting several columns as a data.table 
 iris %>% 
   data.table(.) %>% 
-  .[,list(Species,Sepal.Width)]
+  .[,c("Sepal.Width","Species")]
+
+## Extracting can also be done by using a list of columns
+iris %>% 
+  data.table(.) %>% 
+  .[,list(Sepal.Width,Species)]
+
+
 
 ## extracting one column as as vector
 iris %>% 
@@ -199,6 +206,7 @@ iris %>%
 
 ## select two columns and return a tibble
 iris %>% 
+  tibble(.) %>% 
   select(Sepal.Length,Species)
 
 ```
@@ -220,7 +228,7 @@ iris %>%
 
 Unfortunately we have another dot ... 
 
-Note: the writing `~is.numeric(x)` could seem wired. This is a special short cut to construct _functionals_. Tidysomething will transform formulas starting with `~` into functions. 
+Note: the writing `~is.numeric(.x)` could seem wired. This is a special short cut to construct _functionals_. Tidysomething will transform formulas starting with `~` into functions. 
 
 There are shorthands to refer to their arguments. For functions with one argument you can use the dot! For one or two (`.x` and `.y`), for an arbitrary number of arguments `..1`,`..2`, `..3`, etc.
 
@@ -270,7 +278,9 @@ In TB there is specific function `mutate` which can be piped to create or manipu
 ```{r}
 ## here the creation!
 nef_tb_col <- iris %>% 
-  mutate(myratio = Sepal.Length/Sepal.Width)
+  tibble(.) %>% 
+  mutate(myratio = Sepal.Length/Sepal.Width,
+         myratio2 = Petal.Length/Petal.Width)
 
 ## multiple columns can be created inside the same mutate call by using commas
 
@@ -347,7 +357,7 @@ Get the Olympic game dataset and:
 
 * find the athlete(s) participating to the larger number of events
 * create a new dataset which contains the body mass index of the athletes
-* find the top athletes in terms of absolute number of medals on the Olympic games history both on absolute and per year
+* find the top athletes in terms of absolute number of medals on the Olympic games history, both on absolute and per year
 
 
 
@@ -363,7 +373,7 @@ dat <- read_csv("athlete_events.csv")
 ## Athlete participating to the large number of events
 dat %>% 
   filter(Sport == "Athletics") %>%  ## here I wanted to focus only on people doing athletics
-  group_by(ID,Name,Sport) %>%       ## I group by more columns because I want to retain them in the output of summarise
+  group_by(ID,Name, Sport) %>%       ## I group by more columns because I want to retain them in the output of summarise
   summarise(nevents = length(NOC)) %>% 
   arrange(desc(nevents))         ## arrange allows to order the output ascending (or descending with desc) 
   
@@ -372,16 +382,16 @@ dat %>%
 ```{r}
 ## Calculate the BMI
 dat <- dat %>% 
-  mutate(bmi = Weight/(Height^2))
+  mutate(bmi = Weight/((Height/100)^2))
 ```
 
 
 ```{r}
 # find the top athletes in terms of absolute number of medals on the olympic games history 
 dat %>% 
-  filter(!is.na(Medal)) %>% 
+  filter(!is.na(Medal)) %>%      ## keeping only rows where Medal is not NA
   filter(Sport == "Athletics") %>%
-  group_by(Name, Sport) %>% 
+  group_by(Name, Sport, Event) %>% 
   summarise(nevents = length(NOC)) %>% 
   arrange(desc(nevents))
 
@@ -391,7 +401,7 @@ dat %>%
   filter(Sport == "Athletics") %>%
   group_by(Name, Year, Sport) %>% 
   summarise(nevents = length(NOC)) %>% 
-  arrange(desc(nevents))
+  arrange(desc(nevents)) 
 ```
 
 We were discussing whether there are athletes who got medals in different sports ...
@@ -403,7 +413,7 @@ dat %>%
   group_by(Name) %>% 
   summarise(n_sport = length(unique(Sport)),
             what_sport = paste(unique(Sport), collapse = ";")) %>% 
-  filter(n_sport > 1) 
+  filter(n_sport > 1)  
 ```
 
 
@@ -430,11 +440,6 @@ tidy(ing_model)
 ```
 
 Up to this point the advantage is not completely clear, but be patient ...
-
-
-## Writing R functions
-
-
 
 
 ## Vectorizing operations (`purrr`)
@@ -503,7 +508,7 @@ but this type of approach can be really handy if you combine it with modelling, 
 Suppose we want to make an ignorant model for the three species of varieties and get out the coefficients in a clean and readable way ...
 
 ```{r}
-iris_nest %>% 
+iris_nest <- iris_nest %>% 
   mutate(models = map(data, ~lm(Sepal.Length ~ Sepal.Width, data = .x))) %>%     ## here I'm mapping the modelling
   mutate(coefficients = map(models, ~tidy(.x))) %>%                              ## here I'm mapping the tidying
   unnest(coefficients)                                                          ## here I'm unnesting the coefficients
@@ -541,7 +546,7 @@ Suppose, for example that you want to use t.test to compare all thenproerties of
 
 
 ```{r}
- pippo <- iris %>% 
+iris %>% 
   filter(Species != "setosa") %>%    
   droplevels() %>% 
   pivot_longer(!(Species), names_to = "mynames", values_to = "myvalues") %>% 
@@ -550,7 +555,12 @@ Suppose, for example that you want to use t.test to compare all thenproerties of
                                                 y =t %>%  filter(Species == "virginica") %>% pull(myvalues)) 
                       )
          ) %>% 
-  mutate(coeff = map(mytest,~tidy(.x)))
+  mutate(coeff = map(mytest,~tidy(.x))) %>% 
+  unnest(coeff) %>% 
+  mutate(is_sig = ifelse(p.value < 0.05,"sig","non_sig")) %>% 
+  ggplot() +
+  geom_col(aes(x = mynames, y = estimate1, fill = is_sig)) +
+  theme_light()
   
 ```
 
