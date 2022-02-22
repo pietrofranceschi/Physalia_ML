@@ -22,19 +22,20 @@ In particular:
   * data carpentry (`tidyverse`, `data.table`)
   * *long* and *wide* tables 
   * modeling (`broom`)
+* Writing R functions
 * Vectorizing operations (`purrr`)
  
 
 ```{r}
 library(tidyverse)     ## the full tidyverse ecosystem for seamless working with tables
-library(broom)         ## a broom to tidy the outcomes of modeling
-library(data.table)    ## a less flexible (bit more fast) approach to the manipulation of tabular data
+library(broom)         ## a broom to tidy the outcomes of modelling
+library(data.table)    ## a less flexible (but more fast) approach to the manipulation of tabular data
 ```
 
 
 # Piping
 
-The overall idea behind piping is to make easy to read a chain of functions. Pipes `%>%` have been introduced in the `magrittr` package but are now a core tool of tidyverse
+The overall idea behind piping is to make easy to read (and perform) a chain of functions. Pipes `%>%` have been introduced in the `magrittr` package but are now a core tool of the _tidyverse_
 
 ```{r}
 ## sequence going from 1 to the square root of 100
@@ -46,10 +47,11 @@ one_pipe <- sqrt(100) %>%
   seq(1,.)
 
 ## one_old and one_pipe are exactly equivalent, but the second is by far more easy to read
+## in addition, whan used in data manipulation tasks, pipes do not save intermediate objects
 
 ```
 
-When putting a function in a pile, you refer to "what is coming from the pipe" with a dot `.`
+When putting a function in a pipe, you refer to "what is coming from the pipe" with a dot `.`
 
 ```{r}
 ## Pipes can be used also to produce plots!
@@ -77,25 +79,25 @@ In R tabular data are commonly treated with three different classes of objects
 
 * `data.frame`: old, faithful and the father of almost everything else. A data frame is a list
 * `data.table`: basically still a data.frame which have been optimized for efficiency
-* `tibble`: is the tidyverse form of data.frames, less efficient than data.table, but more flexyble since it is integrated in the tidy environment
+* `tibble`: is the tidyverse form of data.frames, less efficient than data.table, but more flexible since it is integrated in the tidy environment
 
-Both data.tables and tibble retains the characteristics of dfs (indexing with square brackets, possible use of $ to get the columns). Importantly, in both cases the row.names attribute has been removed.
+Both data.tables and tibble retains the characteristics of dfs (indexing with square brackets, possible use of $ to get the columns). Importantly, in both cases the row.names attribute has been removed and  its use is discouraged even if sometimes useful ;-)
 
 These three box of code allow to benchmark the efficiency of the three solution sin reading a relatively big dataset (35 MB)
 
 ```{r}
 ## Base R
-system.time(read.csv("athlete_events.csv"))
+system.time(read.csv("../data/athlete_events.csv"))
 ```
 
 ```{r}
 # data.table
-system.time(fread("athlete_events.csv"))
+system.time(fread("../data/athlete_events.csv"))
 ```
 
 ```{r}
 # tidyverse
-system.time(read_csv("athlete_events.csv"))
+system.time(read_csv("../data/athlete_events.csv"))
 ```
 
 As it can be seen data.table is almost ten times faster than base R, while tidyverse stays somehow in the middle
@@ -105,9 +107,9 @@ tibbles and data.tables also own an improved print method that allows for a more
 ```{r}
 ## read the three tables
 
-baseR <- read.csv("athlete_events.csv")
-datat <- fread("athlete_events.csv")
-tidyv <- read_csv("athlete_events.csv")
+baseR <- read.csv("../data/athlete_events.csv")
+datat <- fread("../data/athlete_events.csv")
+tidyv <- read_csv("../data/athlete_events.csv")
 ```
 
 
@@ -123,6 +125,8 @@ tidyv
 ```
 
 # Data carpentry in`tidyverse` and `data.table`
+
+Data tables and tibbles are very useful when you are engaged in manipulating tabular data in what is called **data carpentry**
 
 ## Filtering rows on condition
 
@@ -150,7 +154,7 @@ iris %>%
   tibble() %>% 
   filter(Species == "setosa") ## the function filter selects rows on condition
 
-## Note: as we discussed in the lecture, the tibble() call is not necessary, since the coercion to a tibble object
+## Note: the tibble() call is not necessary, since the coercion to a tibble object
 ## is performed under the hood by the fact that you are using pipes
 ```
 
@@ -216,7 +220,7 @@ iris %>%
 
 Unfortunately we have another dot ... 
 
-Note: the writing `~is.numeric(x)` could seem wired. This is a special shortcut to construct _functionals_. Tidysomething will transform formulas starting with `~` into functions. 
+Note: the writing `~is.numeric(x)` could seem wired. This is a special short cut to construct _functionals_. Tidysomething will transform formulas starting with `~` into functions. 
 
 There are shorthands to refer to their arguments. For functions with one argument you can use the dot! For one or two (`.x` and `.y`), for an arbitrary number of arguments `..1`,`..2`, `..3`, etc.
 
@@ -240,10 +244,10 @@ iris %>%
 
 ## Creating new columns or mutating existing ones
 
-Creating new columns on the bases of the one present in our dataset is one of the most useful and common tasks of data carpentry.
+Creating new columns on the bases of the ones present in our dataset is one of the most useful and common tasks of data carpentry.
 If you look to it in abstract, also mutating the content of an existing column fits in the previous reasoning: I'm creating a new column with a name which is identical to the old one ... 
 
-In DT, new columns are created by using the `:=` operator in the second "placeholder" of the call
+In DT, new columns are created by using the `:=` operator in the second "place holder" of the call
 ```{r}
 ## Create a column with the ration between sepal lenght and sepal width
 new_dt_col <- iris %>% 
@@ -296,7 +300,7 @@ The last type of operations I want to touch on this flyby, are the one meant to 
 This is normally handy when you want to calculate summary statistics over a large table of samples. 
 
 
-In DT this operation is performed combining what we heve done before with the `by` argument
+In DT this operation is performed combining what we have done before with the `by` argument
 
 ```{r}
 ## Calculate the average of sepal length on the three species
@@ -337,15 +341,18 @@ iris %>%
 ```
 
 
+## Practical #1
+
+Get the Olympic game dataset and: 
+
+* find the athlete(s) participating to the larger number of events
+* create a new dataset which contains the body mass index of the athletes
+* find the top athletes in terms of absolute number of medals on the Olympic games history both on absolute and per year
+
 
 
 
 ## Correction of Practical 1
-
-* find the athlete(s) participating to the larger number of events
-* create a new dataset which contains the body mass index of the athletes
-* find the top athletes in terms of absolute number of medals on the olympic games history and per year
-
 
 ```{r}
 ## read the data
@@ -402,7 +409,7 @@ dat %>%
 
 ## Brooming models (`broom`)
 
-`broom` is a package part of the tidyverse environment which allow to reformat the output of a model (actually of many classes of models, tests, etc) making tidier and easy to use
+`broom` is a package part of the tidyverse environment which allow to reformat the output of a model (actually of many classes of models, tests, etc) makingm them tidier and easy to use
 
 ```{r}
 ## this is an ignorant model of the iris dataset
@@ -424,6 +431,12 @@ tidy(ing_model)
 
 Up to this point the advantage is not completely clear, but be patient ...
 
+
+## Writing R functions
+
+
+
+
 ## Vectorizing operations (`purrr`)
 
 The ones of you with some experience with "old" R know that - mainly for historical reasons nowadays - _for loops_ should be avoided like the plague when you want an efficient code.
@@ -437,7 +450,7 @@ To show you how this is working in a rather "modern" settings I will introduce y
 ```{r}
 ## I'm nesting a tibble with three categories in a `nested` tibble
 iris_nest <- iris %>% 
-  nest(data = !c(Species))  ## this line says: plaese nest all columns different from `Species` in a new column called data
+  nest(data = !c(Species))  ## this line says: please nest all columns different from `Species` in a new column called data
 
 iris_nest
 ```
@@ -449,7 +462,7 @@ The fact that you can nest list is not surprising, and since tibbles are lists, 
 iris_nest$data[[1]]
 ```
 
-The overall structuyre of the object better clarify the nested nature of the data ...
+The overall structure of the object better clarify the nested nature of the data ...
 
 ```{r}
 str(iris_nest)
@@ -458,13 +471,13 @@ str(iris_nest)
 Ok, now let's suppose we would like to calculate the dimension of the three sub data table by using `apply`
 
 ```{r}
-## lapply apply a function to a list and return a list
+## lapply applies a function to a list and return a list
 lapply(iris_nest$data, function(e) dim(e))
 ```
 
 Voila! Fast, efficient ... but not very clear to read
 
-To cleanup all that, in the tidyverse world you can rely on the functions part of the `purrr` package. What I will show here is the basic idea (so the advantage in readability in comparison to base R is not enormous), but `purrr` contains a bunch of functions which can really improve your R experience
+To clean-up all that, in the tidyverse world you can rely on the functions part of the `purrr` package. What I will show here is the basic idea (so the advantage in readability in comparison to base R is not enormous), but `purrr` contains a bunch of functions which can really improve your R experience
 
 The analogous of `apply` in `purrr` is `map`
 
@@ -485,15 +498,15 @@ iris_nest %>%
   mutate(mydim = map(data,~dim(.x)))
 ```
 
-but this type of approach can be really handy if you combine it with modeling, and brooming.
+but this type of approach can be really handy if you combine it with modelling, and brooming.
 
 Suppose we want to make an ignorant model for the three species of varieties and get out the coefficients in a clean and readable way ...
 
 ```{r}
 iris_nest %>% 
-  mutate(models = map(data, ~lm(Sepal.Length ~ Sepal.Width, data = .x))) %>%     ## here I'm mapping the modeling
+  mutate(models = map(data, ~lm(Sepal.Length ~ Sepal.Width, data = .x))) %>%     ## here I'm mapping the modelling
   mutate(coefficients = map(models, ~tidy(.x))) %>%                              ## here I'm mapping the tidying
-  unnest(coefficients)                                                          ## here I'm unnesting the coeffieints
+  unnest(coefficients)                                                          ## here I'm unnesting the coefficients
 
 ## note that here I'm recycling the data and the models ... so normally I would create a new tibble with the coefficients discarding 
 ## the redundant columns
@@ -502,9 +515,9 @@ iris_nest %>%
 
 ## Wide to long
 
-In the previous step we have been using modeling on sample groups ... could I use the same approach to model the separate variables?
+In the previous step we have been using modelling on sample groups ... could I use the same approach to model the separate variables?
 
-To do that I have first to reshape my data in "long" format. Thsi is done in tidyverse by the `pivot_longer` function
+To do that I have first to reshape my data in "long" format. This is done in tidyverse by the `pivot_longer` function
 
 ```{r}
 
@@ -522,12 +535,14 @@ iris_long
 
 But now we have a column with the variable names! ... 
 
-so I could nest the long DF and switch on my modeling machinery ;-)
+so I could nest the long DF and switch on my modelling machinery ;-)
+
+Suppose, for example that you want to use t.test to compare all thenproerties of virginica and versicolor flowers
 
 
 ```{r}
  pippo <- iris %>% 
-  filter(Species != "setosa") %>% 
+  filter(Species != "setosa") %>%    
   droplevels() %>% 
   pivot_longer(!(Species), names_to = "mynames", values_to = "myvalues") %>% 
   nest(data = !mynames) %>% 
@@ -539,9 +554,16 @@ so I could nest the long DF and switch on my modeling machinery ;-)
   
 ```
 
+Like this I have a tibble of model coefficients ... and now I get them out!
 
 ```{r}
-pippo %>% dplyr::select(!c(mytest,data)) %>% unnest(coeff)
+pippo %>% 
+  dplyr::select(!c(mytest,data)) %>% 
+  unnest(coeff)
 ```
+
+
+
+
 
 

@@ -1,0 +1,330 @@
+---
+title: "Introducting Tidymodels"
+author: "Pietro Franceschi"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidymodels)
+```
+
+
+## Introduction to Tidymodels
+
+During the lectures we have been stressing the need of standardization when dealing with multiple R packages. The origin of the problem is that often the way we specify models and we get out model results is strongly depending on which package we are using the model.
+
+If we stick with a method (let's say `lm`), this is not particularly problematic, but in a ML context where you want to test the performance of different models on the same data one gets easily messy ... so keeping an unified interface to modelling can be an extremely useful asset for high throughput data analysis.In addition, as you will discover during the week, machine learning always requires a fairly complex work of data splitting and parameter tuning ... It would be great also to have all of that well standardized.  
+
+The idea behind `tidymodels` is to introduce a sort of "abstraction" layer where we can define the abstract properties of our model without bothering too much about the structure of the different modelling package. In other words, `tidymodels` acts as an interface between an abstract definition of the model and of its tuning and the actual "fitting" which is very much package dependent.
+
+`tidymodels` tries also to integrate this approach on the tidyverse/pipe/broom environment. If some of you is familiar with python, the package tries to do what scikit-learn does. 
+
+In the following we will look to the basic use of `tidymodels` to fit linear regression through lm. This is something like chasing a fly with a nuclear weapon ... but it highlights the basic ideas ... 
+
+The abstract steps of model selection and tuning are 
+
+* decide a model
+* Split the data ... just to simulate what will happen on unseen data
+* preprocess your data  ... get better features for modelling
+* fit the model (and tune it in the ML context)
+* evaluate the performance predicting unseen new observations
+
+The reason for this workflow will be better clear at the end of the course. For now let's start simple
+
+
+**I want to fit a linear regression model on the Iris dataset, predicting Sepal.Length as a function of Species and Sepal.Width**
+
+
+## Old Style Approach
+
+We start with a fairly basic problem: we want to model Sepal Length as a function of Sepal Width and Iris specie in the iris dataset
+
+```{r}
+## get the data
+data(iris)
+
+```
+
+
+```{r}
+## linear model with categorical predictor and a continuous predictor 
+## the reason of the ignorance will be clear in a while ...
+old_fashion_ign <- lm(Sepal.Length ~ Species*Sepal.Width, data = iris)
+
+summary(old_fashion_ign)
+```
+
+
+The output of the previous command will be familiar to many of you.  Basically, we have the parameters of three lines (intercepts and slopes) for the samples belonging to the three groups.
+
+For basic R choices, both parameters are returned taking as a reference the first level of the categorical variable (here setosa because s in the alphabet comes before v ;-) ). What I mean is that :
+
+* the `(Intercept)` term estimate the intercept (i.e. the value of Sepal.Length when Sepal.Width is zero ...) of the line for the setosa variety 
+* The other two Species* terms  estimate the intercepts for the other two varieties, not on absolute, but as differences with the reference value.
+* A similar reasoning holds for the slope (the `Sepal.Width` term). 
+
+This type of coding has to deal with the "question" which is tested (here: Is the trend for setosa different from "no trend? Are the trends for Virginica and Versicolor different from the one we see for setosa?) 
+To change this type of _coding_ one should change the **contrasts** but this goes beyond the point of our present discussion.
+
+In view of the objective of this demo, it is important to have a glimpse on how R handles under the hood the process of fitting a line when categorical variables are present in the model. Fitting is done by matrix operations, so in some way it is necessary to transform categorical variables (here the species) in numbers. This is done "under the hood" by creating a series of dummy (0,1,-1) variables which are then used in my fitting. Another time, the details of how you code the dummy variables is linked to the contrasts you want, but the important point to focus here is that lm does automatically a preprocessing step to make your data ready to be fitted by linear regression.
+
+If you want to see the results of this process of dummization you can give a look to the model matrix, which is the matrix which is actually used in the mathematical solution of the regression problem
+
+```{r}
+model.matrix(old_fashion_ign)[1:10,]
+```
+
+So `lm` is taking our iris data and transparently preprocessing them before making the linear regression model. 
+
+Going back to the previous output. The model like this is telling us
+
+* that the intercept of setosa is significantly different from zero 
+* the slope for setosa is significantly different from "flat"
+* for both the parameters, the other two varieties are not different from setosa
+
+Let's look to the data
+
+```{r}
+plot(y = iris$Sepal.Length, x = iris$Sepal.Width, col = iris$Species)
+points(x = iris$Sepal.Width,y = predict(old_fashion_ign), col = iris$Species, pch = 19)
+```
+
+Here empty dots represents the observations and filled dots represent the model predictions. 
+By eye we clearly see that the slope of the three lines is almost the same. Good! It fits with the model! But I would say that it is not easy to sell that setosa is not different from the other two ...
+
+The reason for this odd behaviour was already remarked during the lecture. The overall idea of comparing intercepts is wrong. First of all the idea of finding a Sepal.Length different from zero when the Sepal.Width is zero is odd. Moreover, If you look to our point you see that to see what happens to zero we are extrapolating away from the cloud of points and this is dangerous. To understand that let's look to the position of our data ...
+
+```{r}
+
+plot(y = iris$Sepal.Length, x = iris$Sepal.Width, col = iris$Species, xlim = c(0,5), ylim = c(0,8))
+points(x = iris$Sepal.Width,y = predict(old_fashion_ign), col = iris$Species, pch = 19)
+abline(v = 0, h = 0)
+```
+
+You see that saying something reliable on what happens at Sepal.Width = zero is a dangerous exercise
+
+To get something more sensible a good strategy could be to "center" the cloud of points. In this way the intercept of the model will be the mean value of Sepal.Length.
+
+
+```{r}
+## Here I'm centering my data ...
+iris_new <- iris %>% 
+  mutate(Sepal.Width = scale(Sepal.Width,scale = FALSE))
+```
+
+
+```{r}
+plot(y = iris_new$Sepal.Length, x = iris_new$Sepal.Width, col = iris_new$Species, ylim = c(0,8))
+abline(v = 0, h = 0)
+```
+
+Now the old fashion model becomes
+
+```{r}
+old_fashion <- lm(Sepal.Length ~ Species*Sepal.Width, data = iris_new)
+
+summary(old_fashion)
+
+```
+
+And now the results is what we see!
+
+* significant difference from zero of the intercept of setosa
+* significant differences of the intercepts of versicolor and virginica from setosa
+* significant slope for setosa
+* non-significant difference of virginica and versicolor from setosa
+
+Beyond that. We see that we had to implement another manual pre-processing step (the centering) to construct a meaningful linear regression model.
+I'm quite convinced that many of you have been also transforming predictors or response variable, scaling them, making logarithms, etc, etc 
+
+## Doing this with tidymodels
+
+As I anticipated the idea of tidymodels is to clearly disentangle and make it abstract the process of modelling. Following on our regression example the elements of the process will be 
+
+1) a dataset
+2) a type of model
+3) a series of pre-processing steps which are intended to "cook" our data in a way to make them easier to be modelled
+
+in tidymodels elements 2 and 3 are defined in an abstract way, decoupling the process from the package (or the _engine_) that is taking care of the fitting. This process of abstraction is similar to using markdown to write this text .. the content of the text is decoupled from the way you will present it (a pdf, a webpage with a css, ...)
+
+
+# Defining an abstract model
+
+The first step is to define a model and to define which "engine" which will take care of the fitting
+```{r}
+## here we say that we want to fit a linear regression model with a lm engine
+new_model <- linear_reg() %>%   ## I want to fit an abstract linear regression
+  set_engine("lm")              ## I will use lm to do that
+
+
+## Notes: lm is only one possibilities, another is to use stan or spark, which is a platform for large scale data processing.  
+
+new_model
+```
+
+In this abstract context one could decide to test a different model on the same data with the same pre-processing steps. To do that it will be sufficient to change the model specification!
+
+```{r} 
+library(poissonreg)
+
+## a glm based poisson regression will be fit as 
+
+model2 <- poisson_reg() %>% 
+  set_engine("glm")
+
+
+model2
+```
+
+
+## Pre process my data
+
+The second abstract block of modelling is pre processing. Since this is often a sort of cooking exercise, the `recipe` package (part of `tidymodels`) is taking care of that
+
+
+To proceed step-by-step let's start easy and try to model sepal length as a function of sepal width, only for the setosa iris
+
+```{r}
+iris_recipe <- iris %>% 
+  recipe(Sepal.Length~.) %>% ## I'll start saying that Sepal Length will be my outcome variable
+  update_role(starts_with("Petal"), new_role = "id") %>% 
+  update_role(Species, new_role = "id") %>% 
+  step_filter(Species == "setosa") %>% 
+  step_center(Sepal.Width) 
+  
+```
+
+The objective of the previous recipe is to explicitly perform all the steps that before were performed either by hand (the centering) or implicitly by the `lm function`
+
+The important point is that also the previous recipe is completely abstract. Nothing is calculated yet from the data.
+
+This is a somehow subtle aspect. To understand it let's consider the centering step. To actually perform it on the data it is necessary to **calculate** the mean of Sepal.Width and store this value somewhere. This number will be then used to preprocess the dataset and any new dataset that will be then **baked** with the previous recipe. This means that to feed new data to my model I have to center them not by using their mean, but the mean of the "training" data
+
+This estimation of the pre-processing parameters has not yet been done. We only defined the steps we will do.
+
+In order to be ready to be applied to a dataset, the previous recipe should be **prepared**
+
+```{r}
+iris_recipe %>% 
+  prep()
+```
+
+Now the recipe is prepares, so the pre-processing parameters (here the mean of Sepal.Width) has been calculated.
+
+The results of the preparation can be extracted by **juicing** the recipe, just to see the data that we will eventually fit 
+
+```{r}
+## juicing the recipe
+iris_recipe %>%
+  prep() %>% 
+  juice()
+
+```
+
+
+So we see that we have only the setosa flowers and the their sepal with was mean centered. The id columns are still there, but they are unchanged. Another time, all that is done under the hood, so no intermediated df are created, making everything better organised
+
+## Arrenging everything in a workflow and fit the model
+
+Now that we have in place the model and the recipe, we can combine them in an abstract modeling workflow which will be then fit on the data
+
+```{r}
+iris_workflow <- workflow() %>% 
+  add_model(new_model) %>%     ## adding my model
+  add_recipe(iris_recipe)      ## adding my poreprocessing
+
+iris_workflow
+```
+
+The actual fitting is performed by a specific `fit` method which will internally take care of the preparation of the recipe and of the baking of the dataset 
+
+
+```{r}
+## Now I fit my workflow on my data
+iris_fit <- fit(iris_workflow,iris)
+
+iris_fit
+```
+
+
+and the output can be elegantly broomed and made tidy
+
+```{r}
+tidy(iris_fit)
+```
+
+
+So we get something that is on line to what one would expect ...
+
+
+## Changing the model
+
+The advantage of the previous approach becomes clear if now I want to modify my recipe to fit a separate model on the three flower varieties
+
+
+```{r}
+## we prepare now  a new recipe 
+iris_recipe_interaction <- iris %>%                               
+  recipe( Sepal.Length~ .) %>% 
+  update_role(starts_with("Petal"), new_role = "id") %>% 
+  step_dummy(Species) %>%     
+  step_interact(~starts_with("Species"):Sepal.Width) 
+
+
+## this shows the roles of the variables/predictors and if they were in the original data or they comes form preprocessing
+summary(iris_recipe_interaction)
+
+```
+
+
+```{r}
+iris_recipe_interaction %>% 
+  prep() %>% 
+  juice()
+```
+
+If you compare the previous tibble with the model matrix, you will see that they look really similar. The only difference is the presence of a column with the response variable.
+
+
+Now we can update our workflow with the new recipe and fit it
+
+```{r}
+iris_workflow %>% 
+  update_recipe(iris_recipe_interaction) %>% 
+  fit(iris) %>% 
+  tidy()
+
+```
+## Final Notes
+
+* If you look to it in the perspective of ML, I could easily work on my model keeping everything ordered and organised
+* Preprocessing steps are clear and under control
+* The output is always coherent 
+
+
+
+## Practical
+
+Let's try to put together nesting, and tidy modelling. Our challenge is to investigate if there was a significant temporal evolution of the average bmi of the medal winners in a series of athletics running events of increasing length (100,200,400,800, 1500, 5000, 10000, Marathon).
+
+In practice we want to perform a linear model of the average bmi vs time ...
+
+* filter the data with only the correct Event
+* calculate the average bmi per year
+* nest the data by event
+* prepare a tidymodel workflow
+* map it to the nested df getting out the regression coefficients
+* start thinking to publish a paper ...
+
+
+
+
+
+
+
+
+
+
