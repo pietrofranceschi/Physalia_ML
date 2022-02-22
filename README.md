@@ -17,7 +17,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 
 * General Introduction 
 * Data mining, -omics and machine learning
-    * [slides 0.Introduction to ML](slides/0.introduction_to_machine_learning.pdf) (Filippo) 
+    * [slides 0: Hands-off introduction to ML](slides/0.introduction_to_machine_learning.pdf) (Filippo) 
     * [Omics meet ML](slides/Omics_meet_ML.pdf) (Pietro) 
 * Introduction to advanced R data libraries [Rmd](scripts/R_advanced_libraries.Rmd)
 * Introduction to `tidymodels` [Rmd](scripts/Introduction_to_tidymodels.Rmd)
@@ -45,6 +45,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [script 4.classification] [(.Rmd)](scripts/4.classification.Rmd) [(html)](scripts/4.classification.html) [(ipynb)](scripts/4.classification.ipynb)
    * [slides 5.classification](slides/5.classification.pdf) (Filippo)
 * Regression and classification with tidymodels
+   * [script 5.regression_and_classification_with_tidymodels] [(.Rmd)](scripts/5.regression_classification_tidymodels.Rmd) [(ipynb)](scripts/5.regression_classification_tidymodels.ipynb)
 * Lasso-penalised linear and logistic regression
    * [data_lasso](data/dogs_imputed.raw) 
    * [script 5.lasso] [(.Rmd)](scripts/5.lasso.Rmd) [(html)](scripts/5.lasso.html) [(ipynb)](scripts/5.lasso.ipynb)
