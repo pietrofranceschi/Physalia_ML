@@ -28,21 +28,21 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Model and variable selection: the machine learning paradigm
    * [slides 1.variable_selection](slides/1.variable_selection.pdf)  (Filippo)
 * Supervised learning: regression and classification
-   * [script 1.introduction_to_ml] [(.Rmd)](scripts/1.introduction_to_ml.Rmd) [(html)](scripts/1.introduction_to_ml.html) [(ipynb)](scripts/1.introduction_to_ml.ipynb) 
+   * [script 1.introduction_to_ml] [(.Rmd)](scripts/1.introduction_to_ml.Rmd) [(ipynb)](scripts/1.introduction_to_ml.ipynb) 
    * [slides 2.Supervised learning](slides/2.supervised_learning.pdf)  (Filippo) 
  * Machine learning for regression problems
    * [data_reg](data/DNA methylation data.xlsm)
-   * [script 2.linear_regression] [(.Rmd)](scripts/2.linear_regression.Rmd) [(html)](scripts/2.linear_regression.html) [(ipynb)](scripts/2.linear_regression.ipynb) 
+   * [script 2.linear_regression] [(.Rmd)](scripts/2.linear_regression.Rmd) [(ipynb)](scripts/2.linear_regression.ipynb) 
    * [slides 3.Regression](slides/3.regression.pdf) (Filippo)
 
 **Day 3**
 * Overfitting and resampling techniques
-   * [script 3.training_testing] [(.Rmd)](scripts/3.training_testing.Rmd) [(html)](scripts/3.training_testing.html) [(ipynb)](scripts/3.training_testing.ipynb)
+   * [script 3.training_testing] [(.Rmd)](scripts/3.training_testing.Rmd) [(ipynb)](scripts/3.training_testing.ipynb)
    * [slides 3.overfitting](slides/3.overfitting.pdf) (Filippo)
    * [slides 4.resampling](slides/4.resampling.pdf) (Filippo)
 * Classification problems
    * [data_class](data/dogs_imputed_reduced.raw) 
-   * [script 4.classification] [(.Rmd)](scripts/4.classification.Rmd) [(html)](scripts/4.classification.html) [(ipynb)](scripts/4.classification.ipynb)
+   * [script 4.classification] [(.Rmd)](scripts/4.classification.Rmd) [(ipynb)](scripts/4.classification.ipynb)
    * [slides 5.classification](slides/5.classification.pdf) (Filippo)
 * Regression and classification with tidymodels
    * [script 5.regression_and_classification_with_tidymodels] [(.Rmd)](scripts/5.regression_classification_tidymodels.Rmd) [(ipynb)](scripts/5.regression_classification_tidymodels.ipynb)
