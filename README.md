@@ -48,11 +48,11 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [script 5.regression_and_classification_with_tidymodels] [(.Rmd)](scripts/5.regression_classification_tidymodels.Rmd) [(ipynb)](scripts/5.regression_classification_tidymodels.ipynb)
 * Lasso-penalised linear and logistic regression
    * [data_lasso](data/dogs_imputed.raw) 
-   * [script 5.lasso] [(.Rmd)](scripts/5.lasso.Rmd) [(html)](scripts/5.lasso.html) [(ipynb)](scripts/5.lasso.ipynb)
+   * [script 6.lasso] [(.Rmd)](scripts/6.lasso.Rmd) [(ipynb)](scripts/6.lasso.ipynb)
    * [slides 6.lasso_regularization](slides/6.lasso_regularization.pdf) (Filippo)
 * Lasso and model tuning
    * [data lasso 2](data/MTBSL1.tsv)
-   * [script 6.lasso_with_tidymodels] [(.Rmd)](scripts/6.lasso_with_tidymodels.Rmd) [(html)](scripts/6.lasso_with_tidymodels.html) [(ipynb)](scripts/6.lasso_with_tidymodels.ipynb)
+   * [script 7.lasso_with_tidymodels] [(.Rmd)](scripts/7.lasso_with_tidymodels.Rmd) [(ipynb)](scripts/7.lasso_with_tidymodels.ipynb)
 * KNN imputation
    * [script knni] [(.Rmd)](scripts/knni.Rmd) [(html)](scripts/knni.html) [(ipynb)](scripts/knni.ipynb)
 
