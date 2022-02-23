@@ -54,7 +54,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [data lasso 2](data/MTBSL1.tsv)
    * [script 7.lasso_with_tidymodels] [(.Rmd)](scripts/7.lasso_with_tidymodels.Rmd) [(ipynb)](scripts/7.lasso_with_tidymodels.ipynb)
 * KNN imputation
-   * [script knni] [(.Rmd)](scripts/knni.Rmd) [(html)](scripts/knni.html) [(ipynb)](scripts/knni.ipynb)
+   * [script knni] [(.Rmd)](scripts/knni.Rmd) [(ipynb)](scripts/knni.ipynb)
 
 **Day 4**
 * Random Forest for regression and classification
