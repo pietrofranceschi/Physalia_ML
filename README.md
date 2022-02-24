@@ -58,12 +58,12 @@ Code and data will be available at the beginning of each day. Slides will be ava
 
 **Day 4**
 * Random Forest for regression and classification
-   * [script 7.random_forest] [(.Rmd)](scripts/8.random_forest.Rmd) [(ipynb)](scripts/8.random_forest.ipynb)
-   * [script 8.multiclass_random_forest] [(.Rmd)](scripts/9.multiclass_random_forest.Rmd) [(ipynb)](scripts/9.multiclass_random_forest.ipynb)
-   * [slides 7.random_forest](slides/7.random_forest.pdf) (Filippo)
+   * [script 8.random_forest] [(.Rmd)](scripts/8.random_forest.Rmd) [(ipynb)](scripts/8.random_forest.ipynb)
+   * [script 9.multiclass_random_forest] [(.Rmd)](scripts/9.multiclass_random_forest.Rmd) [(ipynb)](scripts/9.multiclass_random_forest.ipynb)
+   * [slides 8.random_forest](slides/7.random_forest.pdf) (Filippo)
 * Slow learning: the boosting approach
-   * [script 9.boosting] [(.Rmd)](scripts/10.boosting.Rmd) [(ipynb)](scripts/10.boosting.ipynb)
-   * [slides 8.boosting](slides/8.boosting.pdf) (Filippo)
+   * [script 10.boosting] [(.Rmd)](scripts/10.boosting.Rmd) [(ipynb)](scripts/10.boosting.ipynb)
+   * [slides 9.boosting](slides/8.boosting.pdf) (Filippo)
 * Unsupervised learning: PCA, Umap, Self-organizing maps (Pietro)
 
 **Day 5**
