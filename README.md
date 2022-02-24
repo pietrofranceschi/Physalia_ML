@@ -38,18 +38,18 @@ Code and data will be available at the beginning of each day. Slides will be ava
 **Day 3**
 * Overfitting and resampling techniques
    * [script 3.training_testing] [(.Rmd)](scripts/3.training_testing.Rmd) [(ipynb)](scripts/3.training_testing.ipynb)
-   * [slides 3.overfitting](slides/3.overfitting.pdf) (Filippo)
-   * [slides 4.resampling](slides/4.resampling.pdf) (Filippo)
+   * [slides 4.overfitting](slides/4.overfitting.pdf) (Filippo)
+   * [slides 5.resampling](slides/5.resampling.pdf) (Filippo)
 * Classification problems
    * [data_class](data/dogs_imputed_reduced.raw) 
    * [script 4.classification] [(.Rmd)](scripts/4.classification.Rmd) [(ipynb)](scripts/4.classification.ipynb)
-   * [slides 5.classification](slides/5.classification.pdf) (Filippo)
+   * [slides 6.classification](slides/6.classification.pdf) (Filippo)
 * Regression and classification with tidymodels
    * [script 5.regression_and_classification_with_tidymodels] [(.Rmd)](scripts/5.regression_classification_tidymodels.Rmd) [(ipynb)](scripts/5.regression_classification_tidymodels.ipynb)
 * Lasso-penalised linear and logistic regression
    * [data_lasso](data/dogs_imputed.raw) 
    * [script 6.lasso] [(.Rmd)](scripts/6.lasso.Rmd) [(ipynb)](scripts/6.lasso.ipynb)
-   * [slides 6.lasso_regularization](slides/6.lasso_regularization.pdf) (Filippo)
+   * [slides 7.lasso_regularization](slides/7.lasso_regularization.pdf) (Filippo)
 * Lasso and model tuning
    * [data lasso 2](data/MTBSL1.tsv)
    * [script 7.lasso_with_tidymodels] [(.Rmd)](scripts/7.lasso_with_tidymodels.Rmd) [(ipynb)](scripts/7.lasso_with_tidymodels.ipynb)
