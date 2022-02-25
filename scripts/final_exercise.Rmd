@@ -1,0 +1,136 @@
+---
+title: "final_exercise"
+author: "Filippo Biscarini"
+date: "7/9/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library("knitr")
+library("ROCit")
+library("glmnet")
+library("ggplot2")
+library("corrplot")
+library("tidyverse")
+library("tidymodels")
+library("data.table")
+library("randomForest")
+```
+
+## Wrap-up exercise
+
+We now use the metabolomics data on raspberries (genus *Rubus*) for a wrap-up exercise on the use of machine learning algorithms for predictions.
+Some code is already there as hint, however you will mostly have to write your own code (and make your own choices)
+
+### Reading the data
+
+This is a classification problem: we want to use metabolomics data to classify samples into the color/pigmentation class they belong to.
+
+```{r data}
+rubus <- fread("../data/rubusTable.txt")
+
+rubus %>%
+  group_by(color, variety) %>%
+  summarise(N=n())
+```
+
+### Data preprocessing
+
+We see that we have **three colors** (`R`, `Y`, `P`), and 15 varieties nested within color.
+Color `P` has only one observation, and we can either remove it or assign it to the pigmented samples (`R`).
+
+```{r rubus, echo=FALSE}
+rubus <- na.omit(rubus) ## remove observations with missing values (there are none in this dataset)
+
+rubus[rubus$color == "P","color"] <- "R"
+metabolites <- rubus[,-c(1,2)]
+corx <- cor(metabolites)
+
+corx[1:10,1:10]
+```
+
+The number of pairwise correlations between variables is ${n \choose k}$ = ${10\,986 \choose 2}$ = $60\,340\,605$ (a lot!).
+Let's see how many are highly correlated:
+
+```{r}
+diag(corx) <- 0
+num_correlated_vars <- sum(abs(corx)>0.99)/2 ## correlation matrix is symmetric
+print(num_correlated_vars)
+```
+
+
+```{r}
+
+```
+
+
+In total, `r num_correlated_vars` pairs of variable have linear correlation coefficient $> 0.99$.
+We can consider removing one variable for each pair.
+
+First, however, we split the data in the training and test set:
+
+```{r}
+## write here your code
+```
+
+### Training the classifier
+
+First we remove highly correlated variables (collinearity) from the training set (remember, that any preprocessing should be done after splitting the data in the training and testing sets!)
+
+```{r}
+## write here your code
+```
+
+### Lasso
+
+```{r}
+## write here your code
+```
+
+#### Fit the final model on the training data
+
+We can now fit the final model (tuned with cross-validation) to the training set:
+
+```{r}
+## write here your code
+```
+
+#### Make predictions
+
+```{r}
+## write here your code
+```
+
+### Random Forest
+
+#### Tuning the model
+
+```{r}
+## write here your code
+```
+
+#### Fitting the RF model
+
+```{r}
+## write here your code
+```
+
+#### Variable importance
+
+```{r varimp}
+## write here your code
+```
+
+#### Predictions
+
+```{r}
+## write here your code
+```
+
+### ROC curves
+
+```{r, label = 'roc'}
+## write here your code
+```
