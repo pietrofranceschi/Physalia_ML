@@ -75,7 +75,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * SOM demo [(.Rmd)](scripts/SOMs_also_with_tidymodels.Rmd)
 * Datasets
    * [dataset 1 (rubus)](data/rubusTable.txt) [dataset 3 (komp reduced)](data/KOMP_data_targeted.RData)
-* Final interactive exercise
+* Final interactive exercise: [(.Rmd)](scripts/final_exercise.Rmd)
 * Kahoot quiz: let’s test our machine learning skills!
    * [Go to test!](http://www.kahoot.it) 
 * Q&A
