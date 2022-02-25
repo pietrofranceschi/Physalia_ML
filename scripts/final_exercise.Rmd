@@ -61,11 +61,6 @@ print(num_correlated_vars)
 ```
 
 
-```{r}
-
-```
-
-
 In total, `r num_correlated_vars` pairs of variable have linear correlation coefficient $> 0.99$.
 We can consider removing one variable for each pair.
 
