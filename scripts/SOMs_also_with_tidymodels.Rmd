@@ -1,0 +1,171 @@
+---
+title: "UMAP with tidymodels"
+author: "Pietro Franceschi"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidymodels)
+library(kohonen)
+
+```
+
+
+## Introduction
+
+The objective of this demo is to demonstrate how how to combine `tidymodels` and the `kohonen` package to start using Self Organising maps to analyze complex datasets 
+
+This is the description of the dataset from the R documentation:
+
+A data frame containing 177 rows and thirteen columns; object vintages contains the class labels.
+
+These data are the results of chemical analyses of wines grown in the same region in Italy (Piedmont) but derived from three different cultivars: Nebbiolo, Barberas and Grignolino grapes. The wine from the Nebbiolo grape is called Barolo. The data contain the quantities of several constituents found in each of the three types of wines, as well as some spectroscopic variables.
+
+
+```{r}
+data("wines")
+```
+
+
+```{r}
+first_som <- recipe(~., wines) %>% 
+  step_normalize(all_predictors()) %>% 
+  prep() %>% 
+  juice() %>% 
+  as.matrix(.) %>% 
+  som(., grid = somgrid(5, 4, "hexagonal"), rlen = 1000)
+```
+
+One of the most natural questions is: how big should be my map? Well a good rule of thumb is to think that, on the average, 10/20 samples could be inside each unit ... But the question is similar to "how many clusters do I have?"
+
+
+```{r}
+plot(first_som)
+```
+
+This shows the weight of the initial variables on the different codebook vectors. 
+
+The unit to which each samples is projected to can be obtained with that
+
+```{r}
+plot(first_som, "mapping", col = vintages, pchs = 19)
+```
+
+This plot in a sense identifies patterns and also proximity on the dataset, the two types of plots together are telling also what variables are are contribution to each prototype vector 
+
+
+```{r}
+plot(first_som, "dist.neighbours")
+```
+
+
+The "numbers" are present the map object. Among them 
+
+* unit.classif: winning units for all data objects, only returned if keep.data == TRUE.
+* distances: distances of objects to their corresponding winning unit, only returned if keep.data == TRUE.
+* codes: a list of matrices containing codebook vectors.
+* changes: matrix of mean average deviations from code vectors; every map corresponds with one column.
+
+The last element can be used to inspect the "convergence" of the map training 
+
+```{r}
+plot(first_som$changes[,1], type = "l")
+```
+
+
+An additional aggregation of the codes can be performed by hierarchical clustering
+
+
+Let's first calculate the dendrogram
+
+```{r}
+wines_som_hc <- cutree(hclust(dist(first_som$codes[[1]])), 5)
+```
+
+
+```{r}
+plot(first_som, type = "codes")
+add.cluster.boundaries(first_som, wines_som_hc)
+
+```
+
+
+Ok, let's try with the metabolomics dataset
+
+
+Here we get the data
+```{r}
+load("KOMP_data_targeted.RData")
+komp
+```
+
+We also recalculate the truncated dataset
+
+```{r}
+komp1 <- komp %>% 
+  mutate(across(!c("MouseID","Genotype","Gender","Zygosity"), function(x) {
+    minx <- min(x, na.rm = TRUE)
+    x[is.na(x)] <- minx
+    x
+  }))
+```
+
+
+
+
+And now imputation!
+
+```{r}
+komp_som <- recipe(~., data = komp1) %>% 
+  step_select(!c("MouseID","Genotype","Gender","Zygosity")) %>% 
+  step_impute_lower(all_predictors()) %>%
+  step_log(all_predictors()) %>% 
+  step_normalize(all_predictors()) %>%  
+  prep() %>% 
+  juice() %>% 
+  as.matrix(.) %>% 
+  som(., grid = somgrid(6, 5, "hexagonal"), rlen = 1000)
+```
+
+
+And now let's display the results,
+
+```{r}
+plot(komp_som)
+```
+
+Since the number of variables is bigger the codes plot is less informative, let's look to the mapping
+
+```{r}
+plot(komp_som, "mapping", col = factor(komp$Gender), pchs = 19)
+```
+
+As you see the partial separation from male and females is visible, and the maps shows some sort of "pure" patches indicating different populations. This is somehow in keeping with what we have seen in the case UMAP 
+
+
+```{r}
+komp_som_hc <- cutree(hclust(dist(komp_som$codes[[1]])), 6)
+```
+
+
+```{r}
+plot(komp_som, type = "mapping", col = factor(komp$Gender), pchs = 19)
+add.cluster.boundaries(komp_som, komp_som_hc)
+
+```
+
+As an additional step we could highlight the position of each genotype on the map
+
+
+```{r}
+colvec <- ifelse(komp$Genotype == "Null","red","gray80")
+plot(komp_som, type = "mapping", col = colvec, pchs = 19)
+
+```
+
+... but we see what we expect on the bases of the previous analyses
+
+

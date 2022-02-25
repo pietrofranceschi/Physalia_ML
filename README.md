@@ -1,6 +1,5 @@
 # Physalia_ML
 
-
 **Machine Learning for Biologists, a hands-on introduction**
 
 Instructors: *Pietro Franceschi, Filippo Biscarini*
@@ -23,7 +22,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Introduction to `tidymodels` [Rmd](scripts/Introduction_to_tidymodels.Rmd)
 
 **Day 2**
-* Recap of Day_1: DIY!
+
 * Multivariate data: things to always remember
 * Model and variable selection: the machine learning paradigm
    * [slides 1.variable_selection](slides/1.variable_selection.pdf)  (Filippo)
@@ -36,6 +35,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [slides 3.Regression](slides/3.regression.pdf) (Filippo)
 
 **Day 3**
+
 * Overfitting and resampling techniques
    * [script 3.training_testing] [(.Rmd)](scripts/3.training_testing.Rmd) [(ipynb)](scripts/3.training_testing.ipynb)
    * [slides 4.overfitting](slides/4.overfitting.pdf) (Filippo)
@@ -57,6 +57,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [script knni] [(.Rmd)](scripts/knni.Rmd) [(ipynb)](scripts/knni.ipynb)
 
 **Day 4**
+
 * Random Forest for regression and classification
    * [script 8.random_forest] [(.Rmd)](scripts/8.random_forest.Rmd) [(ipynb)](scripts/8.random_forest.ipynb)
    * [script 9.multiclass_random_forest] [(.Rmd)](scripts/9.multiclass_random_forest.Rmd) [(ipynb)](scripts/9.multiclass_random_forest.ipynb)
@@ -64,17 +65,23 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Slow learning: the boosting approach
    * [script 10.boosting] [(.Rmd)](scripts/10.boosting.Rmd) [(ipynb)](scripts/10.boosting.ipynb)
    * [slides 9.boosting](slides/9.boosting.pdf) (Filippo)
-* Unsupervised learning: PCA, Umap, Self-organizing maps (Pietro)
+* Unsupervised learning: PCA, Umap, Self-organizing maps (Pietro) 
+   * PCA demo [(.Rmd)](scripts/PCA_with_tidymodels.Rmd)
 
 **Day 5**
-* Advanced data visualization: master ggplot! [optional]
-   * [dataset 1 (rubus)](data/rubusTable.txt) [dataset 2 (komp)](data/KOMP.tsv) [dataset 3 (komp reduced)](data/KOMP_data_targeted.RData)
+
+* Unsupervised learning demos
+   * UMAP demo [(.Rmd)](scripts/UMAP_with_tidymodels.Rmd)
+   * SOM demo [(.Rmd)](scripts/SOMs_also_with_tidymodels.Rmd)
+* Datasets
+   * [dataset 1 (rubus)](data/rubusTable.txt) [dataset 3 (komp reduced)](data/KOMP_data_targeted.RData)
 * Final interactive exercise
 * Kahoot quiz: let’s test our machine learning skills!
    * [Go to test!](http://www.kahoot.it) 
 * Q&A
 
 **R Libraries**
+
 * Complete list [here](https://github.com/pietrofranceschi/Physalia_ML/blob/main/r_packages.R)
 
 ## Timetable

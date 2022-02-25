@@ -1,0 +1,420 @@
+---
+title: "PCA with tidymodels"
+author: "Pietro Franceschi"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidymodels)
+
+```
+
+
+## Introduction
+
+The objective of this demo is to demonstrate how Principal Component Analysis can be performed by using `tidymodels`.
+
+PCA is a data projection technique which is often used to create new features which can then be used to "feed" different ML algorithms. For this reason, in `tidymodels` PCA and other projection methods are included inside the `parsnip` preprocessing package (the one which creates and handles **recipes**)
+
+
+
+# PCA of the iris dataset
+
+As a showcase we start simple, showing how to use the tool on the `iris` dataset
+
+```{r}
+data(iris)
+
+iris <- iris %>% ## this is just to transform the iris df into a tibble
+  tibble()
+
+iris
+```
+
+
+## Performing PCA
+
+Now we set-up the recipe to run the PCA analysis
+
+```{r}
+iris_PCA <- recipe(~., data = iris) %>%      ## no target variable there 
+  update_role(Species, new_role = "id") %>%  ## we are not interested of including the Specie
+  step_center(all_numeric()) %>%             ## we have to center the cloud of points
+  step_pca(all_numeric())                    ## we run the PCA by using prcomp unde the hood
+
+iris_PCA
+
+```
+
+We are now ready to prepare the recipe and to give a look to the results. Just to give a look to the data we are feeding to the PCA algorithm let's give a look to the partial recipe
+
+```{r}
+recipe(~., data = iris) %>%      ## no target variable there 
+  update_role(Species, new_role = "id") %>%  ## we are not interested of including the Specie
+  step_normalize(all_numeric()) %>% 
+  prep() %>% 
+  juice()
+```
+
+As you can see we have the set of centered variables. Back to the PCA
+
+
+```{r}
+
+## prepare the recipe
+iris_PCA_prep <- iris_PCA %>% 
+  prep()
+
+
+## show the results
+iris_PCA_prep %>% juice()
+```
+
+A question for you, why do I have only four PCs?
+
+Sometimes it is useful to keep also the old variables after preprocessing, to do that use the `keep_original_cols` argument of `step_pca`.
+
+The previous, "clean" output which keep together PCs and id variables is prefect to feed `ggplot`
+
+
+```{r}
+iris_PCA_prep %>% 
+  juice() %>% 
+  ggplot() + 
+  geom_point(aes(x = PC1, y = PC2, col = Species), size = 2, alpha = 0.7) + 
+  scale_color_brewer(palette = "Set1") + 
+  ggtitle("Iris Scoreplot") + 
+  theme_bw() + 
+  theme(aspect.ratio = 1)
+```
+
+PCA is a projection so almost always one is interested in understanding how many variance is a projection representing.
+
+This info is typically happily provided by many PCA packages, in Tidymodels we have to follow another way, by tidyng a part of the prepared recipe. In tidymodels we can indeed tydy out a specific step of our recipe
+
+```{r}
+tidy(iris_PCA_prep,      ## the recipe
+     2,                  ## the step we want to tidy 
+     type = "variance")  ## what we want to get out from that tidying 
+```
+
+
+So if we want a "battery" of scree plot we simply do
+
+```{r}
+tidy(iris_PCA_prep,   
+     2,               
+     type = "variance") %>% 
+  ggplot() + 
+  geom_col(aes(x = component, y = value), fill = "steelblue", alpha = 0.7) + 
+  facet_wrap(~terms, scales = "free_y") + 
+  theme_light()
+```
+
+The other thing we want to get out now are the loadings
+
+```{r}
+## they are there!
+tidy(iris_PCA_prep,   
+     2) 
+```
+
+
+The shape of the data is nice for a barplot illustrating the weight of the initial variables on the different components
+
+```{r}
+tidy(iris_PCA_prep,2) %>% 
+  filter(component %in% paste0("PC", 1:5)) %>%   ## keep only the first five cps
+  mutate(component = fct_inorder(component)) %>% ## 
+  ggplot() +
+  geom_point(aes(x = value, y = terms, col = terms)) + 
+  geom_segment(aes(xend = value, x = 0, y = terms, yend = terms, col = terms)) + 
+  facet_wrap(~component, nrow = 1) +
+  labs(y = NULL) + 
+  theme_light() + 
+  theme(aspect.ratio = 1)
+```
+
+Just to give a look on the prepared recipe, the different steps are included in the `steps` element of the results
+
+```{r}
+## these are the results of my prcomp
+iris_PCA_prep$steps[[2]]
+```
+
+
+
+The last thing we would like to do is a Biplot!
+
+First we need to make the loadings less ugly ;-)
+
+```{r}
+loadings_wider <- iris_PCA_prep %>% 
+  tidy(2) %>% 
+  pivot_wider(names_from = component, id_cols = terms)
+
+loadings_wider
+```
+
+And now we go!
+```{r}
+
+library(ggrepel)
+
+iris_PCA_prep %>% 
+  juice() %>% 
+  ggplot() + 
+  geom_point(aes(x = PC1, y = PC2, col = Species), size = 2, alpha = 0.7) + 
+  geom_segment(data = loadings_wider, 
+               mapping = aes(xend = 1.5*PC1, x = 0, y = 0, yend = 1.5*PC2, col = "steelblue")) + 
+  geom_point(data = loadings_wider, 
+               mapping = aes(x = 1.5*PC1, y = 1.5*PC2), col = "steelblue") +
+  geom_text_repel(data = loadings_wider, 
+               mapping = aes(x = 1.5*PC1, y = 1.5*PC2, label= terms), col = "steelblue") + 
+  scale_color_brewer(palette = "Set1") + 
+  ggtitle("Iris Biplot") + 
+  theme_bw() + 
+  theme(aspect.ratio = 1)
+```
+
+## Projecting new data
+
+PCA can be useful to see where new data will be fit on the picture we have. This is a common application in the field of "novelty" detection. How can this be done in tidymodels?
+
+Let's split the data
+
+```{r}
+## Let's make a split of our data 
+iris_split <- initial_split(iris, strata = Species)
+```
+
+And now we perform PCA on the training set ..
+
+```{r}
+small_iris_pca <- recipe(~., data = training(iris_split)) %>%      ## no target variable there 
+  update_role(Species, new_role = "id") %>%  ## we are not interested of including the Specie
+  step_normalize(all_numeric()) %>% 
+   step_pca(all_numeric()) %>% 
+  prep() 
+```
+
+
+And now let's look to the score plot
+
+```{r}
+small_iris_pca  %>% 
+  juice() %>% 
+  ggplot() + 
+  geom_point(aes(x = PC1, y = PC2, col = Species), size = 2, alpha = 0.7) + 
+  scale_color_brewer(palette = "Set1") + 
+  ggtitle("Iris Scoreplot") + 
+  theme_bw() + 
+  theme(aspect.ratio = 1)
+```
+
+Now we use `bake` to see where the new points will be going
+
+```{r}
+baked_iris <- small_iris_pca %>% 
+  bake(testing(iris_split))
+
+baked_iris
+```
+
+And now the plot!
+
+```{r}
+small_iris_pca  %>% 
+  juice() %>% 
+  ggplot() + 
+  geom_point(aes(x = PC1, y = PC2, col = Species), size = 2, alpha = 0.7) + 
+  geom_point(baked_iris, mapping = aes(x = PC1, y = PC2, col = Species), size = 2, pch = 3) +
+  scale_color_brewer(palette = "Set1") + 
+  ggtitle("Iris Scoreplot") + 
+  theme_bw() + 
+  theme(aspect.ratio = 1)
+```
+
+Nice! So here we see that new data are "in keeping" with old ones. This is a nice example of projection, but always remember that in general we are looking to a low dimensional representation of our data so new samples could fall in a reasonable position even if they are far away from the PC1 XP C2 plane in the "vertical" direction
+
+
+# PCA in the KOMP metabolomics dataset
+
+Let's now move to a more complex dataset.
+
+
+[**KOMP Plasma Metabolomics Dataset**](https://www.kaggle.com/desertman/komp-plasma-metabolomics-dataset)
+
+Mouse knockouts facilitate the study of gene functions. Often, multiple abnormal phenotypes are induced when a gene is inactivated. The International Mouse Phenotyping Consortium (IMPC) has generated thousands of mouse knockouts and cataloged their phenotype data. We have acquired metabolomics data from 220 plasma samples from 30 unique mouse gene knockouts and corresponding wild-type mice from the IMPC. To acquire comprehensive metabolomics data, we have used liquid chromatography (LC) combined with mass spectrometry (MS) for detecting polar and lipophilic compounds in an untargeted approach. We have also used targeted methods to measure bile acids, steroids and oxylipins. In addition, we have used gas chromatography GC-TOFMS for measuring primary metabolites. The metabolomics dataset reports 832 unique structurally identified metabolites from 124 chemical classes as determined by ChemRICH software
+
+In this demo we will use only the metabolites quantified in the targeted assays. The belong to the chemical classes of _bile acids, steroids and oxylipins_
+
+
+Here we get the data
+```{r}
+load("KOMP_data_targeted.RData")
+komp
+```
+
+
+This is a targeted metabolomics dataset where a panel of 56 metabolites was measured on 220 samples. 
+At first sight this could seem a large dataset, but the design is fairly complex
+
+
+```{r}
+table(komp$Gender, komp$Genotype)
+```
+
+So, excluding the wildtype, we have only 3 vs 3 mice, not too much indeed if you would like to assess the combined effects of gender and genetic background by machine learning ... another time the caveats of the multilevel designs.
+
+Anyway, here we are dealing with unsupervised learning and we want only to look to the structure of the dataset.
+
+Another thing that you have most likely notes is that we have missing values! Here missing values are of analytical origin and they are clearly not randomly distributed. Progesterone, for example, shows a large number of samples.
+
+So what we sould do is:
+
+* remove variables (and maybe samples) with too many NAs
+* look to similarity patterns in missing data both comparing variables and comparing samples
+* impute the variables we will decide to keep 
+
+
+I'll leave the second step to you ;-) ... but it is a nice matrix algebra exercice.
+
+Let's look to the variables with a large fraction of missingness
+
+```{r}
+komp %>% 
+  pivot_longer(!c("MouseID","Genotype","Gender","Zygosity")) %>% 
+  filter(is.na(value)) %>% 
+  count(name) %>% 
+  arrange(desc(n))
+```
+
+We can have up to 99 NAs out 220 samples. Should we keep everything? Well, our design is having at minimum 3 samples per class, so a gender biomarker specific of one genotype could potentially shows up only on three samples. In this case the number of missing value would be 217 ... this seems to us that we should keep everything.
+
+Let's go on with that. And try to do PCA. Since we have NAs imputation will be a part of the recipe. In addition, in metabolomics it is useful to work on log transformed concentration. Also this will go in the recipe
+
+
+Here I take away NAs and I substitute them with the minimum
+
+```{r}
+
+komp1 <- komp %>% 
+  mutate(across(!c("MouseID","Genotype","Gender","Zygosity"), function(x) {
+    minx <- min(x, na.rm = TRUE)
+    x[is.na(x)] <- minx
+    x
+  }))
+
+```
+
+
+And now I can use a specific recipe fro imputation ...
+
+```{r}
+komp_recipe <- recipe(~., data = komp1) %>% 
+  update_role(c("MouseID","Genotype","Gender","Zygosity"), new_role = "id") %>% 
+  step_impute_lower(all_predictors()) %>%
+  step_log(all_predictors()) %>% 
+  step_normalize(all_predictors()) %>%  
+  step_pca(all_predictors()) %>% 
+  prep()
+```
+
+
+Let's give a look to the matrix after imputation ...
+
+```{r}
+recipe(~., data = komp1) %>% 
+  update_role(c("MouseID","Genotype","Gender","Zygosity"), new_role = "id") %>% 
+  step_impute_lower(all_predictors()) %>% 
+  step_log(all_predictors()) %>% 
+  prep() %>% 
+  juice() 
+```
+
+
+And now let's display the PCA!
+
+
+```{r}
+tidy(komp_recipe,   
+     4,               
+     type = "variance") %>% 
+  filter(component < 20 ) %>% 
+  ggplot() + 
+  geom_col(aes(x = component, y = value), fill = "steelblue", alpha = 0.7) + 
+  facet_wrap(~terms, scales = "free_y") + 
+  theme_light()
+```
+
+Ok here we see that the situation is more "fancy" than the one we were observing before. It is less easy to decide how many components we want to keep. Food for brain!
+
+For the scope of this demo let's focus on the first two, which accounts for the 35 percent of the variance
+
+```{r}
+komp_recipe %>% 
+  juice() %>% 
+  ggplot() + 
+  geom_point(aes(x = PC1, y = PC2, col = Gender), size = 2, alpha = 0.7) + 
+  scale_color_brewer(palette = "Set1") + 
+  ggtitle("Komp Scoreplot") + 
+  theme_bw() + 
+  theme(aspect.ratio = 1)
+```
+
+Well we see some sort of partial separation there. We also have some outlier, let's give a closer look
+
+
+```{r}
+komp_recipe %>% 
+  juice() %>% 
+  ggplot() + 
+  geom_point(aes(x = PC1, y = PC2, col = Gender), size = 2, alpha = 0.7) + 
+  geom_text_repel(aes(x = PC1, y = PC2, col = Gender, label = ifelse(PC1>5,as.character(Genotype),''))) + 
+  scale_color_brewer(palette = "Set1") + 
+  ggtitle("Komp Scoreplot") + 
+  theme_bw() + 
+  theme(aspect.ratio = 1)
+```
+
+Other food for brain. In terms of the genetic background, instead
+
+
+```{r}
+komp_recipe %>% 
+  juice() %>% 
+  ggplot() + 
+  geom_point(aes(x = PC1, y = PC2, col = Genotype), size = 2, alpha = 0.7) + 
+  ggtitle("Komp Scoreplot") + 
+  theme_bw() + 
+  theme(aspect.ratio = 1)
+```
+
+Thsi is not easy to see, but the problem here is the number of genotypes. An alternative could be
+
+```{r}
+komp_recipe %>% 
+  juice() %>% 
+  ggplot() + 
+  geom_point(aes(x = PC1, y = PC2, col = Genotype == "Null"), size = 2) + 
+  scale_color_manual(values = c("gray80","red")) + 
+  ggtitle("Komp Scoreplot") + 
+  theme_bw() + 
+  theme(aspect.ratio = 1)
+```
+
+
+## Something for you
+
+* Go through the code and understand what I did
+* Try different methods of scaling and imputing (eg. knn `step_impute_knn`)
+* Try PCA on the MTBLS1 dataset
+
+
+
+
+

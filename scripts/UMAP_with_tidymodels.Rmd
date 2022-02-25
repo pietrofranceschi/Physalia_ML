@@ -1,0 +1,126 @@
+---
+title: "UMAP with tidymodels"
+author: "Pietro Franceschi"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(tidymodels)
+
+```
+
+
+## Introduction
+
+The objective of this demo is to demonstrate how how to use UMAP by using `tidymodels`. 
+
+The steps needed to include UMAP projection in a recipe are included in the `embed` package with also include other methods for embedding predictors in new columns. Also *sparse pca* is ioncluded there
+
+```{r}
+library(embed)
+```
+
+
+
+
+Here we get the data
+```{r}
+load("KOMP_data_targeted.RData")
+komp
+```
+
+And now imputation!
+
+```{r}
+komp_recipe <- recipe(~., data = komp1) %>% 
+  update_role(c("MouseID","Genotype","Gender","Zygosity"), new_role = "id") %>% 
+  step_impute_lower(all_predictors()) %>%
+  step_log(all_predictors()) %>% 
+  #step_normalize(all_predictors()) %>%  
+  step_umap(all_predictors(), neighbors = 8) %>% 
+  prep()
+```
+
+
+Let's give a look to the matrix after imputation ...
+
+And now let's display the results
+
+
+```{r}
+komp_recipe %>% 
+  juice() %>% 
+  ggplot() + 
+  geom_point(aes(x = UMAP1, y = UMAP2, col = Gender), size = 2, alpha = 0.7) + 
+  scale_color_brewer(palette = "Set1") + 
+  ggtitle("Komp UMAP") + 
+  theme_bw() + 
+  theme(aspect.ratio = 1)
+```
+
+We see many groups. Can we link them to something interpretable?  
+
+```{r}
+komp_recipe %>% 
+  juice() %>% 
+  filter(UMAP1 < 0 & UMAP2 < 0)
+```
+
+
+Not clear unfortunately. Now it would be necessary to discuss the outcomes with the chemical analyst, the biochemists ...
+
+
+## Something for you
+
+* Go through the code and understand what I did
+* Try different methods of scaling and imputing (eg. knn `step_impute_knn`)
+* Try UMAP on the MTBLS1 dataset
+
+
+```{r}
+library(readr)
+MTBSL1 <- read_delim("MTBSL1.tsv", delim = "\t", 
+    escape_double = FALSE, trim_ws = TRUE)
+```
+
+
+
+```{r}
+MTBLS1_recipe <- recipe(~., data = MTBSL1) %>% 
+  update_role(!all_numeric(), new_role = "id") %>% 
+  step_zv(all_predictors()) %>% 
+  step_center(all_predictors()) %>% 
+  step_pca(all_predictors()) %>% 
+  prep()
+  
+```
+
+
+```{r}
+MTBLS1_recipe_umap <- recipe(~., data = MTBSL1) %>% 
+  update_role(!all_numeric(), new_role = "id") %>% 
+  step_zv(all_predictors()) %>% 
+  step_center(all_predictors()) %>% 
+  step_umap(all_predictors(), neighbors = 8) %>% 
+  prep()
+  
+```
+
+
+
+
+
+```{r}
+MTBLS1_recipe_umap %>% 
+  juice() %>% 
+  ggplot() + 
+  geom_point(aes(x = UMAP1, y = UMAP2, col = Gender, shape = Metabolic_syndrome), size = 2, alpha = 0.7) + 
+  scale_color_brewer(palette = "Set1") + 
+  ggtitle("Iris Scoreplot") + 
+  theme_bw() + 
+  theme(aspect.ratio = 1)
+```
+
