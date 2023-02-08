@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Load Packages
 library("ISLR") 
+library("knitr")
 library("e1071")
 library("kernlab")      
 library("tidyverse") 
@@ -18,12 +19,16 @@ library("RColorBrewer")
 
 ## SVM: support vector machines. A super-quick snippet
 
-SVM: developed to construct boundaries between groups of observations based on their measurements $\rightarrow$ **classification**. SVMs can handle any number of classes and sample sizes, and can construct boundaries of virtually any shape (linear, polynomial, highly complex/wiggly).
+SVM: developed (in the 1990s) to construct boundaries between groups of observations based on their measurements $\rightarrow$ **classification**. SVMs are considered to be one of the best **out of the box** classifiers.
+
+SVMs are a generalization of the **maximum margin classifier** (that required the classes to be linearly separable).
+SVMs can handle **any number of classes** and sample sizes, and can construct **boundaries of virtually any shape** (linear, polynomial, highly complex/wiggly).
 
 **Examples with synthetic data**: a **merely qualitative** explanation of separating hyperplanes, margins and SVM follows.
 
 ```{r synthetic_dataset}
 set.seed(223)
+set.seed(229)
 # Construct sample data set - completely separated
 x <- matrix(rnorm(20*2), ncol = 2)
 y <- c(rep(-1,10), rep(1,10))
@@ -37,16 +42,24 @@ ggplot(data = dat, aes(x = x.2, y = x.1, color = y, shape = y)) +
   theme(legend.position = "none")
 ```
 
-### Separating (hyper)plane
+### Separating (hyper)plane and support vectors
 
-We try to find a (hyper)plane that separates the two classes in the feature space
+We try to find a (hyper)plane that separates the two classes in the feature space:
 
-We can find **several possible separating (hyper)planes** (see figure above) 
+$$
+\beta_0 + \beta_1x_1 + \beta_2x_2 + \ldots + \beta_px_p = 0 
+$$
+
+All points for which the equation above holds (is equal to zero) are points that **belong to the hyperplane**. 
+The separating hyperplane will yield: $\sum_{j=1}^p \beta_j x_j > 0$ for classes labelled `+1`, and $\sum_{j=1}^p \beta_j x_j < 0$ for classes labelled as `-1`.
+This can be combined in $y_i(\sum_{j=1}^p \beta_j x_{ij}) > 0$ (where $y_i$ is either $\pm 1$).
+
+We can find **several possible separating (hyper)planes** (see figure above): which shall we pick?
 
 **Maximal margin classifier**: among all separating hyperplanes, find the one that makes the
-biggest gap or margin between the two classes.
+biggest gap or margin between the two classes. This means **maximising the distance** between the **separating hyperplane** and the **closest points**.
 
-We can use the svm() function in the e1071 package to find this boundary.
+We can use the `svm()` function in the `e1071` *R package* to find this boundary.
 
 ```{r pressure, echo=FALSE}
 svmfit <- svm(y ~ ., data = dat, kernel = "linear", scale = FALSE)
@@ -54,24 +67,51 @@ svmfit <- svm(y ~ ., data = dat, kernel = "linear", scale = FALSE)
 plot(svmfit, dat)
 ```
 
-points that are represented by an "X" are the support vectors, or the points that directly affect the classification line. The points marked with an "o" are the other points, which don't affect the calculation of the line. This principle will lay the foundation for support vector machines.
+The "closest points to the boundary" are represented by an `X` in the plot above, and are the **support vectors**. Only the support vectors do affect the classification line. The other points (marked with a `o`s) don't affect the calculation of the classification boundary (the separating hyperplane). 
+The support vectors "support" the hyperplane: if these points change, the separating hyperplane changes as well.
 
 ```{r}
 # fit model and produce plot
-kernfit <- ksvm(x, y, type = "C-svc", kernel = 'vanilladot')
-plot(kernfit, data = x)
+# kernfit <- ksvm(x, y, type = "C-svc", kernel = 'vanilladot')
+# plot(kernfit, data = x)
+```
+
+```{r}
+make.grid=function(x,n=75){
+  grange=apply(x,2,range)
+  x1=seq(from=grange[1,1],to=grange[2,1],length=n)
+  x2=seq(from=grange[1,2],to=grange[2,2],length=n)
+  expand.grid(x.1=x1,x.2=x2)
+  }
+xgrid=make.grid(x)
+ygrid=predict(svmfit,xgrid)
+plot(xgrid,col=c("red","blue")[as.numeric(ygrid)],pch=20,cex=.2)
+points(x,col=y+3,pch=19)
+points(x[svmfit$index,],pch=5,cex=2)
+```
+
+```{r}
+beta=drop(t(svmfit$coefs)%*%x[svmfit$index,])
+beta0=svmfit$rho
+plot(xgrid,col=c("red","blue")[as.numeric(ygrid)],pch=20,cex=.2)
+points(x,col=y+3,pch=19)
+points(x[svmfit$index,],pch=5,cex=2)
+abline(beta0/beta[2],-beta[1]/beta[2])
+abline((beta0-0.5)/beta[2],-beta[1]/beta[2],lty=2)
+abline((beta0+0.35)/beta[2],-beta[1]/beta[2],lty=2)
 ```
 
 #### Support Vector Classifiers
 
-If this is not possible, we need to get creative, e.g.:
+In most cases however, the two classes are not perfectly separable by a hyperplane (e.g. plot below), therefore we need to get creative, e.g.:
 
--   we **soften** what we mean by "separates"
+-   <span style="color:red">we **soften** what we mean by "separates"</span>
 -   we **transform** (enrich, enlarge) the feature space so that separation is possible.
 
-As convenient as the maximal marginal classifier is to understand, most real data sets will not be fully separable by a linear boundary. To handle such data, we must use modified methodology. We simulate a new data set where the classes are more mixed.
+Moving away from a perfectly-separating hyperplane will also reduce problems with generalization (remember the bias/variance trade-off and the training/test data).
 
 ```{r}
+set.seed(129)
 # Construct sample data set - not completely separated
 x <- matrix(rnorm(20*2), ncol = 2)
 y <- c(rep(-1,10), rep(1,10))
@@ -85,11 +125,27 @@ ggplot(data = dat, aes(x = x.2, y = x.1, color = y, shape = y)) +
   theme(legend.position = "none")
 ```
 
-Whether the data is separable or not, the svm() command syntax is the same. In the case of data that is not linearly separable, however, the cost = argument takes on real importance. This quantifies the penalty associated with having an observation on the wrong side of the classification boundary. We can plot the fit in the same way as the completely separable case. We first use e1071:
+The **support vector classifier** will allow some observations (data points) to **violate the margin**: some points will be allowed to be inside the margin or even on the other side of the hyperplane (misclassifications) $\rightarrow$ **soft margin** (the support vector classifier is also called *soft margin classifier*).
+
+To do this, **slack (support) variables** $\epsilon_i$ are introduced for each example $i$ in $[1,n]$: 
+
+- $\epsilon_i=0$ if example $i$ is on the correct side of the margin; 
+- $\epsilon_i$ is between 0 and 1, if example $i$ is on the wrong side of the margin, BUT on the correct side of the hyperplane
+- $\epsilon_i > 1$ if example $i$ is on the wrong side of the margin, AND on the wrong side of the hyperplane
+
+<span style="color:blue">**QUESTION**: How many observations/examples (data points) will be allowed to violate the margin/hyperplane?</span>
+
+This is controlled by the **cost** $C$:
+
+$$
+\sum_{i=1}^n \epsilon_i \leq C
+$$
+
+We use the same function `svm()` to fit the **support vector classifier**: you can see that we now use the **cost** argument of the function to specify the extent to which misclassifications (or simple violations of the margin) are allowed:
 
 ```{r}
-# Fit Support Vector Machine model to data set
-svmfit <- svm(y~., data = dat, kernel = "linear", cost = 10)
+# Fit Support Vector Classifier model to data set
+svmfit <- svm(y~., data = dat, kernel = "linear", cost = 100)
 # Plot Results
 plot(svmfit, dat)
 ```
@@ -101,7 +157,11 @@ kernfit <- ksvm(x,y, type = "C-svc", kernel = 'vanilladot', C = 100)
 plot(kernfit, data = x)
 ```
 
-But how do we decide how costly these misclassifications actually are? Instead of specifying a cost up front, we can use the tune() function from e1071 to test various costs and identify which value produces the best fitting model.
+<span style="color:blue">**QUESTION**: How do we decide how costly these misclassifications actually are?</span> 
+
+The cost of the support vector classifier is a **hyperparameter** (tuning parameter) of the model: we already know that to decide on the value for hypeparameters of machine learning models we use **cross-validation**.
+
+We can use the `tune()` function of the `e1071` *R package*:
 
 ```{r}
 # find optimal cost of misclassification
@@ -112,14 +172,27 @@ tune.out <- tune(svm, y~., data = dat, kernel = "linear",
 ```
 
 ```{r}
-# Create a table of misclassified observations
+# Create a confusion matrix of predictions vs observations
 ypred <- predict(bestmod, dat)
 (misclass <- table(predict = ypred, truth = dat$y))
 ```
 
+Important: only observations that either lie on the margin or violate the margin will aﬀect the hyperplane! $\rightarrow$ **support vectors**
+
+If $C$ is large there are many support vectors (many observations violating the margin), and viceversa.
+
 ### Support Vector Machines
 
-Support Vector Classifiers are a subset of the group of classification structures known as Support Vector Machines. Support Vector Machines can construct classification boundaries that are nonlinear in shape. The options for classification structures using the svm() command from the e1071 package are linear, polynomial, radial, and sigmoid. To demonstrate a nonlinear classification boundary, we will construct a new data set.
+We said that to overcome the limitations of the *maximum margin classifier*, we need to be creative in two ways. We already saw how softening the margin leads to the *support vector classifier*. We now look at the second extension of the method, which deals with transforming the feature space to accommodate non-linear separation boundaries:
+
+-   we **soften** what we mean by "separates"
+-   <span style="color:red">we **transform** (enrich, enlarge) the feature space so that separation is possible</span>
+
+This transformation of the feature space can be obtained by using **quadratic**, **cubic**, or **higher-order polynomial** functions of the original features (or other more complicated functions of the features can be used) $\rightarrow$ this is known as the **kernel trick** (mathematically very efficient).
+
+We are not going too much into the mathematical details, we just say that there are several types of kernels: `linear` ($\rightarrow$ support vector classifier), `polynomial`, `radial`, `sigmoid` etc.
+
+We create a dataset with clearly a **non-linear boundary** between the classes:
 
 ```{r}
 set.seed(123)
@@ -137,6 +210,8 @@ ggplot(data = dat, aes(x = x.2, y = x.1, color = y, shape = y)) +
   theme(legend.position = "none")
 ```
 
+Now, with the same `svm()` function we fit a **support vector machine** to the data, specifying the `kernel` argument:
+
 ```{r}
 # set pseudorandom number generator
 set.seed(123)
@@ -153,3 +228,100 @@ kernfit <- ksvm(x[train,],y[train], type = "C-svc", kernel = 'rbfdot', C = 1, sc
 # Plot training data
 plot(kernfit, data = x[train,])
 ```
+
+### SVM: multiclass classification
+
+[example from: https://uc-r.github.io/svm]
+
+
+```{r}
+# construct data set
+x <- rbind(x, matrix(rnorm(50*2), ncol = 2))
+y <- c(y, rep(0,50))
+x[y==0,2] <- x[y==0,2] + 2.5
+dat <- data.frame(x=x, y=as.factor(y))
+
+# plot data set
+ggplot(data = dat, aes(x = x.2, y = x.1, color = y, shape = y)) + 
+  geom_point(size = 2) +
+  scale_color_manual(values=c("#000000","#FF0000","#00BA00")) +
+  theme(legend.position = "none")
+```
+
+```{r}
+# fit model
+svmfit <- svm(y~., data = dat, kernel = "radial", cost = 10, gamma = 1)
+# plot results
+plot(svmfit, dat)
+```
+
+```{r}
+#construct table
+ypred <- predict(svmfit, dat)
+(misclass <- table(predict = ypred, truth = dat$y))
+```
+
+```{r}
+# fit and plot
+kernfit <- ksvm(as.matrix(dat[,2:1]),dat$y, type = "C-svc", kernel = 'rbfdot', 
+                C = 100, scaled = c())
+
+# Create a fine grid of the feature space
+x.1 <- seq(from = min(dat$x.1), to = max(dat$x.1), length = 100)
+x.2 <- seq(from = min(dat$x.2), to = max(dat$x.2), length = 100)
+x.grid <- expand.grid(x.2, x.1)
+
+# Get class predictions over grid
+pred <- predict(kernfit, newdata = x.grid)
+
+# Plot the results
+cols <- brewer.pal(3, "Set1")
+plot(x.grid, pch = 19, col = adjustcolor(cols[pred], alpha.f = 0.05))
+
+classes <- matrix(pred, nrow = 100, ncol = 100)
+contour(x = x.2, y = x.1, z = classes, levels = 1:3, labels = "", add = TRUE)
+
+points(dat[, 2:1], pch = 19, col = cols[predict(kernfit)])
+```
+
+
+## Application to a classification problem
+
+Now we use a clinical dataset on breast cancer ($n=699$).
+Examples are classified as `benign` or `malignant` based on results from a tissue biopsy:
+
+```{r}
+library("mlbench")
+data(BreastCancer)
+head(BreastCancer) |> kable()
+```
+
+Training and test sets:
+
+```{r}
+BreastCancer = na.omit(BreastCancer)
+BreastCancer <- select(BreastCancer, -Id)
+BreastCancer$Class = factor(BreastCancer$Class)
+prop=0.8 ## proportion training
+vec_train <- sample(nrow(BreastCancer),prop*nrow(BreastCancer))
+
+train_set = BreastCancer[vec_train,]
+test_set = BreastCancer[-vec_train,]
+```
+
+```{r}
+svmfit = svm(factor(Class) ~ ., data=train_set, scale=TRUE, kernel="radial", cost=5, decision.values=TRUE)
+```
+
+Performance on the training set:
+
+```{r}
+table(svmfit$fitted, train_set$Class)
+```
+
+```{r}
+svm.pred <- predict(svmfit, test_set)
+table(svm.pred, test_set$Class)
+```
+
+## SVM for regression problems
