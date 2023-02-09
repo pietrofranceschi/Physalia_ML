@@ -28,7 +28,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [slides 1.variable_selection](slides/1.variable_selection.pdf)  (Filippo)
 * Supervised learning: regression and classification
    * [slides 2.Supervised learning](slides/2.supervised_learning.pdf)  (Filippo) 
-   * [script 1.introduction_to_ml] [(.Rmd)](scripts/1.introduction_to_ml.Rmd) [(ipynb)](scripts/1.introduction_to_ml.ipynb) 
+   * [script 1.introduction_to_ml] [(.Rmd)](scripts/1.introduction_to_ml.Rmd) <!-- [(ipynb)](scripts/1.introduction_to_ml.ipynb) -->
  * Machine learning for regression problems
    * [data_reg](data/DNA methylation data.xlsm)
    * [script 2.linear_regression] [(.Rmd)](scripts/2.linear_regression.Rmd) [(ipynb)](scripts/2.linear_regression.ipynb) 
