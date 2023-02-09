@@ -7,8 +7,9 @@ output: html_document
 
 ## DNA methylation and age in bats
 
-We are now ready to build our first **predictive machine**! <br>
-First, we load the R packages that are needed for this analysis:
+We are now ready to build our first **predictive machine**!
+
+First, we load the *R packages* that are needed for this analysis:
 
 ```{r setup, include=FALSE}
 library("xlsx")
@@ -89,7 +90,7 @@ r_squared <- summary(fit)$r.squared
 print(paste("R^2 is: ", round(r_squared,3)))
 ```
 
-The coefficient of determination **$R^2$** is `r r_squared`
+The coefficient of determination $R^2$ is `r r_squared`
 
 ```{r}
 data.frame("coefficient"=coef(fit))
@@ -210,7 +211,6 @@ print(paste("NDCG is",ndcg))
 
 Below a function to compute NDCG:
 
-
 ```{r}
 #Function to calculate Mean Normalized discounted cumulative gain (MNV)
 ndcg <- function(y_hat,y,k) {
@@ -230,12 +230,11 @@ NDCG <- ndcg(y_hat = predictions, y = ch4$Age, k = 10)
 print(round(NDCG,4))
 ```
 
-
 ## Exercise 2.1 (optional)
 
-- write your own model: remove variables (e.g. collinearity), add interactions, quadratic effects etc.
-- measure the performance of your model
-- try to improve the model performance! (e.g. higher correlation between predictions and observations or lower RMSE)
+-   write your own model: remove variables (e.g. collinearity), add interactions, quadratic effects etc.
+-   measure the performance of your model
+-   try to improve the model performance! (e.g. higher correlation between predictions and observations or lower RMSE)
 
 ```{r}
 ## write your code here
