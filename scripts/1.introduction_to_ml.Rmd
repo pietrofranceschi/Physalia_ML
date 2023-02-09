@@ -15,7 +15,7 @@ library("tidyverse")
 
 ## 1.1 Linear regression: a basic model for parameter estimation
 
-Here we look more in detail at how the estimation of model parameters works. <br> We have a generating model of the following form:
+Here we look more in detail at how the estimation of model parameters works. We have a generating model of the following form:
 
 $$
 y = 1.25 \cdot x
@@ -31,14 +31,16 @@ lin_reg <- function(x) 1.25*x
 x = 1
 y = lin_reg(x)
 print(paste("y as function of x=1 in the model above:",y))
+```
 
-## now apply the function to a bunch of data
+Now apply the function to a bunch of data
+
+```{r}
 x = seq(-5,+5,0.5) ## independent variable
 y = lin_reg(x) ## dependent variable
 
 kable(data.frame("x" = x, "y" = y))
 ```
-
 
 ```{r echo=FALSE}
 p <- ggplot(data = data.frame(x = 0), mapping = aes(x = x))
@@ -64,17 +66,26 @@ loss_function <- function(x,beta) {
 }
 ```
 
-We then calculate the loss function for different values of the parameter(s) to estimate.
-We take 11 datapoints (from 0 to 10) for our linear regression model and try different values for beta:
+We then calculate the loss function for different values of the parameter(s) to estimate. We take 11 datapoints (from 0 to 10) for our linear regression model and try different values for beta:
 
 ```{r}
 x <- seq(0,10,0.25)
 beta <- seq(0.25,2.25,0.05)
 
+print("The data points:")
+print(x)
+
+cat("\nand the values for the parameter beta:\n")
+print(beta)
+```
+
+Now we calculate the loss function for all different values of the parameter $\beta$ to be estimated:
+
+```{r}
 cost <- sapply(beta, function(z) loss_function(x,z))
 res <- data.frame("x" = x, "beta" = beta, "loss" = cost)
 beta_min = res[which.min(res$loss),"beta"]
-print(res)
+kable(res)
 ```
 
 ```{r}
@@ -85,50 +96,47 @@ print(paste("parameter value for which the cost function is minimised:", beta_mi
 plot(beta,cost, type="l",xlab = "Values for parameter beta", ylab = "Value for loss function")
 ```
 
-
-Note: sometimes the term **loss function** is used to define the individual loss (each single record, i.e. $(y_i-\hat{y_i})^2$) and the term **cost function** is used for the summ of individual losses
-
+Note: sometimes the term **loss function** is used to define the individual loss (each single record, i.e. $(y_i-\hat{y_i})^2$) and the term **cost function** is used for the sum of individual losses
 
 ### Exercise 1.1
 
 Try to estimate your own model coefficient:
 
-1. Create your generating (true) model (dare try with the intercept, too?):
+1.  Create your generating (true) model (dare try with the intercept, too?):
 
 ```{r results="asis"}
 lin_reg.1 <- function() {}
 ```
 
-2. Define your own loss function:
+2.  Define your own loss function:
 
 ```{r results="asis"}
 loss_function.1 <- function() {}
 ```
 
-3. Create your dataset:
+3.  Create your dataset:
 
 ```{r results="asis"}
 x <- c()
 ```
 
-4. Choose a set of values for $\beta$ to be tested
+4.  Choose a set of values for $\beta$ to be tested
 
 ```{r results="asis"}
 beta = c()
 ```
 
-5. Calculate the values for the loss function and plot results
+5.  Calculate the values for the loss function and plot results
 
 ```{r results="asis"}
 cost = c()
 ```
 
-6. Plot the cost function vs values of the parameter(s)
+6.  Plot the cost function vs values of the parameter(s)
 
 ```{r results="asis"}
 # plot()
 ```
-
 
 ## 1.2 Linear regression: measuring performance
 
@@ -199,7 +207,7 @@ Besides visualizing how predictions relate to observations, we need also to meas
 
 Several metrics exist for regression problems. Here we list a few of the most commonly used.
 
-1. **MSE** (mean squared error)
+1.  **MSE** (mean squared error)
 
 ```{r}
 mse <- function(y,y_hat) {
@@ -217,7 +225,7 @@ error
 
 The MSE is **`r round(error,3)`**.
 
-2. **RMSE** (root mean squared error): this is on the same scale as the target variable
+2.  **RMSE** (root mean squared error): this is on the same scale as the target variable
 
 ```{r}
 rmse = sqrt(error)
@@ -226,7 +234,7 @@ rmse
 
 The RMSE is **`r round(rmse,3)`**.
 
-3. **MAE** (mean absolute error)
+3.  **MAE** (mean absolute error)
 
 ```{r}
 mae <- function(y,y_hat) {
@@ -246,8 +254,8 @@ The MAE is **`r round(error,3)`**.
 
 The we have correlations:
 
-4. **Pearson's linear** correlation coefficient
-5. **Spearman's rank** correlation coefficient
+4.  **Pearson's linear** correlation coefficient
+5.  **Spearman's rank** correlation coefficient
 
 ```{r}
 r_pearson = cor(dataset$y, predictions, method = "pearson")
@@ -267,8 +275,8 @@ ggplot(dataset, aes(x = x, y = y)) + geom_jitter() + geom_smooth(method = "lm", 
 
 Generate a dataset, fit a linear model and measure the accuracy of predictions:
 
-1. you can choose one of the many built-in R datasets, using the function `data()`:
-2. or you can generate a dataset (e.g. sampling from a Gaussian distribution)
+1.  you can choose one of the many built-in R datasets, using the function `data()`:
+2.  or you can generate a dataset (e.g. sampling from a Gaussian distribution)
 
 ```{r results="asis"}
 #data()
@@ -281,28 +289,26 @@ x = NULL # feature 1
 z = NULL # feature 2 (optional)
 ```
 
-2. Fit a linear model
+2.  Fit a linear model
 
 ```{r results="asis"}
 # fit <- lm()
 ```
 
-3. Obtain predictions
+3.  Obtain predictions
 
 ```{r results="asis"}
 # predictions <- predict()
 ```
 
-4. Plot observations vs predictions
+4.  Plot observations vs predictions
 
 ```{r}
 # p <- ggplot()
 ```
 
-5. Choose a metric to measure the accuracy of predictions (performance)
+5.  Choose a metric to measure the accuracy of predictions (performance)
 
 ```{r results="asis"}
 # metric = 
 ```
-
-
