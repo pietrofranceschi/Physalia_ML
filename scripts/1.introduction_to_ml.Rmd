@@ -98,14 +98,73 @@ plot(beta,cost, type="l",xlab = "Values for parameter beta", ylab = "Value for l
 
 Note: sometimes the term **loss function** is used to define the individual loss (each single record, i.e. $(y_i-\hat{y_i})^2$) and the term **cost function** is used for the sum of individual losses
 
+### Random dataset
+
+```{r}
+# Construct sample data set
+set.seed(132)
+x <- sort(rnorm(30))
+y <- sort(rnorm(30)/sample(3,1))
+
+plot(x,y)
+```
+
+```{r}
+beta0 = seq(-1,1,0.1)
+beta1 = seq(0.1,3,0.1)
+parameters <- expand_grid(beta0,beta1)
+```
+
+```{r}
+loss_function <- function(x,y,beta0,beta1) {
+  
+  n = length(x)
+  y_hat = beta0 + beta1*x
+  normalised_squared_error = sum((y - y_hat)^2)/(2*n)
+  
+  return(normalised_squared_error)
+}
+```
+
+```{r}
+res <- parameters |> group_by(beta0,beta1) |> mutate(cost = loss_function(x=x, y=y, beta0=beta0, beta1=beta1))
+beta_min = res[which.min(res$cost),c("beta0","beta1")]
+kable(res)
+```
+
+```{r}
+cat("Estimated coefficents (values of parameters that minimise the cost function:\n")
+kable(beta_min)
+```
+
+```{r}
+plot(x,y)
+abline(beta_min$beta0, beta_min$beta1, col="red")
+```
+
+#### Compare with least squares
+
+```{r}
+X = matrix(c(rep(1,length(x)), x), ncol = 2)
+beta_coeffs = solve(t(X)%*%X) %*% t(X)%*%y
+kable(beta_coeffs)
+```
+
+```{r}
+plot(x,y)
+abline(beta_min$beta0, beta_min$beta1, col="red")
+abline(beta_coeffs[1], beta_coeffs[2], col="blue")
+```
+
 ### Exercise 1.1
 
 Try to estimate your own model coefficient:
 
-1.  Create your generating (true) model (dare try with the intercept, too?):
+1.  Create your random data (**dare try with more than two parameters?**):
 
 ```{r results="asis"}
-lin_reg.1 <- function() {}
+x <- NULL
+y <- NULL
 ```
 
 2.  Define your own loss function:
@@ -114,25 +173,27 @@ lin_reg.1 <- function() {}
 loss_function.1 <- function() {}
 ```
 
-3.  Create your dataset:
+3.  Choose a set of values for the $\beta$'s to be tested (and combine them in a grid of unique value combinations):
 
 ```{r results="asis"}
-x <- c()
+beta0 = c()
+beta1 = c()
+## etc.
 ```
 
-4.  Choose a set of values for $\beta$ to be tested
-
-```{r results="asis"}
-beta = c()
-```
-
-5.  Calculate the values for the loss function and plot results
+4.  Calculate the values for the loss function and get the coefficients corresponding to the minimum loss:
 
 ```{r results="asis"}
 cost = c()
 ```
 
-6.  Plot the cost function vs values of the parameter(s)
+5.  [optional] Plot the cost function vs values of the parameter(s):
+
+```{r results="asis"}
+# plot()
+```
+
+6.  [optional] Compare your results with those from least squares:
 
 ```{r results="asis"}
 # plot()
@@ -163,6 +224,8 @@ fit <- lm(y ~ x, data = dataset)
 coef(fit)
 ```
 
+[Question: how do we interpret the estimated model coefficients?]{style="color:red"}
+
 ```{r}
 ggplot(dataset, aes(x = x, y = y)) + geom_jitter() + geom_smooth(method = "lm", se = FALSE)
 ```
@@ -171,6 +234,7 @@ We now have all the ingredients to obtain predictions: either by explicitly usin
 
 ```{r}
 predictions <- dataset$x*coef(fit)[2] + coef(fit)[1]
+head(predictions)
 ```
 
 or by using the *R* `predict()` function:
@@ -267,11 +331,17 @@ print(r_pearson)
 print(r_spearman)
 ```
 
-## Exercise 1.2
+------------------------------------------------------------------------
+
+[**Food for thought**: what if the relationship between the response variable and the predictors is not linear?]{style="color:green"}
 
 ```{r}
 ggplot(dataset, aes(x = x, y = y)) + geom_jitter() + geom_smooth(method = "lm", formula = y ~ poly(x,2), se = FALSE)
 ```
+
+------------------------------------------------------------------------
+
+## Exercise 1.2
 
 Generate a dataset, fit a linear model and measure the accuracy of predictions:
 
