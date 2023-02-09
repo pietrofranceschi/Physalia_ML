@@ -31,39 +31,39 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [script 1.introduction_to_ml] [(.Rmd)](scripts/1.introduction_to_ml.Rmd) <!-- [(ipynb)](scripts/1.introduction_to_ml.ipynb) -->
  * Machine learning for regression problems
    * [data_reg](data/DNA methylation data.xlsm)
-   * [script 2.linear_regression] [(.Rmd)](scripts/2.linear_regression.Rmd) [(ipynb)](scripts/2.linear_regression.ipynb) 
+   * [script 2.linear_regression] [(.Rmd)](scripts/2.linear_regression.Rmd) <!-- [(ipynb)](scripts/2.linear_regression.ipynb) -->
    * [slides 3.Regression](slides/3.regression.pdf) (Filippo)
 
 **Day 3**
 
 * Overfitting and resampling techniques
-   * [script 3.training_testing] [(.Rmd)](scripts/3.training_testing.Rmd) [(ipynb)](scripts/3.training_testing.ipynb)
+   * [script 3.training_testing] [(.Rmd)](scripts/3.training_testing.Rmd) <!-- [(ipynb)](scripts/3.training_testing.ipynb) -->
    * [slides 4.overfitting](slides/4.overfitting.pdf) (Filippo)
    * [slides 5.resampling](slides/5.resampling.pdf) (Filippo)
 * Classification problems
    * [data_class](data/dogs_imputed_reduced.raw) 
-   * [script 4.classification] [(.Rmd)](scripts/4.classification.Rmd) [(ipynb)](scripts/4.classification.ipynb)
+   * [script 4.classification] [(.Rmd)](scripts/4.classification.Rmd) <!-- [(ipynb)](scripts/4.classification.ipynb) -->
    * [slides 6.classification](slides/6.classification.pdf) (Filippo)
 * Regression and classification with tidymodels
-   * [script 5.regression_and_classification_with_tidymodels] [(.Rmd)](scripts/5.regression_classification_tidymodels.Rmd) [(ipynb)](scripts/5.regression_classification_tidymodels.ipynb)
+   * [script 5.regression_and_classification_with_tidymodels] [(.Rmd)](scripts/5.regression_classification_tidymodels.Rmd) <!-- [(ipynb)](scripts/5.regression_classification_tidymodels.ipynb) -->
 * Lasso-penalised linear and logistic regression
    * [data_lasso](data/dogs_imputed.raw) 
-   * [script 6.lasso] [(.Rmd)](scripts/6.lasso.Rmd) [(ipynb)](scripts/6.lasso.ipynb)
+   * [script 6.lasso] [(.Rmd)](scripts/6.lasso.Rmd) <!-- [(ipynb)](scripts/6.lasso.ipynb) -->
    * [slides 7.lasso_regularization](slides/7.lasso_regularization.pdf) (Filippo)
 * Lasso and model tuning
    * [data lasso 2](data/MTBSL1.tsv)
-   * [script 7.lasso_with_tidymodels] [(.Rmd)](scripts/7.lasso_with_tidymodels.Rmd) [(ipynb)](scripts/7.lasso_with_tidymodels.ipynb)
+   * [script 7.lasso_with_tidymodels] [(.Rmd)](scripts/7.lasso_with_tidymodels.Rmd) <!-- [(ipynb)](scripts/7.lasso_with_tidymodels.ipynb) -->
 * KNN imputation [optional]
-   * [script knni] [(.Rmd)](scripts/knni.Rmd) [(ipynb)](scripts/knni.ipynb)
+   * [script knni] [(.Rmd)](scripts/knni.Rmd) <!-- [(ipynb)](scripts/knni.ipynb) -->
 
 **Day 4**
 
 * Random Forest for regression and classification
-   * [script 8.random_forest] [(.Rmd)](scripts/8.random_forest.Rmd) [(ipynb)](scripts/8.random_forest.ipynb)
-   * [script 9.multiclass_random_forest] [(.Rmd)](scripts/9.multiclass_random_forest.Rmd) [(ipynb)](scripts/9.multiclass_random_forest.ipynb)
+   * [script 8.random_forest] [(.Rmd)](scripts/8.random_forest.Rmd) <!-- [(ipynb)](scripts/8.random_forest.ipynb) -->
+   * [script 9.multiclass_random_forest] [(.Rmd)](scripts/9.multiclass_random_forest.Rmd) <!-- [(ipynb)](scripts/9.multiclass_random_forest.ipynb) -->
    * [slides 8.random_forest](slides/8.random_forest.pdf) (Filippo)
 * Slow learning: the boosting approach
-   * [script 10.boosting] [(.Rmd)](scripts/10.boosting.Rmd) [(ipynb)](scripts/10.boosting.ipynb)
+   * [script 10.boosting] [(.Rmd)](scripts/10.boosting.Rmd) <!-- [(ipynb)](scripts/10.boosting.ipynb) -->
    * [slides 9.boosting](slides/9.boosting.pdf) (Filippo)
 * Unsupervised learning: PCA, Umap, Self-organizing maps (Pietro) 
    * PCA demo [(.Rmd)](scripts/PCA_with_tidymodels.Rmd)
