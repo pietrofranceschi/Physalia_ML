@@ -333,7 +333,65 @@ SVR changes the perspective: aim for an **acceptable range for the errors, not t
 - $min\frac{1}{2}\sum_{j=1}^p(w_j)^2$
 - $|y_i-\mathbf{w}_i\mathbf{x}_i| \leq \epsilon$
 
-As it turns out, just like with SVM for classification, also is SVR we need to **soften the margin** and allow some errors to exceed the acceptable margin (subject to their overall sum being within a given cost $C$ -tunable hyperparameter).
+As it turns out, just like with SVM for classification, also in SVR we need to **soften the margin** and allow some errors to exceed the acceptable margin (subject to their overall sum being within a given cost $C$ -tunable hyperparameter).
+
+- $min \left( \frac{1}{2}\sum_{j=1}^p(w_j)^2 + C\sum_{i=1}^n|\xi| \right)$
+- $|y_i-\mathbf{w}_i\mathbf{x}_i| \leq \epsilon + |\xi_i|$
+
+```{r}
+data("ChickWeight")
+head(ChickWeight)
+ChickWeight <- ChickWeight |> mutate(Diet = as.factor(Diet))
+```
+
+```{r}
+y = ChickWeight$weight
+diet <- model.matrix(~-1+Diet, data=ChickWeight)
+X = bind_cols("Time"=ChickWeight[,2], diet)
+```
+
+```{r}
+prop=0.8 ## proportion training
+vec_train <- sample(nrow(X),prop*nrow(X))
+
+train_X = X[vec_train,]
+train_y = y[vec_train]
+
+test_X = X[-vec_train,]
+test_y = y[-vec_train]
+```
+
+
+```{r}
+svmfit = svm(x = train_X, y = train_y, type = "eps-regression")
+print(svmfit)
+```
+
+```{r}
+# find optimal cost of misclassification
+tune.out <- tune(svm, train.x = train_X, train.y = train_y, kernel="radial",
+                 ranges = list(cost = c(0.001, 0.01, 0.1, 1, 2.5, 5, 10, 100)))
+# extract the best model
+(bestmod <- tune.out$best.model)
+```
+
+```{r}
+#Predict using SVM regression
+# predYsvm = predict(svmfit, test_X)
+predYsvm = predict(bestmod, test_X)
+
+df = data.frame("y"=test_y, "y_hat"=predYsvm)
+ggplot(df, aes(y, y_hat)) + geom_point()
+```
+
+
+```{r}
+rmse = sqrt(mean((predYsvm-test_y)^2))
+```
+
+
+
+
 
 
 
