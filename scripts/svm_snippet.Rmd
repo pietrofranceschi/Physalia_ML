@@ -324,4 +324,18 @@ svm.pred <- predict(svmfit, test_set)
 table(svm.pred, test_set$Class)
 ```
 
-## SVM for regression problems
+## SVM for regression problems (SVR)
+
+In most regression methods the objective is to minimize the error: e.g. OLS (Ordinary Least Squares), or extensions of OLS like Ridge Regression, Lasso-penalised regression etc.
+
+SVR changes the perspective: aim for an **acceptable range for the errors, not the minimum**, and **minimise the model coefficients** subject to the **constraint that the errors fall within the range**:
+
+- $min\frac{1}{2}\sum_{j=1}^p(w_j)^2$
+- $|y_i-\mathbf{w}_i\mathbf{x}_i| \leq \epsilon$
+
+As it turns out, just like with SVM for classification, also is SVR we need to **soften the margin** and allow some errors to exceed the acceptable margin (subject to their overall sum being within a given cost $C$ -tunable hyperparameter).
+
+
+
+
+
