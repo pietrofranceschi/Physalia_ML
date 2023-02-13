@@ -127,13 +127,29 @@ loss_function <- function(x,y,beta0,beta1) {
 ```
 
 ```{r}
-res <- parameters |> group_by(beta0,beta1) |> mutate(cost = loss_function(x=x, y=y, beta0=beta0, beta1=beta1))
+res <- parameters |> group_by(beta0,beta1) |> 
+  mutate(cost = loss_function(x=x, y=y, beta0=beta0, beta1=beta1))
 beta_min = res[which.min(res$cost),c("beta0","beta1")]
 kable(res)
 ```
 
 ```{r}
-cat("Estimated coefficents (values of parameters that minimise the cost function:\n")
+library("plotly")
+
+plot_ly(x = res$beta0, y=res$beta1, z=res$cost, type = "scatter3d", mode = "markers", color = res$cost) %>%
+ layout(
+     title = "cost function with 2 parameters",
+      scene = list(
+          xaxis = list(title = "beta0"),
+          yaxis = list(title = "beta1"),
+          zaxis = list(title = "cost")
+      )
+ )
+```
+
+```{r}
+cat("Estimated coefficents 
+    (values of parameters that minimise the cost function:\n")
 kable(beta_min)
 ```
 
@@ -227,7 +243,8 @@ coef(fit)
 [Question: how do we interpret the estimated model coefficients?]{style="color:red"}
 
 ```{r}
-ggplot(dataset, aes(x = x, y = y)) + geom_jitter() + geom_smooth(method = "lm", se = FALSE)
+ggplot(dataset, aes(x = x, y = y)) + geom_jitter() + 
+  geom_smooth(method = "lm", se = FALSE)
 ```
 
 We now have all the ingredients to obtain predictions: either by explicitly using the estimated coefficients:
@@ -247,8 +264,9 @@ predictions <- predict(fit, newdata = dataset)
 The two approaches are obviously equivalent
 
 ```{r}
-concordance <- predict(fit, newdata = dataset) == dataset$x*coef(fit)[2] + coef(fit)[1]
-sum(concordance)/length(predictions)
+concordance <- predict(fit, newdata = dataset) == dataset$x*coef(fit)[2] + 
+  coef(fit)[1]
+print(sum(concordance)/length(predictions))
 ```
 
 The predict function is more flexible and can for instance also give us a confidence interval for predictions:

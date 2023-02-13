@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Our first classifier!
 
-\[reminder: classifier = predictive machine for classification problems \]
+$$reminder: classifier = \text{predictive machine for classification problems} $$
 
 ### Reading the data
 
@@ -23,11 +23,11 @@ For this practical session on logistic regression we are using a dataset on the 
 
 The public dataset downloaded from Dryad is a *Plink* `.tped/.tfam` file. The data have been preprocessed:
 
-- filtered (SNP quality, call-rate, MAF)
-- imputed (imputation of missing genotypes using LHCI: localised haplotype-clustering imputation)
-- selected (only SNPs on chromosomes 25, 26, 27, 28, 29)
+-   filtered (SNP quality, call-rate, MAF)
+-   imputed (imputation of missing genotypes using LHCI: localised haplotype-clustering imputation)
+-   selected (only SNPs on chromosomes 25, 26, 27, 28, 29)
 
-We begin by using a reduced version of the dataset, where $0.5\%$ of the SNP loci have been randomly picked: 
+We begin by using a reduced version of the dataset, where $0.5\%$ of the SNP loci have been randomly picked:
 
 ```{r label="reading_data"}
 dogs <- fread("../data/dogs_imputed_reduced.raw")
@@ -41,13 +41,13 @@ print(nrow(dogs))
 print(ncol(dogs)-1)
 ```
 
-The dataset contains data on `r nrow(dogs)` and `r ncol(dogs)-2` SNP genotypes.
-Controls (dogs without cleft lip) are coded as `1`'s, cases (dogs with cleft lip) are coded as `2`'s:
+The dataset contains data on `r nrow(dogs)` and `r ncol(dogs)-2` SNP genotypes. Controls (dogs without cleft lip) are coded as `1`'s, cases (dogs with cleft lip) are coded as `2`'s:
 
 ```{r}
 dogs %>%
   group_by(PHENOTYPE) %>%
-  summarise(N=n())
+  summarise(N=n()) |>
+  kable()
 ```
 
 ```{r}
@@ -61,12 +61,9 @@ mD <- reshape2::melt(maf)
 ggplot(mD, aes(y = value, x = variable)) + geom_boxplot(aes(fill=variable)) + xlab(element_blank()) + ylab("MAF")
 ```
 
-
 ## Fitting the logistic regression model
 
-We now split the data into training and test set, and then fit the logistic regression model to the training set.
-We have an **unbalanced binomial dataset** (13 cases, 112 controls, tot = 125), therefore we may want to keep the same proportion of cases adn controls when sampling the training and the test sets. To do so, we can use what is called "**stratified sampling**":
-
+We now split the data into training and test set, and then fit the logistic regression model to the training set. We have an **unbalanced binomial dataset** (13 cases, 112 controls, tot = 125), therefore we may want to keep the same proportion of cases adn controls when sampling the training and the test sets. To do so, we can use what is called "**stratified sampling**":
 
 ```{r logistic, echo=FALSE}
 seed = 121
@@ -87,6 +84,7 @@ test_set$id <- NULL
 table(training_set$PHENOTYPE)
 table(test_set$PHENOTYPE)
 ```
+
 In *R*, you can use the function `glm()` (generalised linear model) that allows you to specify the distribution (binomial in this case) and the link function (logit, in this case).
 
 ```{r}
@@ -95,7 +93,7 @@ glm.fit <- glm(PHENOTYPE ~ ., data = training_set, family=binomial(link="logit")
 
 ## Making predictions
 
-To make predictions, we apply the fitted model to the test data. We get probabilities of being a case ($$p(y=1|x)$$), and we need to set a threshold to discriminate between cases (1's) and controls (0's): a common choice for the threshold is **0.5**. 
+To make predictions, we apply the fitted model to the test data. We get probabilities of being a case ($$p(y=1|x)$$), and we need to set a threshold to discriminate between cases (1's) and controls (0's): a common choice for the threshold is **0.5**.
 
 ```{r}
 glm.probs <- predict(glm.fit, newdata = test_set[,-1],type="response") 
@@ -127,7 +125,7 @@ False postive rate is `r FPR`, false negative rate is `r FNR`
 
 ## Exercise 4.1
 
-- implement k-fold cross-validation to assess the performance of the logistic regression model:
+-   implement k-fold cross-validation to assess the performance of the logistic regression model:
 
 ```{r}
 n = nrow(dogs)
@@ -163,5 +161,3 @@ We can also have a look at the AUC (Area Under the ROC Curve):
 ```{r}
 paste("AUC is:",print(ROCit_logit$AUC))
 ```
-
-

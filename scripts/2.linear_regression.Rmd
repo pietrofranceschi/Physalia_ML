@@ -70,7 +70,7 @@ plot(ch4)
 
 ```{r}
 M <- cor(ch4, use = "complete.obs")
-M
+kable(M)
 ```
 
 ```{r}
@@ -126,7 +126,7 @@ We then predict all observations using the `predict()` function:
 ```{r}
 predictions <- predict(fit,ch4[,-1],interval="none", type = "response", na.action=na.pass)
 
-cbind(ch4, predictions) %>% head(10)
+cbind(ch4, predictions) %>% head(10) |> kable()
 ```
 
 Finally, we can measure the predictive performance of the model:

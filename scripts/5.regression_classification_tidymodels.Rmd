@@ -1,7 +1,7 @@
 ---
 title: "Regression and Classification with Tidymodels"
 author: "Filippo"
-date: "2/16/2022"
+date: "`r Sys.Date()`"
 output: html_document
 ---
 
@@ -21,13 +21,13 @@ Here we use the `bats` dataset to build a regression model using the programming
 ```{r label="bat_data", echo=TRUE}
 ch4 <- readxl::read_excel("../data/DNA methylation data.xlsm", sheet = 1)
 ch4 <- na.omit(ch4[,-c(1,3)])
-head(ch4)
+head(ch4) |>
+  kable()
 ```
 
 #### 1. partitioning the data
 
-We now use `k-fold` cross-validation to estimate the performance of our linear regresdsion model for the prediction of the age of bats based on epigenetics data.
-The dataset is small, and therefore we apply 5-fold cross-validation.
+We now use `k-fold` cross-validation to estimate the performance of our linear regresdsion model for the prediction of the age of bats based on epigenetics data. The dataset is small, and therefore we apply 5-fold cross-validation.
 
 The objective is to get a **robust estimate** of the model **predictive ability**.
 
@@ -38,7 +38,7 @@ folds
 
 #### 2. specifying the model and workflow
 
-We use `tidymodels` syntax to specify our linear regression model, and put everything into a *workflow*: 
+We use `tidymodels` syntax to specify our linear regression model, and put everything into a *workflow*:
 
 ```{r}
 lm_mod = linear_reg() %>%
@@ -50,7 +50,7 @@ lm_wf <-
   add_formula(Age ~ .)
 ```
 
-#### 3. fitting the model on the resampled data 
+#### 3. fitting the model on the resampled data
 
 Now we apply the workflow to the partitions of the data that we prepared before (our 5-fold partitions: 4 folds for training, 1 fold for validation, in turns $\rightarrow$ 5 different partitions of the data)
 
@@ -76,17 +76,20 @@ error_pct = metrs$mean[1]/mean(ch4$Age)
 print(error_pct)
 ```
 
-We see the error is **`r round(error_pct,2)*100`%** of the average age of bats in the dataset. 
-We then look at predictions in the validation folds, and measure the Pearson linear correlation between predicted and observed age values:
+We see the error is **`r round(error_pct,2)*100`%** of the average age of bats in the dataset. We then look at predictions in the validation folds, and measure the Pearson linear correlation between predicted and observed age values:
 
 ```{r}
-collect_predictions(lm_fit) %>% group_by(id) %>% summarise(pearson = cor(.pred,Age))
+collect_predictions(lm_fit) %>% group_by(id) %>% 
+  summarise(pearson = cor(.pred,Age)) |>
+  kable()
 ```
+
 ### Repeated cross-validation
 
 This was one single 5-fold cross-validation partition. However, to really take advantage of the full power of resampling methods and get robust estimates of the model performance, it is better (and usually done) to replicate the k-fold cross-validation **n times** (thereby resampling at each of the *n* replicates a different 5-fold partition):
 
 ```{r 'repeated_cv'}
+gc()
 folds = vfold_cv(ch4, v = 5, repeats = 10)
 ```
 
@@ -99,18 +102,21 @@ lm_fit <-
 ```
 
 ```{r}
-collect_metrics(lm_fit)
+collect_metrics(lm_fit) |> kable()
 ```
 
 We see that the standard errors of the estimated RMSE and $R^2$ are now smaller (averages of 50 values instead of 5 values!). We finally get the average Pearson correlation between predicted and observed ages, and its standard deviation:
 
 ```{r}
-collect_predictions(lm_fit) %>% group_by(id) %>% summarise(pearson = cor(.pred,Age)) %>% summarise(avg = mean(pearson), std = sd(pearson))
+collect_predictions(lm_fit) %>% 
+  group_by(id) %>% 
+  summarise(pearson = cor(.pred,Age)) %>% 
+  summarise(avg = mean(pearson), std = sd(pearson))
 ```
+
 ## Classification
 
-We now see how we can apply `tidymodels` to a classification problem.
-We use our `dogs` dataset (reduced: only 45 SNPs):
+We now see how we can apply `tidymodels` to a classification problem. We use our `dogs` dataset (reduced: only 45 SNPs):
 
 ```{r label="reading_data"}
 dogs <- fread("../data/dogs_imputed_reduced.raw")
@@ -129,13 +135,14 @@ This dataset is unbalanced: we have far fewer cases than controls:
 ```{r}
 dogs %>%
   group_by(PHENOTYPE) %>%
-  summarise(N=n())
+  summarise(N=n()) |>
+  kable()
 ```
 
 When data are unbalanced, one possible approach to improve the performance of the predictive model is to **subsample** the data:
 
-- **downsampling** or **undersampling**: *sample down* the *majority* class until it has the same frequency of the *minority* class
-- **oversample** the data: generate new samples of the *minority* class based on its *neighbourhood* (determined by a similarity matrix)
+-   **downsampling** or **undersampling**: *sample down* the *majority* class until it has the same frequency of the *minority* class
+-   **oversample** the data: generate new samples of the *minority* class based on its *neighbourhood* (determined by a similarity matrix)
 
 Subsampling usually improves model performance (see for instance [Menardi and Torelli, 2012](https://link.springer.com/article/10.1007/s10618-012-0295-5)).
 
@@ -154,7 +161,11 @@ imbal_rec <-
 ```
 
 ```{r}
-prep(imbal_rec) %>% juice() %>% group_by(PHENOTYPE) %>% summarise(N=n())
+prep(imbal_rec) %>% 
+  juice() %>% 
+  group_by(PHENOTYPE) %>% 
+  summarise(N=n()) |>
+  kable()
 ```
 
 #### 2. partitioning the data
@@ -183,7 +194,7 @@ log_wf <-
 cls_metrics <- metric_set(roc_auc,sens,spec)
 ```
 
-#### 5. fitting the model on the resampled data 
+#### 5. fitting the model on the resampled data
 
 ```{r, warning=FALSE, message=FALSE}
 log_res <- fit_resamples(
@@ -198,18 +209,21 @@ log_res <- fit_resamples(
 
 We look at the average:
 
-- `AUC`: area under the ROC curve
-- `sens`: TPR (true positive rate)
-- `spec`: TNR (true negative rate)
+-   `AUC`: area under the ROC curve
+-   `sens`: TPR (true positive rate)
+-   `spec`: TNR (true negative rate)
 
 ```{r}
-collect_metrics(log_res)
+collect_metrics(log_res) |> kable()
 ```
 
 Then we can look at predictions and calculate the overall error rate:
 
 ```{r}
-collect_predictions(log_res) %>% group_by(id,id2) %>% summarise(errors = sum(.pred_class != PHENOTYPE), tot = length(PHENOTYPE), error_rate = errors/tot)
+collect_predictions(log_res) %>% 
+  group_by(id,id2) %>% 
+  summarise(errors = sum(.pred_class != PHENOTYPE), tot = length(PHENOTYPE), error_rate = errors/tot) |>
+  kable()
 ```
 
 ```{r}
@@ -217,5 +231,6 @@ collect_predictions(log_res) %>%
   group_by(id,id2) %>% 
   summarise(errors = sum(.pred_class != PHENOTYPE), tot = length(PHENOTYPE), error_rate = errors/tot) %>%
   ungroup() %>%
-  summarise(avg_er = mean(error_rate), std = sd(error_rate))
+  summarise(avg_er = mean(error_rate), std = sd(error_rate)) |>
+  kable()
 ```

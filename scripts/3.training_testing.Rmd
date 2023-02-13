@@ -33,8 +33,7 @@ head(ch4)
 
 ## Training and testing sets
 
-We now need to subset the data into a **training set** and a **testing set**
-We can randomly assign records from the original dataset to the two subsets, for instance $80\%$ to the training set and $20\%$ to the test set:
+We now need to subset the data into a **training set** and a **testing set** We can randomly assign records from the original dataset to the two subsets, for instance $80\%$ to the training set and $20\%$ to the test set:
 
 ```{r pressure, echo=FALSE}
 # set.seed(295)
@@ -65,7 +64,7 @@ print(paste("
 cbind.data.framR^2", round(r_squared,4)))
 ```
 
-The coefficient of determination **$R^2$** is `r r_squared`
+The coefficient of determination $R^2$ is `r r_squared`
 
 ```{r}
 data.frame("coefficient"=coef(fit))
@@ -76,7 +75,8 @@ data.frame("coefficient"=coef(fit))
 ```{r}
 predictions <- predict(fit, newdata = test_set[,-1], interval="none", type = "response", na.action=na.pass)
 
-cbind.data.frame("test_age"=test_set[,1], "predictions"=round(predictions,2))
+cbind.data.frame("test_age"=test_set[,1], "predictions"=round(predictions,2)) |>
+  kable()
 ```
 
 ```{r}
@@ -113,16 +113,14 @@ data.frame("metric"=c("MSE","RMSE","NRMSE","r pearson","r spearman"),
            "value"=c(mse,rmse,nrmse,r_pearson,r_spearman)) %>% kable()
 ```
 
-
 ```{r}
 ggplot(data.frame("training_y"=training_set$Age,"predictions"=predictions), aes(x=predictions,y=training_y)) + geom_point()
 ```
 
-
 ## Exercise 3.1
 
-- try different training/testing sets 
-- measure the performance of the model
+-   try different training/testing sets
+-   measure the performance of the model
 
 ```{r}
 ## write your code here
@@ -130,8 +128,7 @@ ggplot(data.frame("training_y"=training_set$Age,"predictions"=predictions), aes(
 
 ## Validation set approach
 
-We now implement the validation set approach. First, we choose the relative proportions for the training and test sets, e.g. $70\%$ and $30\%$.
-We feed the original dataset and the chose proportions in a function to implement the validation set approach for our regression problem, and then we repeat this 20 times, to get an estimate of the variability of the predictor $\hat{f}(x)$.
+We now implement the validation set approach. First, we choose the relative proportions for the training and test sets, e.g. $70\%$ and $30\%$. We feed the original dataset and the chose proportions in a function to implement the validation set approach for our regression problem, and then we repeat this 20 times, to get an estimate of the variability of the predictor $\hat{f}(x)$.
 
 ```{r validation_set, echo=FALSE}
 validation_approach <- function(dataset,proportion) {
@@ -192,8 +189,7 @@ p
 
 ## k-fold cross-validation
 
-Now, we implement 5-fold cross-validation.
-We set k=5 and then assign each observation from the original dataset to a fold:
+Now, we implement 5-fold cross-validation. We set k=5 and then assign each observation from the original dataset to a fold:
 
 ```{r}
 n = nrow(ch4)
@@ -249,10 +245,8 @@ p
 
 ## Exercise 3.2
 
-- implement cross-validation with a different value for k (e.g. k=4, k=10, etc.)
+-   implement cross-validation with a different value for k (e.g. k=4, k=10, etc.)
 
 ```{r}
 ## write your code here
 ```
-
-
