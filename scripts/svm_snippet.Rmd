@@ -26,7 +26,8 @@ SVM: developed (in the 1990s) to construct boundaries between groups of observat
 SVMs are considered to be one of the best **out of the box** classifiers.
 
 SVMs are a generalization of the **maximum margin classifier** (that required the classes to be linearly separable).
-SVMs can handle **any number of classes** and sample sizes, and can construct **boundaries of virtually any shape** (linear, polynomial, highly complex/wiggly).
+SVMs can handle **any number of classes** and sample sizes, and can construct 
+**boundaries of virtually any shape** (linear, polynomial, highly complex/wiggly).
 
 **Examples with synthetic data**: a **merely qualitative** explanation of separating hyperplanes, margins and SVM follows.
 
@@ -55,12 +56,14 @@ $$
 $$
 
 All points for which the equation above holds (is equal to zero) are points that **belong to the hyperplane**.
-The separating hyperplane will yield: $\sum_{j=1}^p \beta_j x_j > 0$ for classes labelled `+1`, and $\sum_{j=1}^p \beta_j x_j < 0$ for classes labelled as `-1`.
+The separating hyperplane will yield: $\sum_{j=1}^p \beta_j x_j > 0$ for classes labelled `+1`, 
+and $\sum_{j=1}^p \beta_j x_j < 0$ for classes labelled as `-1`.
 This can be combined in $y_i(\sum_{j=1}^p \beta_j x_{ij}) > 0$ (where $y_i$ is either $\pm 1$).
 
 We can find **several possible separating (hyper)planes** (see figure above): which shall we pick?
 
-**Maximal margin classifier**: among all separating hyperplanes, find the one that makes the biggest gap or margin between the two classes.
+**Maximal margin classifier**: among all separating hyperplanes, find the one that makes the biggest gap or 
+margin between the two classes.
 This means **maximising the distance** between the **separating hyperplane** and the **closest points**.
 
 We can use the `svm()` function in the `e1071` *R package* to find this boundary.
@@ -109,12 +112,14 @@ abline((beta0+0.35)/beta[2],-beta[1]/beta[2],lty=2)
 
 #### Support Vector Classifiers
 
-In most cases however, the two classes are not perfectly separable by a hyperplane (e.g. plot below), therefore we need to get creative, e.g.:
+In most cases however, the two classes are not perfectly separable by a hyperplane (e.g. plot below), 
+therefore we need to get creative, e.g.:
 
 -   [we **soften** what we mean by "separates"]{style="color:red"}
 -   we **transform** (enrich, enlarge) the feature space so that separation is possible.
 
-Moving away from a perfectly-separating hyperplane will also reduce problems with generalization (remember the bias/variance trade-off and the training/test data).
+Moving away from a perfectly-separating hyperplane will also reduce problems with generalization 
+(remember the bias/variance trade-off and the training/test data).
 
 ```{r}
 set.seed(129)
