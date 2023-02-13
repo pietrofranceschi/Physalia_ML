@@ -352,6 +352,10 @@ As it turns out, just like with SVM for classification, also in SVR we need to *
 -   $min \left( \frac{1}{2}\sum_{j=1}^p(w_j)^2 + C\sum_{i=1}^n|\xi| \right)$
 -   $|y_i-\mathbf{w}_i\mathbf{x}_i| \leq \epsilon + |\xi_i|$
 
+We use data on chick weights as a function of time and diet:
+
+1.  Get the data:
+
 ```{r}
 data("ChickWeight")
 head(ChickWeight) |> kable()
@@ -359,10 +363,19 @@ ChickWeight <- ChickWeight |> mutate(Diet = as.factor(Diet))
 ```
 
 ```{r}
+p <- ggplot(ChickWeight, aes(x = Time, y = weight, color = Diet)) + geom_jitter(aes(color=Diet), width=0.2, alpha=0.3) + geom_smooth(se=FALSE)
+p
+```
+
+2.  A little preprocessing:
+
+```{r}
 y = ChickWeight$weight
-diet <- model.maranges = list(cost = c(0.001, 0.01, 0.1, 1, 2.5, 5, 10, 100))trix(~-1+Diet, data=ChickWeight)
+diet <- model.matrix(~-1+Diet, data=ChickWeight)
 X = bind_cols("Time"=ChickWeight[,2], diet)
 ```
+
+3.  Split the data into the training and test sets:
 
 ```{r}
 prop=0.8 ## proportion training
@@ -375,15 +388,19 @@ test_X = X[-vec_train,]
 test_y = y[-vec_train]
 ```
 
+4.  Fit the SVR model:
+
 ```{r}
 svmfit = svm(x = train_X, y = train_y, type = "eps-regression")
 print(svmfit)
 ```
 
+5.  Fine-tuning of the hyperparameters:
+
 ```{r}
 # find optimal cost of misclassification
 tune.out <- tune(svm, train.x = train_X, train.y = train_y, kernel="radial",
-                 ranges = list(epsilon = seq(0,1,0.1), cost = 2^(seq(0.5,8,.5))))
+                 ranges = list(epsilon = seq(0.1,1.1,0.1), cost = 2^(seq(0.5,10,.5))))
 # extract the best model
 (bestmod <- tune.out$best.model)
 ```
@@ -397,6 +414,8 @@ df = data.frame("y"=test_y, "y_hat"=preds)
 ggplot(df, aes(y, y_hat)) + geom_point()
 ```
 
+6.  Measure model performance on the **test data**:
+
 ```{r}
 rmse = sqrt(mean((preds-test_y)^2))
 print(paste("RMSE is:", rmse))
@@ -408,7 +427,9 @@ Is this a **large error or not**?
 print(paste("The RMSE is ", round(rmse/mean(ChickWeight$weight),3)*100, "% of the average value for the response variable (chick weight)"))
 print(paste("The RMSE is", round(rmse/sd(ChickWeight$weight),2), "standard deviations of the response"))
 ```
+
+Distribution of prediction errors (test data):
+
 ```{r}
 hist(abs(preds-test_y), xlab = "errors", breaks = 20, main = "Distribution of errors")
 ```
-
