@@ -142,7 +142,7 @@ I'm quite convinced that many of you have been also transforming predictors or r
 
 ## Doing this with tidymodels
 
-As I anticipated the idea of tidymodels is to clearly disentangle and make it abstract the process of modelling. Following on our regression example the elements of the process will be 
+As I anticipated, the idea of tidymodels is to clearly disentangle and make it abstract the process of modelling. Following on our regression example the elements of the process will be 
 
 1) a dataset
 2) a type of model
@@ -229,7 +229,7 @@ So we see that we have only the setosa flowers and the their sepal with was mean
 
 ## Arrenging everything in a workflow and fit the model
 
-Now that we have in place the model and the recipe, we can combine them in an abstract modeling workflow which will be then fit on the data
+Now that we have in place the model and the recipe, we can combine them in an abstract modelling workflow which will be then fit on the data
 
 ```{r}
 iris_workflow <- workflow() %>% 

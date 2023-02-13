@@ -47,7 +47,7 @@ one_pipe <- sqrt(100) %>%  ## calculate the square root of 100
   seq(1,.) ## make the sqrt
 
 ## one_old and one_pipe are exactly equivalent, but the second is by far more easy to read
-## in addition, whan used in data manipulation tasks, pipes do not save intermediate objects
+## in addition, when used in data manipulation tasks, pipes do not save intermediate objects
 
 ```
 
@@ -87,17 +87,17 @@ These three box of code allow to benchmark the efficiency of the three solution 
 
 ```{r}
 ## Base R
-system.time(read.csv("athlete_events.csv"))
+system.time(read.csv("../data/athlete_events.csv"))
 ```
 
 ```{r}
 # data.table
-system.time(fread("athlete_events.csv"))
+system.time(fread("../data/athlete_events.csv"))
 ```
 
 ```{r}
 # tidyverse
-system.time(read_csv("athlete_events.csv"))
+system.time(read_csv("../data/athlete_events.csv"))
 ```
 
 As it can be seen data.table is almost ten times faster than base R, while tidyverse stays somehow in the middle
@@ -107,9 +107,9 @@ tibbles and data.tables also own an improved print method that allows for a more
 ```{r}
 ## read the three tables
 
-baseR <- read.csv("athlete_events.csv")
-datat <- fread("athlete_events.csv")
-tidyv <- read_csv("athlete_events.csv")
+baseR <- read.csv("../data/athlete_events.csv")
+datat <- fread("../data/athlete_events.csv")
+tidyv <- read_csv("../data/athlete_events.csv")
 ```
 
 
@@ -174,8 +174,6 @@ iris %>%
 iris %>% 
   data.table(.) %>% 
   .[,list(Sepal.Width,Species)]
-
-
 
 ## extracting one column as as vector
 iris %>% 
@@ -255,7 +253,8 @@ iris %>%
 Creating new columns on the bases of the ones present in our dataset is one of the most useful and common tasks of data carpentry.
 If you look to it in abstract, also mutating the content of an existing column fits in the previous reasoning: I'm creating a new column with a name which is identical to the old one ... 
 
-In DT, new columns are created by using the `:=` operator in the second "place holder" of the call
+In DT, new columns are created by using the `:=` operator in the second "place holder" of the call. An important point to remember that can create some confusion is that `data.table` modify the object *by reference*, so the new columns will be added to the initial object even without a specific assignment
+
 ```{r}
 ## Create a column with the ration between sepal lenght and sepal width
 new_dt_col <- iris %>% 
@@ -268,6 +267,16 @@ new_dt_col <- iris %>%
 new_dt_col <- iris %>% 
   data.table(.) %>% 
   .[,c("myratio","myratio1") := list(Sepal.Length/Sepal.Width, Petal.Length/Petal.Width)]
+
+
+## Assign by reference
+
+iris_dt <- data.table(iris)
+iris_dt[, myratio := Sepal.Length/Sepal.Width]
+
+
+head(iris_dt)
+
 
 ```
 
@@ -355,6 +364,7 @@ iris %>%
 
 Get the Olympic game dataset and: 
 
+* focus on athletics
 * find the athlete(s) participating to the larger number of events
 * create a new dataset which contains the body mass index of the athletes
 * find the top athletes in terms of absolute number of medals on the Olympic games history, both on absolute and per year
@@ -542,7 +552,7 @@ But now we have a column with the variable names! ...
 
 so I could nest the long DF and switch on my modelling machinery ;-)
 
-Suppose, for example that you want to use t.test to compare all thenproerties of virginica and versicolor flowers
+Suppose, for example that you want to use t.test to compare all the properties of virginica and versicolor flowers
 
 
 ```{r}
