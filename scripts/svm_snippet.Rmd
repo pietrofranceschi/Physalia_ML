@@ -136,7 +136,10 @@ ggplot(data = dat, aes(x = x.2, y = x.1, color = y, shape = y)) +
   theme(legend.position = "none")
 ```
 
-The **support vector classifier** will allow some observations (data points) to **violate the margin**: some points will be allowed to be inside the margin or even on the other side of the hyperplane (misclassifications) $\rightarrow$ **soft margin** (the support vector classifier is also called *soft margin classifier*).
+The **support vector classifier** will allow some observations (data points) to **violate the margin**: 
+some points will be allowed to be inside the margin or even on the other side of 
+the hyperplane (misclassifications) $\rightarrow$ **soft margin** 
+(the support vector classifier is also called *soft margin classifier*).
 
 To do this, **slack (support) variables** $\epsilon_i$ are introduced for each example $i$ in $[1,n]$:
 
@@ -152,7 +155,9 @@ $$
 \sum_{i=1}^n \epsilon_i \leq C
 $$
 
-We use the same function `svm()` to fit the **support vector classifier**: you can see that we now use the **cost** argument of the function to specify the extent to which misclassifications (or simple violations of the margin) are allowed:
+We use the same function `svm()` to fit the **support vector classifier**; 
+you can see that we now use the **cost** argument of the function to specify the 
+extent to which misclassifications (or simple violations of the margin) are allowed:
 
 ```{r}
 # Fit Support Vector Classifier model to data set
@@ -170,7 +175,8 @@ plot(kernfit, data = x)
 
 [**QUESTION**: How do we decide how costly these misclassifications actually are?]{style="color:blue"}
 
-The cost of the support vector classifier is a **hyperparameter** (tuning parameter) of the model: we already know that to decide on the value for hypeparameters of machine learning models we use **cross-validation**.
+The cost of the support vector classifier is a **hyperparameter** (tuning parameter) of the model: 
+we already know that to decide on the value for hypeparameters of machine learning models we use **cross-validation**.
 
 We can use the `tune()` function of the `e1071` *R package*:
 
@@ -197,14 +203,18 @@ If $C$ is large there are many support vectors (many observations violating the 
 
 We said that to overcome the limitations of the *maximum margin classifier*, we need to be creative in two ways.
 We already saw how softening the margin leads to the *support vector classifier*.
-We now look at the second extension of the method, which deals with transforming the feature space to accommodate non-linear separation boundaries:
+We now look at the second extension of the method, which deals with transforming 
+the feature space to accommodate non-linear separation boundaries:
 
 -   we **soften** what we mean by "separates"
 -   [we **transform** (enrich, enlarge) the feature space so that separation is possible]{style="color:red"}
 
-This transformation of the feature space can be obtained by using **quadratic**, **cubic**, or **higher-order polynomial** functions of the original features (or other more complicated functions of the features can be used) $\rightarrow$ this is known as the **kernel trick** (mathematically very efficient).
+This transformation of the feature space can be obtained by using **quadratic**, **cubic**, or **higher-order polynomial** 
+functions of the original features (or other more complicated functions of the features can be used) 
+$\rightarrow$ this is known as the **kernel trick** (mathematically very efficient).
 
-We are not going too much into the mathematical details, we just say that there are several types of kernels: `linear` ($\rightarrow$ support vector classifier), `polynomial`, `radial`, `sigmoid` etc.
+We are not going too much into the mathematical details, we just say that there are several types of kernels: 
+`linear` ($\rightarrow$ support vector classifier), `polynomial`, `radial`, `sigmoid` etc.
 
 We create a dataset with clearly a **non-linear boundary** between the classes:
 
@@ -347,12 +357,15 @@ table(svm.pred, test_set$Class)
 In most regression methods the objective is to minimize the error: e.g.
 OLS (Ordinary Least Squares), or extensions of OLS like Ridge Regression, Lasso-penalised regression etc.
 
-SVR changes the perspective: aim for an **acceptable range for the errors, not the minimum**, and **minimise the model coefficients** subject to the **constraint that the errors fall within the range**:
+SVR changes the perspective: aim for an **acceptable range for the errors, not the minimum**, 
+and **minimise the model coefficients** subject to the **constraint that the errors fall within the range**:
 
 -   $min\frac{1}{2}\sum_{j=1}^p(w_j)^2$
 -   $|y_i-\mathbf{w}_i\mathbf{x}_i| \leq \epsilon$
 
-As it turns out, just like with SVM for classification, also in SVR we need to **soften the margin** and allow some errors to exceed the acceptable margin (subject to their overall sum being within a given cost $C$ -tunable hyperparameter).
+As it turns out, just like with SVM for classification, also in SVR we need to **soften the margin** 
+and allow some errors to exceed the acceptable margin 
+(subject to their overall sum being within a given cost $C$ -tunable hyperparameter).
 
 -   $min \left( \frac{1}{2}\sum_{j=1}^p(w_j)^2 + C\sum_{i=1}^n|\xi| \right)$
 -   $|y_i-\mathbf{w}_i\mathbf{x}_i| \leq \epsilon + |\xi_i|$
@@ -368,7 +381,8 @@ ChickWeight <- ChickWeight |> mutate(Diet = as.factor(Diet))
 ```
 
 ```{r}
-p <- ggplot(ChickWeight, aes(x = Time, y = weight, color = Diet)) + geom_jitter(aes(color=Diet), width=0.2, alpha=0.3) + geom_smooth(se=FALSE)
+p <- ggplot(ChickWeight, aes(x = Time, y = weight, color = Diet)) + geom_jitter(aes(color=Diet), width=0.2, alpha=0.3) 
+p <- p + geom_smooth(se=FALSE)
 p
 ```
 
