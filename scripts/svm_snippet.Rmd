@@ -452,3 +452,108 @@ Distribution of prediction errors (test data):
 ```{r}
 hist(abs(preds-test_y), xlab = "errors", breaks = 20, main = "Distribution of errors")
 ```
+
+## SVM with tidymodels
+
+```{r}
+library("tidymodels")
+```
+
+
+```{r}
+svm_mod <-
+  svm_rbf(cost = tune(), rbf_sigma = tune()) %>%
+  set_mode("classification") %>%
+  set_engine("kernlab")
+```
+
+```{r}
+breast_rec <-
+  recipe(Class ~ ., data = BreastCancer)  %>%
+  # remove any zero variance predictors
+  step_zv(all_predictors()) %>% 
+  # remove any linear combinations
+  step_lincomb(all_numeric())
+```
+
+```{r}
+breast_rs <- vfold_cv(BreastCancer, v = 5, repeats = 5)
+```
+
+```{r}
+roc_vals <- metric_set(roc_auc)
+```
+
+```{r}
+ctrl <- control_grid(verbose = FALSE, save_pred = TRUE)
+```
+
+```{r}
+formula_res <-
+  svm_mod %>% 
+  tune_grid(
+    Class ~ .,
+    resamples = breast_rs,
+    metrics = roc_vals,
+    control = ctrl
+  )
+formula_res
+```
+
+```{r}
+formula_res %>% 
+  select(.metrics) %>% 
+  slice(1) %>% 
+  pull(1)
+```
+
+```{r}
+estimates <- collect_metrics(formula_res)
+estimates
+```
+
+```{r}
+top_models <- show_best(formula_res, metric = "roc_auc")
+top_models
+```
+
+```{r}
+collect_predictions(formula_res)
+```
+
+
+```{r}
+augment(formula_res) %>%
+  ggplot(aes(.pred_malignant, color = Class)) +
+  geom_boxplot()
+```
+
+```{r}
+svm_best <- 
+  formula_res %>% 
+  collect_metrics() %>% 
+  arrange(mean) |>
+  slice(1)
+svm_best <- top_models |> slice(1)
+svm_best
+```
+
+```{r}
+svm_auc <- 
+  formula_res %>% 
+  collect_predictions(parameters = svm_best) %>% 
+  roc_curve(Class, .pred_benign) %>% 
+  mutate(model = "SVM")
+
+autoplot(svm_auc)
+```
+
+```{r}
+formula_res %>% 
+  collect_predictions(parameters = svm_best) %>% 
+  filter(id == "Repeat1", id2 == "Fold1") |>
+  mutate(pred = factor(ifelse(.pred_benign >= 0.5, "benign", "malignant"))) |>
+  conf_mat(Class, pred)
+```
+
+
