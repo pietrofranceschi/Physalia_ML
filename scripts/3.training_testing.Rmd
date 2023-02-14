@@ -70,6 +70,8 @@ The coefficient of determination $R^2$ is `r r_squared`
 data.frame("coefficient"=coef(fit))
 ```
 
+[Question: How do we interpret the model coefficients?]{style="color:red"}
+
 ### The test error
 
 ```{r}
