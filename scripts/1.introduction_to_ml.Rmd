@@ -83,7 +83,7 @@ Now we calculate the loss function for all different values of the parameter $\b
 
 ```{r}
 cost <- sapply(beta, function(z) loss_function(x,z))
-res <- data.frame("x" = x, "beta" = beta, "loss" = cost)
+res <- data.frame("beta" = beta, "loss" = cost)
 beta_min = res[which.min(res$loss),"beta"]
 kable(res)
 ```
@@ -229,6 +229,12 @@ dataset <- rename(ChickWeight, y = weight, x = Time) %>% select(y,x)
 kable(head(dataset))
 ```
 
+y: weight (grams) x: time (days)
+
+```{r}
+summary(dataset)
+```
+
 We now fit a simple linear regression model:
 
 $$
@@ -259,6 +265,7 @@ or by using the *R* `predict()` function:
 ```{r}
 ?predict
 predictions <- predict(fit, newdata = dataset)
+head(predictions)
 ```
 
 The two approaches are obviously equivalent
