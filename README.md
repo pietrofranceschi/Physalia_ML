@@ -20,6 +20,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
     * [Omics meet ML](slides/omics_meet_ML.pdf) (Pietro) 
 * Introduction to advanced R data libraries [Rmd](scripts/R_advanced_libraries.Rmd)
 * Introduction to `tidymodels` [Rmd](scripts/Introduction_to_tidymodels.Rmd)
+    * [data_athletes](data/athlete_events.csv)
 
 **Day 2**
 
