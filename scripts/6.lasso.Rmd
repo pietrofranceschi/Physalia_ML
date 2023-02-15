@@ -1,7 +1,7 @@
 ---
 title: "Lasso regularization"
 author: "Filippo Biscarini"
-date: "7/8/2020"
+date: "`r Sys.Date()`"
 output: html_document
 ---
 
@@ -21,9 +21,9 @@ For this practical session on logistic regression we are using a dataset on the 
 
 The public dataset downloaded from Dryad is a *Plink* `.tped/.tfam` file. The data have been preprocessed:
 
-- filtered (SNP quality, call-rate, MAF)
-- imputed (imputation of missing genotypes using LHCI: localised haplotype-clustering imputation)
-- selected (only SNPs on chromosomes 25, 26, 27, 28, 29)
+-   filtered (SNP quality, call-rate, MAF)
+-   imputed (imputation of missing genotypes using LHCI: localised haplotype-clustering imputation)
+-   selected (only SNPs on chromosomes 25, 26, 27, 28, 29)
 
 ```{r cars}
 dogs <- fread("../data/dogs_imputed.raw")

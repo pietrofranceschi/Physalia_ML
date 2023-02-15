@@ -67,7 +67,7 @@ lm_fit <-
 To evaluate the performance of the model we first collect the error metrics: RMSE and $R^2$. These are averages over the 5 validation folds, together with the standard error:
 
 ```{r}
-collect_metrics(lm_fit)
+collect_metrics(lm_fit) |> kable()
 ```
 
 ```{r}
@@ -153,6 +153,7 @@ It is important that subsampling is **applied only to the training data** (e.g. 
 In this case, data will be oversampled (the dataset is small):
 
 ```{r}
+## ROSE: Randomly Over Sampling Examples
 library("themis")
 imbal_rec <- 
   recipe(PHENOTYPE ~ ., data = dogs) %>%
@@ -234,3 +235,7 @@ collect_predictions(log_res) %>%
   summarise(avg_er = mean(error_rate), std = sd(error_rate)) |>
   kable()
 ```
+
+### Exercise 5.1
+
+Can you calculate the decompostion of the above error rate into the false positive and false negative rates?

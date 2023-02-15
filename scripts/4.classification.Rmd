@@ -6,6 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+library("knitr")
 library("ggplot2")
 library("reshape2")
 library("tidyverse")
@@ -41,7 +42,7 @@ print(nrow(dogs))
 print(ncol(dogs)-1)
 ```
 
-The dataset contains data on `r nrow(dogs)` and `r ncol(dogs)-2` SNP genotypes. Controls (dogs without cleft lip) are coded as `1`'s, cases (dogs with cleft lip) are coded as `2`'s:
+The dataset contains data on `r nrow(dogs)` and `r ncol(dogs)-1` SNP genotypes. Controls (dogs without cleft lip) are coded as `1`'s, cases (dogs with cleft lip) are coded as `2`'s:
 
 ```{r}
 dogs %>%
@@ -63,7 +64,7 @@ ggplot(mD, aes(y = value, x = variable)) + geom_boxplot(aes(fill=variable)) + xl
 
 ## Fitting the logistic regression model
 
-We now split the data into training and test set, and then fit the logistic regression model to the training set. We have an **unbalanced binomial dataset** (13 cases, 112 controls, tot = 125), therefore we may want to keep the same proportion of cases adn controls when sampling the training and the test sets. To do so, we can use what is called "**stratified sampling**":
+We now split the data into training and test set, and then fit the logistic regression model to the training set. We have an **unbalanced binomial dataset** (13 cases, 112 controls, tot = 125), therefore we may want to keep the same proportion of cases and controls when sampling the training and the test sets. To do so, we can use what is called "**stratified sampling**":
 
 ```{r logistic, echo=FALSE}
 seed = 121
@@ -117,11 +118,11 @@ TN = sum(glm.pred == 0 & test_set$PHENOTYPE == 0)
 FP = sum(glm.pred == 1 & test_set$PHENOTYPE == 0)
 FPR = FP/(FP+TN)
 FNR = FN/(FN+TP)
-print(FPR)
-print(FNR)
+print(paste("FPR is",FPR))
+print(paste("FNR is",FNR))
 ```
 
-False postive rate is `r FPR`, false negative rate is `r FNR`
+False positive rate is `r FPR`, false negative rate is `r FNR`
 
 ## Exercise 4.1
 

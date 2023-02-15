@@ -247,7 +247,7 @@ p
 
 ## Exercise 3.2
 
--   implement cross-validation with a different value for k (e.g. k=4, k=10, etc.)
+-   implement cross-validation with a different value for k (e.g. k=4, k=10, etc.): what happens to the estimated accuracy?
 
 ```{r}
 ## write your code here
