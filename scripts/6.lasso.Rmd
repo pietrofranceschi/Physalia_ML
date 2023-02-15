@@ -68,7 +68,11 @@ plot(fit.lasso, xvar="lambda", label=TRUE)
 
 ```{r}
 summary(fit.lasso$lambda)
-tmp_coeffs <- coef(fit.lasso, s = exp(-4))
+```
+
+```{r}
+lambda_val = median(fit.lasso$lambda)
+tmp_coeffs <- coef(fit.lasso, s = lambda_val)
 df <- data.frame(name = tmp_coeffs@Dimnames[[1]][tmp_coeffs@i + 1], coefficient = tmp_coeffs@x)
 df
 ```
@@ -106,15 +110,18 @@ We then apply k-fold cross-validation to select the best value for the regulariz
 ```{r}
 cv.lasso <- cv.glmnet(x_train, y_train, family = "binomial", type.measure = "class", nfolds = 10, alpha = 1)
 plot(cv.lasso)
-cv.lasso$lambda.min
 # coef(cv.lasso, s = "lambda.min")
+```
+
+```{r}
+print(cv.lasso$lambda.min)
 ```
 
 The tuned value for the $\lambda$ parameter is `r cv.lasso$lambda.min`
 
 ### Fit the final model on the training data
 
-We can now fit the final model (tuned with cross-validarion) to the training set:
+We can now fit the final model (tuned with cross-validation) to the training set:
 
 ```{r}
 model <- glmnet(x_train, y_train, alpha = 1, family = "binomial", lambda = cv.lasso$lambda.min)
@@ -149,3 +156,15 @@ legend("bottomright", col = c(1,2),
 
 save(ROCit_lasso, file = "ROClasso.RData")
 ```
+
+### Exercise 6.1
+
+Try:
+- a different training/test split (e.g. 70/30)
+- a different CV scheme for tuning the hyperparameter $\lambda$
+- measure the predictive performance of the model
+
+```{r}
+## your code here
+```
+
