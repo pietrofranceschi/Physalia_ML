@@ -77,7 +77,9 @@ df <- data.frame(name = tmp_coeffs@Dimnames[[1]][tmp_coeffs@i + 1], coefficient 
 df
 ```
 
-In practice, we would begin by setting aside a test set (stratified, as we did previously):
+#### Training and test sets
+
+In practice, we would begin by setting aside a **test set** (**stratified**, as we did previously):
 
 ```{r pressure, echo=FALSE}
 seed = 17
@@ -105,7 +107,9 @@ table(y_train)
 table(y_test)
 ```
 
-We then apply k-fold cross-validation to select the best value for the regularization parameter $\lambda$ (*model tuning*)
+#### Fine-tuning of the hyperparameters
+
+We then apply **k-fold cross-validation** to select the **best value for the regularization parameter** $\lambda$ (*model tuning*)
 
 ```{r}
 cv.lasso <- cv.glmnet(x_train, y_train, family = "binomial", type.measure = "class", nfolds = 10, alpha = 1)
@@ -128,6 +132,10 @@ model <- glmnet(x_train, y_train, alpha = 1, family = "binomial", lambda = cv.la
 # plot(model,xvar="lambda",label=TRUE)
 tmp_coeffs <- coef(model)
 df <- data.frame(name = tmp_coeffs@Dimnames[[1]][tmp_coeffs@i + 1], coefficient = tmp_coeffs@x)
+```
+
+```{r}
+kable(df)
 ```
 
 ### Make predictions
@@ -159,12 +167,8 @@ save(ROCit_lasso, file = "ROClasso.RData")
 
 ### Exercise 6.1
 
-Try:
-- a different training/test split (e.g. 70/30)
-- a different CV scheme for tuning the hyperparameter $\lambda$
-- measure the predictive performance of the model
+Try: - a different training/test split (e.g. 70/30) - a different CV scheme for tuning the hyperparameter $\lambda$ - measure the predictive performance of the model
 
 ```{r}
 ## your code here
 ```
-

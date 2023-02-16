@@ -226,10 +226,10 @@ lasso_grid %>%
 ```
 
 ```{r}
-lowest_roc <- lasso_grid %>%
+best_roc <- lasso_grid %>%
   select_best("roc_auc")
 
-print(lowest_roc)
+print(best_roc)
 ```
 
 With the selected penalty parameter from fine-tuning, we can (finally!) finalize our workflow:
@@ -237,7 +237,7 @@ With the selected penalty parameter from fine-tuning, we can (finally!) finalize
 ```{r}
 final_lasso <- finalize_workflow(
   wf1,
-  lowest_roc
+  best_roc
 )
 
 print(final_lasso)

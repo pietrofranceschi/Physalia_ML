@@ -27,9 +27,9 @@ For this practical session on logistic regression we are using a dataset on the 
 
 The public dataset downloaded from Dryad is a *Plink* `.tped/.tfam` file. The data have been preprocessed:
 
-- filtered (SNP quality, call-rate, MAF)
-- imputed (imputation of missing genotypes using LHCI: localised haplotype-clustering imputation)
-- selected (only SNPs on chromosomes 25, 26, 27, 28, 29)
+-   filtered (SNP quality, call-rate, MAF)
+-   imputed (imputation of missing genotypes using LHCI: localised haplotype-clustering imputation)
+-   selected (only SNPs on chromosomes 25, 26, 27, 28, 29)
 
 ```{r}
 dogs <- fread("../data/dogs_imputed.raw")
@@ -46,7 +46,7 @@ dogs$PHENOTYPE = dogs$PHENOTYPE-1
 Let's start with a classification tree. We split the data in training and testing sets:
 
 ```{r subset, echo=FALSE}
-seed = 157
+seed = 137
 set.seed(seed)
 
 ##Training data
@@ -64,12 +64,11 @@ print(y_test)
 table(x_train$PHENOTYPE)
 ```
 
-
 Then fit the classification tree model to the training set:
 
-- function `rpart` (from the *rpart* package)
-- method = "class" (classification)
-- `minsplit`: minimum number of observations (records) in a split (splits with fewer than 3 records will not be considered/attempted)
+-   function `rpart` (from the *rpart* package)
+-   method = "class" (classification)
+-   `minsplit`: minimum number of observations (records) in a split (splits with fewer than 3 records will not be considered/attempted)
 
 ```{r classification_tree}
 ##Model without bagging
@@ -80,9 +79,9 @@ rpart.plot(no_bag_model)
 
 In the *tree-plot* we see:
 
-- the **classification**
-- the modelled class probability $\rightarrow$ $P(y=1|x)$ (i.e. the probability of the class conditioned on the node)
-- the percentage of observations used at that node
+-   the **classification**
+-   the modelled class probability $\rightarrow$ $P(y=1|x)$ (i.e. the probability of the class conditioned on the node)
+-   the percentage of observations used at that node
 
 With the trained model we can make predictions in the test set:
 
@@ -90,10 +89,10 @@ With the trained model we can make predictions in the test set:
 predictions <- predict(no_bag_model, x_test, type = "class")
 table(predictions, y_test)
 ```
+
 #### Bagging
 
-We now take 10 bootstrapped samples of the data, and fit a classification tree to each sample. We use OOB observations to measure the prediction error.
-At each bagging replicate (bootstrapped sample) typically $1/3$ of the observations are not used for training (out-of-bag -OOB- observations), and can naturally be used to measure the prediction error:
+We now take 10 **bootstrapped samples** of the data, and fit a classification tree to each sample. We use OOB observations to measure the prediction error. At each bagging replicate (bootstrapped sample) typically $1/3$ of the observations are not used for training (out-of-bag -OOB- observations), and can naturally be used to measure the prediction error:
 
 ```{r bagging}
 n_model = 10
@@ -133,7 +132,7 @@ print(paste("average OOB error:" , mean(oob_results$error)))
 
 The average OOB error is `r mean(oob_results$error)`.
 
-Alternatively, we can proceed with splitting the data in training and testing sets, fit the classification trees to bootstrapped replicates of the training data, and then estimate the error rate on the test data.
+Alternatively, we can proceed with splitting the data in **training and testing sets**, fit the classification trees to bootstrapped replicates of the training data, and then estimate the error rate on the test data.
 
 Also here we will have OOB observations, but the error rate in this case would tend to be overestimated since the training set is smaller than the original dataset.
 
@@ -167,29 +166,40 @@ i = i+1
 
 diff = abs(bagged_result - (as.integer(y_test)-1)) ## absolute differences between predictions and observations (averaged over the n replicates of the model)
 error = sum(n_model*diff)/(length(y_test)*n_model) ## average error over number of predictions (size of test set time n. of replicates)
-print(error)
+print(paste("The bagging error is", error))
 ```
 
-Total test error rate is `r error`.
-The breakdown in FPR and FNR is shown below:
+Total average test error rate is `r error`. The breakdown in average FPR and FNR over the bagging replicates is shown below:
 
 ```{r}
-df <- data.frame("pred"=bagged_result,"obs"=as.integer(y_test)-1)
 df %>%
   group_by(obs) %>%
   summarise(N=n(),err=sum(10*abs(pred-obs))/(N*10))
+```
+
+Final bagging classification.
+
+```{r}
+df <- data.frame("pred"=bagged_result,"obs"=as.integer(y_test)-1)
+head(df) |> kable()
+```
+
+```{r}
+preds = ifelse(bagged_result > 0.5,1,0)
+table(preds,y_test)
 ```
 
 ## Random Forest
 
 We can now make the next step from bagging (averaging over bootstrapped trees) to Random Forest (adding randomly sampled subsets of features to bootstrapped data):
 
-- first, split the data in training and test sets (we keep y and x separate here)
-- then we fit a RF model to the training set, without tuning any hyperparameters (for now)
-- the function `randomForest` internally evaluates the model on OOB data
+-   first, split the data in training and test sets (we keep y and x separate here)
+-   then we fit a RF model to the training set, without tuning any hyperparameters (for now)
+-   the function `randomForest` internally evaluates the model on OOB data
 
 ```{r rf, echo=FALSE}
 ##Training data
+set.seed(123)
 n = nrow(dogs) ## sample size
 n_training = round(0.8*n,0)
 n_test = n - n_training
@@ -203,17 +213,17 @@ print(y_test)
 
 ```{r}
 rf.dogs <- randomForest(x = x_train, y = y_train, ntree = 10)
-rf.dogs
+print(rf.dogs)
 ```
 
 #### Let's tune it up a little!
 
 Now we use a convenient built-in function to tune hyperparameters in random forest: the `tuneRF` function, from the *randomForest* package:
 
-- we tune just the number of variables to sample in each tree, `mtry`
-- mtryStart: starting value of `mtry` (usually: $\sqrt{p}$ for classification; $p/3$ for regression)
-- stepFactor: at each iteration, `mtry` is inflated (or deflated) by this value
-- improve: the (relative) improvement in OOB error must be by this much for the search to continue
+-   we tune just the number of variables to sample in each tree, `mtry`
+-   mtryStart: starting value of `mtry` (usually: $\sqrt{p}$ for classification; $p/3$ for regression)
+-   stepFactor: at each iteration, `mtry` is inflated (or deflated) by this value
+-   improve: the (relative) improvement in OOB error must be by this much for the search to continue
 
 ```{r}
 tuned_rf <- tuneRF(x_train, y_train, mtryStart = 25, ntreeTry=50, stepFactor=2, improve=0.01,
