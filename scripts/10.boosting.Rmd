@@ -125,8 +125,7 @@ We now use `tidymodels` to build a recipe and workflow to tune our boosting mode
 3.  partition the training set in k-folds for cross-validation to tune hyperparameter
 4.  specify the boosting model:
     -   "classification" mode
-    -   
-        n.  of trees (sequential models to combine)
+    -   n. of trees (sequential models to combine)
     -   min. n. of obs per node $\rightarrow$ tuning parameter
     -   tree depth $\rightarrow$ tuning parameter
     -   shrinkage parameter (learning rate) $\rightarrow$ tuning parameter
@@ -164,7 +163,7 @@ diab_cv <- vfold_cv(mtbsl1_train, v=5, repeats = 5, strata = gender_status)
 xgboost_model <- 
   boost_tree(
     mode = "classification",
-    trees = 100, ## B parameter
+    trees = 80, ## B parameter
     min_n = tune(),
     tree_depth = tune(), ## d parameter
     learn_rate = tune() 

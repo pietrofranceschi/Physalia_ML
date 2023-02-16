@@ -118,7 +118,7 @@ tune_wf <- workflow() %>%
 We use k-fold cross-validation to tune the hyperparameters in the training set
 
 ```{r}
-trees_folds <- vfold_cv(training_set, v = 5, repeats = 5)
+trees_folds <- vfold_cv(training_set, v = 5, repeats = 3)
 ```
 
 ```{r}
@@ -131,7 +131,7 @@ doParallel::registerDoParallel()
 tune_res <- tune_grid(
   tune_wf,
   resamples = trees_folds,
-  grid = 20 ## n. of tuning combinations
+  grid = 30 ## n. of tuning combinations
 )
 
 ```
@@ -164,9 +164,9 @@ We now try to start from $\sqrt{p}$ (classification problem)
 m <- round(sqrt(ncol(training_set)-1),0)
 print(m)
 rf_grid <- grid_regular(
-  mtry(range = c(m-10, m+10)),
+  mtry(range = c(m-4, m+16)),
   min_n(range = c(8, 12)),
-  levels = 3
+  levels = c(8,4)
 )
 ```
 

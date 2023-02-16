@@ -169,6 +169,11 @@ error = sum(n_model*diff)/(length(y_test)*n_model) ## average error over number 
 print(paste("The bagging error is", error))
 ```
 
+```{r}
+df <- data.frame("pred"=bagged_result,"obs"=as.integer(y_test)-1)
+head(df) |> kable()
+```
+
 Total average test error rate is `r error`. The breakdown in average FPR and FNR over the bagging replicates is shown below:
 
 ```{r}
@@ -178,11 +183,6 @@ df %>%
 ```
 
 Final bagging classification.
-
-```{r}
-df <- data.frame("pred"=bagged_result,"obs"=as.integer(y_test)-1)
-head(df) |> kable()
-```
 
 ```{r}
 preds = ifelse(bagged_result > 0.5,1,0)
@@ -226,8 +226,10 @@ Now we use a convenient built-in function to tune hyperparameters in random fore
 -   improve: the (relative) improvement in OOB error must be by this much for the search to continue
 
 ```{r}
-tuned_rf <- tuneRF(x_train, y_train, mtryStart = 25, ntreeTry=50, stepFactor=2, improve=0.01,
-       trace=TRUE, plot=TRUE) ## we take a smaller starting mtry to better see the plot
+tuned_rf <- tuneRF(x_train, y_train,             ## DATA
+                   mtryStart = 25, ntreeTry=50,  ## HYPERPARAMETERS
+                   stepFactor=2, improve=0.01,
+                   trace=TRUE, plot=TRUE) ## we take a smaller starting mtry to better see the plot
 
 head(tuned_rf)
 ```

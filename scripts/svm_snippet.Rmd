@@ -26,8 +26,7 @@ SVM: developed (in the 1990s) to construct boundaries between groups of observat
 SVMs are considered to be one of the best **out of the box** classifiers.
 
 SVMs are a generalization of the **maximum margin classifier** (that required the classes to be linearly separable).
-SVMs can handle **any number of classes** and sample sizes, and can construct 
-**boundaries of virtually any shape** (linear, polynomial, highly complex/wiggly).
+SVMs can handle **any number of classes** and sample sizes, and can construct **boundaries of virtually any shape** (linear, polynomial, highly complex/wiggly).
 
 **Examples with synthetic data**: a **merely qualitative** explanation of separating hyperplanes, margins and SVM follows.
 
@@ -56,14 +55,12 @@ $$
 $$
 
 All points for which the equation above holds (is equal to zero) are points that **belong to the hyperplane**.
-The separating hyperplane will yield: $\sum_{j=1}^p \beta_j x_j > 0$ for classes labelled `+1`, 
-and $\sum_{j=1}^p \beta_j x_j < 0$ for classes labelled as `-1`.
+The separating hyperplane will yield: $\sum_{j=1}^p \beta_j x_j > 0$ for classes labelled `+1`, and $\sum_{j=1}^p \beta_j x_j < 0$ for classes labelled as `-1`.
 This can be combined in $y_i(\sum_{j=1}^p \beta_j x_{ij}) > 0$ (where $y_i$ is either $\pm 1$).
 
 We can find **several possible separating (hyper)planes** (see figure above): which shall we pick?
 
-**Maximal margin classifier**: among all separating hyperplanes, find the one that makes the biggest gap or 
-margin between the two classes.
+**Maximal margin classifier**: among all separating hyperplanes, find the one that makes the biggest gap or margin between the two classes.
 This means **maximising the distance** between the **separating hyperplane** and the **closest points**.
 
 We can use the `svm()` function in the `e1071` *R package* to find this boundary.
@@ -112,14 +109,12 @@ abline((beta0+0.35)/beta[2],-beta[1]/beta[2],lty=2)
 
 #### Support Vector Classifiers
 
-In most cases however, the two classes are not perfectly separable by a hyperplane (e.g. plot below), 
-therefore we need to get creative, e.g.:
+In most cases however, the two classes are not perfectly separable by a hyperplane (e.g. plot below), therefore we need to get creative, e.g.:
 
 -   [we **soften** what we mean by "separates"]{style="color:red"}
 -   we **transform** (enrich, enlarge) the feature space so that separation is possible.
 
-Moving away from a perfectly-separating hyperplane will also reduce problems with generalization 
-(remember the bias/variance trade-off and the training/test data).
+Moving away from a perfectly-separating hyperplane will also reduce problems with generalization (remember the bias/variance trade-off and the training/test data).
 
 ```{r}
 set.seed(129)
@@ -136,10 +131,7 @@ ggplot(data = dat, aes(x = x.2, y = x.1, color = y, shape = y)) +
   theme(legend.position = "none")
 ```
 
-The **support vector classifier** will allow some observations (data points) to **violate the margin**: 
-some points will be allowed to be inside the margin or even on the other side of 
-the hyperplane (misclassifications) $\rightarrow$ **soft margin** 
-(the support vector classifier is also called *soft margin classifier*).
+The **support vector classifier** will allow some observations (data points) to **violate the margin**: some points will be allowed to be inside the margin or even on the other side of the hyperplane (misclassifications) $\rightarrow$ **soft margin** (the support vector classifier is also called *soft margin classifier*).
 
 To do this, **slack (support) variables** $\epsilon_i$ are introduced for each example $i$ in $[1,n]$:
 
@@ -147,7 +139,7 @@ To do this, **slack (support) variables** $\epsilon_i$ are introduced for each e
 -   $\epsilon_i$ is between 0 and 1, if example $i$ is on the wrong side of the margin, BUT on the correct side of the hyperplane
 -   $\epsilon_i > 1$ if example $i$ is on the wrong side of the margin, AND on the wrong side of the hyperplane
 
-[**QUESTION**: How many observations/examples (data points) will be allowed to violate the margin/hyperplane?]{style="color:blue"}
+[**QUESTION**: How many observations/examples (data points) will be allowed to violate the margin/hyperplane?]{style="color:red"}
 
 This is controlled by the **cost** $C$:
 
@@ -155,9 +147,7 @@ $$
 \sum_{i=1}^n \epsilon_i \leq C
 $$
 
-We use the same function `svm()` to fit the **support vector classifier**; 
-you can see that we now use the **cost** argument of the function to specify the 
-extent to which misclassifications (or simple violations of the margin) are allowed:
+We use the same function `svm()` to fit the **support vector classifier**; you can see that we now use the **cost** argument of the function to specify the extent to which misclassifications (or simple violations of the margin) are allowed:
 
 ```{r}
 # Fit Support Vector Classifier model to data set
@@ -173,10 +163,9 @@ kernfit <- ksvm(x,y, type = "C-svc", kernel = 'vanilladot', C = 100)
 plot(kernfit, data = x)
 ```
 
-[**QUESTION**: How do we decide how costly these misclassifications actually are?]{style="color:blue"}
+[**QUESTION**: How do we decide how costly these misclassifications actually are?]{style="color:red"}
 
-The cost of the support vector classifier is a **hyperparameter** (tuning parameter) of the model: 
-we already know that to decide on the value for hypeparameters of machine learning models we use **cross-validation**.
+The cost of the support vector classifier is a **hyperparameter** (tuning parameter) of the model: we already know that to decide on the value for hypeparameters of machine learning models we use **cross-validation**.
 
 We can use the `tune()` function of the `e1071` *R package*:
 
@@ -203,18 +192,14 @@ If $C$ is large there are many support vectors (many observations violating the 
 
 We said that to overcome the limitations of the *maximum margin classifier*, we need to be creative in two ways.
 We already saw how softening the margin leads to the *support vector classifier*.
-We now look at the second extension of the method, which deals with transforming 
-the feature space to accommodate non-linear separation boundaries:
+We now look at the second extension of the method, which deals with transforming the feature space to accommodate non-linear separation boundaries:
 
 -   we **soften** what we mean by "separates"
 -   [we **transform** (enrich, enlarge) the feature space so that separation is possible]{style="color:red"}
 
-This transformation of the feature space can be obtained by using **quadratic**, **cubic**, or **higher-order polynomial** 
-functions of the original features (or other more complicated functions of the features can be used) 
-$\rightarrow$ this is known as the **kernel trick** (mathematically very efficient).
+This transformation of the feature space can be obtained by using **quadratic**, **cubic**, or **higher-order polynomial** functions of the original features (or other more complicated functions of the features can be used) $\rightarrow$ this is known as the **kernel trick** (mathematically very efficient).
 
-We are not going too much into the mathematical details, we just say that there are several types of kernels: 
-`linear` ($\rightarrow$ support vector classifier), `polynomial`, `radial`, `sigmoid` etc.
+We are not going too much into the mathematical details, we just say that there are several types of kernels: `linear` ($\rightarrow$ support vector classifier), `polynomial`, `radial`, `sigmoid` etc.
 
 We create a dataset with clearly a **non-linear boundary** between the classes:
 
@@ -357,15 +342,12 @@ table(svm.pred, test_set$Class)
 In most regression methods the objective is to minimize the error: e.g.
 OLS (Ordinary Least Squares), or extensions of OLS like Ridge Regression, Lasso-penalised regression etc.
 
-SVR changes the perspective: aim for an **acceptable range for the errors, not the minimum**, 
-and **minimise the model coefficients** subject to the **constraint that the errors fall within the range**:
+SVR changes the perspective: aim for an **acceptable range for the errors, not the minimum**, and **minimise the model coefficients** subject to the **constraint that the errors fall within the range**:
 
 -   $min\frac{1}{2}\sum_{j=1}^p(w_j)^2$
 -   $|y_i-\mathbf{w}_i\mathbf{x}_i| \leq \epsilon$
 
-As it turns out, just like with SVM for classification, also in SVR we need to **soften the margin** 
-and allow some errors to exceed the acceptable margin 
-(subject to their overall sum being within a given cost $C$ -tunable hyperparameter).
+As it turns out, just like with SVM for classification, also in SVR we need to **soften the margin** and allow some errors to exceed the acceptable margin (subject to their overall sum being within a given cost $C$ -tunable hyperparameter).
 
 -   $min \left( \frac{1}{2}\sum_{j=1}^p(w_j)^2 + C\sum_{i=1}^n|\xi| \right)$
 -   $|y_i-\mathbf{w}_i\mathbf{x}_i| \leq \epsilon + |\xi_i|$
@@ -459,8 +441,7 @@ hist(abs(preds-test_y), xlab = "errors", breaks = 20, main = "Distribution of er
 library("tidymodels")
 ```
 
-
-```{r}
+```{r 'svm_with_tidymodels'}
 svm_mod <-
   svm_rbf(cost = tune(), rbf_sigma = tune()) %>%
   set_mode("classification") %>%
@@ -503,7 +484,7 @@ formula_res
 ```{r}
 formula_res %>% 
   select(.metrics) %>% 
-  slice(1) %>% 
+  dplyr::slice(1) %>% 
   pull(1)
 ```
 
@@ -521,7 +502,6 @@ top_models
 collect_predictions(formula_res)
 ```
 
-
 ```{r}
 augment(formula_res) %>%
   ggplot(aes(.pred_malignant, color = Class)) +
@@ -533,8 +513,9 @@ svm_best <-
   formula_res %>% 
   collect_metrics() %>% 
   arrange(mean) |>
-  slice(1)
-svm_best <- top_models |> slice(1)
+  dplyr::slice(1)
+
+svm_best <- top_models |> dplyr::slice(1)
 svm_best
 ```
 
@@ -555,5 +536,3 @@ formula_res %>%
   mutate(pred = factor(ifelse(.pred_benign >= 0.5, "benign", "malignant"))) |>
   conf_mat(Class, pred)
 ```
-
-
