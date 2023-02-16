@@ -34,7 +34,7 @@ mtbsl1 <- fread("../data/MTBSL1.tsv")
 names(mtbsl1)[c(4:ncol(mtbsl1))] <- paste("mtbl",seq(1,ncol(mtbsl1)-3), sep = "_")
 ```
 
-#### Creating the multinomial variable 
+#### Creating the multinomial variable
 
 We combine the variables `Gender` and `Metabolic_syndrom` to create a synthetic outcome variable with four classes:
 
@@ -62,10 +62,10 @@ nrow(mtbsl1_test)
 
 We use tidymodels to build a recipe for data preprocessing:
 
-- remove correlated variables
-- remove non informative variables (zero variance)
-- standardize all variables
-- impute missing data (Random Forest does not handle missing data)
+-   remove correlated variables
+-   remove non informative variables (zero variance)
+-   standardize all variables
+-   impute missing data (Random Forest does not handle missing data)
 
 ```{r}
 diab_recipe <- mtbsl1_train %>%
@@ -90,10 +90,10 @@ head(training_set)
 
 We now specify the structure of our model:
 
-- hyperparameters to tune: `mtry` (number of features to sample for each tree) and `min_n` (minimum number of data points in a node to allow further splitting)
-- number of trees in the forest
-- the problem at hand (classification)
-- the engine (R package)
+-   hyperparameters to tune: `mtry` (number of features to sample for each tree) and `min_n` (minimum number of data points in a node to allow further splitting)
+-   number of trees in the forest
+-   the problem at hand (classification)
+-   the engine (R package)
 
 Then we put this in a workflow together with the preprocessing recipe
 
@@ -158,13 +158,13 @@ tune_res %>%
   labs(x = NULL, y = "AUC")
 ```
 
-We now try to start from $\sqrt{p}$  (classification problem)
+We now try to start from $\sqrt{p}$ (classification problem)
 
 ```{r}
 m <- round(sqrt(ncol(training_set)-1),0)
 print(m)
 rf_grid <- grid_regular(
-  mtry(range = c(m-2, m+2)),
+  mtry(range = c(m-10, m+10)),
   min_n(range = c(8, 12)),
   levels = 3
 )
@@ -201,14 +201,21 @@ regular_res %>%
 
 We now select the best model from the hyperparameters tuning, and fit it to the training set:
 
-1. selecting the best model based on AUC:
+1.  selecting the best model based on AUC:
+
+```{r}
+best_auc <- select_best(regular_res, "roc_auc")
+# print(best_auc)
+show_best(regular_res, metric = "roc_auc", n=1)
+```
 
 ```{r}
 best_auc <- select_best(tune_res, "roc_auc")
-print(best_auc)
+# print(best_auc)
+show_best(tune_res, metric = "roc_auc", n=1)
 ```
 
-2. finalise the model:
+2.  finalise the model:
 
 ```{r}
 final_rf <- finalize_model(
@@ -219,7 +226,7 @@ final_rf <- finalize_model(
 print(final_rf)
 ```
 
-3. finalise the workflow and fit it to the initial split (training and test data):
+3.  finalise the workflow and fit it to the initial split (training and test data):
 
 ```{r}
 final_wf <- workflow() %>%
@@ -230,7 +237,7 @@ final_res <- final_wf %>%
   last_fit(mtbsl1_split)
 ```
 
-4. evaluate the fine-tuned RF model:
+4.  evaluate the fine-tuned RF model:
 
 ```{r}
 print(final_res)
@@ -238,7 +245,7 @@ final_res %>%
   collect_metrics()
 ```
 
-5. get variable importance:
+5.  get variable importance:
 
 ```{r}
 final_res %>% 
@@ -261,6 +268,9 @@ final_res %>%
 cm <- final_res %>%
   collect_predictions() %>%
   conf_mat(gender_status, .pred_class)
+
+row.names(cm$table) <-c("FCG","FDM","MCG","MDM")
+colnames(cm$table) <- c("FCG","FDM","MCG","MDM")
 
 print(cm)
 ```
