@@ -71,7 +71,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
 
 **Day 5**
 
-* SVM: snippet [(.Rmd)](scripts/svm_snippet.Rmd)
+* SVM demo [(.Rmd)](scripts/svm_snippet.Rmd)
 * Unsupervised learning demos
    * UMAP demo [(.Rmd)](scripts/UMAP_with_tidymodels.Rmd)
    * SOM demo [(.Rmd)](scripts/SOMs_also_with_tidymodels.Rmd)
