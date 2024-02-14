@@ -12,7 +12,6 @@ We are now ready to build our first **predictive machine**!
 First, we load the *R packages* that are needed for this analysis:
 
 ```{r setup, include=FALSE}
-library("xlsx")
 library("broom")
 library("knitr")
 library("dplyr")
@@ -70,7 +69,7 @@ plot(ch4)
 
 ```{r}
 M <- cor(ch4, use = "complete.obs")
-kable(M)
+M
 ```
 
 ```{r}
@@ -98,7 +97,9 @@ data.frame("coefficient"=coef(fit))
 
 ## Predictions
 
-We start by manually predicting one observation $i$ from the estimated coefficients and the feature vector $x_i$
+We start by manually predicting one observation $i$ from the estimated coefficients and the feature vector $x_i$.
+
+[**Q: what is the equation that we use to predict** $\hat{y}_i$ for observation *i*?]{style="color:red"}
 
 ```{r}
 n <- sample(nrow(ch4),1) ## we sample one record to predict
@@ -126,7 +127,7 @@ We then predict all observations using the `predict()` function:
 ```{r}
 predictions <- predict(fit,ch4[,-1],interval="none", type = "response", na.action=na.pass)
 
-cbind(ch4, predictions) %>% head(10) |> kable()
+cbind(ch4, predictions) %>% head(10)
 ```
 
 Finally, we can measure the predictive performance of the model:
