@@ -39,7 +39,7 @@ Now apply the function to a bunch of data
 x = seq(-5,+5,0.5) ## independent variable
 y = lin_reg(x) ## dependent variable
 
-kable(data.frame("x" = x, "y" = y))
+data.frame("x" = x, "y" = y)
 ```
 
 ```{r echo=FALSE}
@@ -53,7 +53,21 @@ p
 
 For linear regression (simple or multiple, as long as $n > p$), the least squares method can be used, where the residual sum of squares is minimised through differentiation of vector and matrix expressions (linear algebra $\rightarrow$ *normal equations*).
 
-However, from the perspective of machine learning a different approach is taken. First, a **loss function** is chosen: a common choice for (multiple) linear regression is the **normalised squared error function**:
+$$
+\mathbf{y} = \mathbf{Xb}+\mathbf{e} \rightarrow \mathbf{X’y} = \mathbf{X’Xb} \rightarrow \mathbf{X’Xb} = \mathbf{X’y} \rightarrow \mathbf{b} = (\mathbf{X’X})^{-1} \cdot \mathbf{X’y}
+$$
+
+\$ b = \frac{cov(x,y)}{var(x)} \$\$
+
+$$
+\mu = avg(y) - b \cdot avg(x)
+$$
+
+However, from the **perspective of machine learning** a different approach is taken. First, a **loss function** is chosen: a common choice for (multiple) linear regression is the **normalised squared error function**:
+
+$$
+J(\beta) = \frac{1}{2n} \sum_{i=1}^n \left( \beta_i X_i -y_i \right)^2
+$$
 
 ```{r}
 loss_function <- function(x,beta) {
@@ -85,7 +99,7 @@ Now we calculate the loss function for all different values of the parameter $\b
 cost <- sapply(beta, function(z) loss_function(x,z))
 res <- data.frame("beta" = beta, "loss" = cost)
 beta_min = res[which.min(res$loss),"beta"]
-kable(res)
+print(res)
 ```
 
 ```{r}
@@ -109,6 +123,14 @@ y <- sort(rnorm(30)/sample(3,1))
 plot(x,y)
 ```
 
+We can model this data using a **simple linear regression model** of the following form:
+
+$$
+y = \beta_0 + \beta_1 x + e
+$$
+
+To find the linear regression that "best" fits the data, we now try a range of values for the parameters $\beta_0$ and $\beta_1$, and modify the **loss function** accordingly:
+
 ```{r}
 beta0 = seq(-1,1,0.1)
 beta1 = seq(0.1,3,0.1)
@@ -129,9 +151,14 @@ loss_function <- function(x,y,beta0,beta1) {
 ```{r}
 res <- parameters |> group_by(beta0,beta1) |> 
   mutate(cost = loss_function(x=x, y=y, beta0=beta0, beta1=beta1))
-beta_min = res[which.min(res$cost),c("beta0","beta1")]
-kable(res)
+print(res)
 ```
+
+```{r}
+print(paste("The minimum value for the cost function is", min(res$cost)))
+```
+
+We can plot the cost function to appraise it visually:
 
 ```{r}
 library("plotly")
@@ -150,7 +177,9 @@ plot_ly(x = res$beta0, y=res$beta1, z=res$cost, type = "scatter3d", mode = "mark
 ```{r}
 cat("Estimated coefficents 
     (values of parameters that minimise the cost function:\n")
-kable(beta_min)
+
+beta_min = res[which.min(res$cost),c("beta0","beta1")]
+beta_min
 ```
 
 ```{r}
@@ -163,7 +192,7 @@ abline(beta_min$beta0, beta_min$beta1, col="red")
 ```{r}
 X = matrix(c(rep(1,length(x)), x), ncol = 2)
 beta_coeffs = solve(t(X)%*%X) %*% t(X)%*%y
-kable(beta_coeffs)
+print(beta_coeffs)
 ```
 
 ```{r}
@@ -179,7 +208,8 @@ Try to estimate your own model coefficient:
 1.  Create your random data (**dare try with more than two parameters?**):
 
 ```{r results="asis"}
-x <- NULL
+x1 <- NULL
+# x2 <- NULL
 y <- NULL
 ```
 
@@ -194,6 +224,7 @@ loss_function.1 <- function() {}
 ```{r results="asis"}
 beta0 = c()
 beta1 = c()
+beta2 = c()
 ## etc.
 ```
 
@@ -226,7 +257,7 @@ Let's start by using an example dataset from base R: the ChickWeight dataset, wi
 ```{r}
 data(ChickWeight) ##
 dataset <- rename(ChickWeight, y = weight, x = Time) %>% select(y,x)
-kable(head(dataset))
+head(dataset)
 ```
 
 y: weight (grams) x: time (days)
@@ -280,15 +311,18 @@ The predict function is more flexible and can for instance also give us a confid
 
 ```{r}
 predict(fit, newdata = dataset, interval = "confidence") %>%
-  head() %>%
-  kable()
+  head()
 ```
 
 Finally, we can plot predictions against observations:
 
 ```{r}
 dataset$predictions <- predictions
-plot(dataset$y, dataset$predictions, xlab = "observations", ylab = "predictions")
+dataset <- dataset |>
+  mutate(error = abs(predictions-y)/y)
+
+ggplot(data = dataset, aes(y,predictions)) + geom_jitter(aes(color=error)) + xlab("observed values") +
+  scale_color_gradient(low="black", high="red")
 #abline(fit)
 ```
 
@@ -368,20 +402,19 @@ ggplot(dataset, aes(x = x, y = y)) + geom_jitter() + geom_smooth(method = "lm", 
 
 ## Exercise 1.2
 
-Generate a dataset, fit a linear model and measure the accuracy of predictions:
+Choose a built-in dataset, fit a linear model and measure the accuracy of predictions:
 
 1.  you can choose one of the many built-in R datasets, using the function `data()`:
 2.  or you can generate a dataset (e.g. sampling from a Gaussian distribution)
 
+```{r}
+data()
+```
+
 ```{r results="asis"}
-#data()
-
-#y <- rnorm(n = 100, mean = 0, sd = 1)
-#x <- rnorm(n = 100, mean = 0, sd = 1)
-
-y = NULL # target variable
-x = NULL # feature 1
-z = NULL # feature 2 (optional)
+# data(NULL) ## choose a dataset
+# dataset <- rename() %>% select()
+# head(dataset)
 ```
 
 2.  Fit a linear model
