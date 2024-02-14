@@ -57,7 +57,9 @@ $$
 \mathbf{y} = \mathbf{Xb}+\mathbf{e} \rightarrow \mathbf{X’y} = \mathbf{X’Xb} \rightarrow \mathbf{X’Xb} = \mathbf{X’y} \rightarrow \mathbf{b} = (\mathbf{X’X})^{-1} \cdot \mathbf{X’y}
 $$
 
-\$ b = \frac{cov(x,y)}{var(x)} \$\$
+$$
+b = \frac{cov(x,y)}{var(x)}
+$$
 
 $$
 \mu = avg(y) - b \cdot avg(x)
