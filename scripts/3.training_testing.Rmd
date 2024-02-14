@@ -6,7 +6,6 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-library("xlsx")
 library("broom")
 library("knitr")
 library("ggplot2")
@@ -26,7 +25,7 @@ For this practical session on linear regression we are using a dataset on the re
 The public dataset downloaded from Dryad is an `.xlsm` file, and can be read into *R* using the `read.xlsx()` function from the **xlsx** package.
 
 ```{r label="reading_data"}
-ch4 <- read.xlsx("../data/DNA methylation data.xlsm", sheetIndex = 1)
+ch4 <- readxl::read_excel("../data/DNA methylation data.xlsm")
 ch4 <- na.omit(ch4[,-c(1,3)])
 head(ch4)
 ```
@@ -77,8 +76,7 @@ data.frame("coefficient"=coef(fit))
 ```{r}
 predictions <- predict(fit, newdata = test_set[,-1], interval="none", type = "response", na.action=na.pass)
 
-cbind.data.frame("test_age"=test_set[,1], "predictions"=round(predictions,2)) |>
-  kable()
+cbind.data.frame("test_age"=test_set[,1], "predictions"=round(predictions,2))
 ```
 
 ```{r}
@@ -88,8 +86,9 @@ mse = mean((test_set$Age-predictions)^2)
 rmse = sqrt(mse)
 nrmse = sqrt(mse)/mean(test_set$Age)
 
-data.frame("metric"=c("MSE","RMSE","NRMSE","r pearson","r spearman"),
+res.test = data.frame("metric"=c("MSE","RMSE","NRMSE","r pearson","r spearman"),
            "value"=c(mse,rmse,nrmse,r_pearson,r_spearman))
+res.test
 ```
 
 ```{r}
@@ -111,13 +110,21 @@ mse = mean((training_set$Age-predictions)^2)
 rmse = sqrt(mse)
 nrmse = sqrt(mse)/mean(training_set$Age)
 
-data.frame("metric"=c("MSE","RMSE","NRMSE","r pearson","r spearman"),
-           "value"=c(mse,rmse,nrmse,r_pearson,r_spearman)) %>% kable()
+res.train = data.frame("metric"=c("MSE","RMSE","NRMSE","r pearson","r spearman"),
+           "value"=c(mse,rmse,nrmse,r_pearson,r_spearman))
+
+res.train
 ```
 
 ```{r}
 ggplot(data.frame("training_y"=training_set$Age,"predictions"=predictions), aes(x=predictions,y=training_y)) + geom_point()
 ```
+
+```{r}
+res.train |> inner_join(res.test, by = "metric") |> rename(training = value.x, test = value.y) |>
+  mutate(tst_trn_pct = round(100*(test-training)/training, 3))
+```
+
 
 ## Exercise 3.1
 
@@ -227,7 +234,7 @@ for(i in 1:k) {
 ```
 
 ```{r}
-kable(cv.error)
+print(cv.error)
 ```
 
 ```{r}
