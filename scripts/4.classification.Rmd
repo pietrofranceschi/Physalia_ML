@@ -158,7 +158,6 @@ In this example, both **FPR** and **FNR** are high, therefore we expect the AUC 
 
 [**Question for you: what do we consider to be a low AUC value?**]{style="color:red"}
 
-
 ```{r label="roc"}
 library("ROCit")
 
@@ -171,4 +170,46 @@ We can also have a look at the AUC (Area Under the ROC Curve):
 
 ```{r}
 paste("AUC is:",print(ROCit_logit$AUC))
+```
+
+## MCC: Matthews Correlation Coefficient
+
+$$
+\phi = \frac{(TP \cdot TN - FP \cdot FN)}{\sqrt{(TP+FP) \cdot (TP+FN) \cdot (TN+FP) \cdot (TN+FN)}}
+$$
+
+```{r}
+## function to calculate MCC
+mcc = function(tp,fp,tn,fn) {
+  phi =(tp*tn - fp*fn) / sqrt((tp+fp)*(fn+tn)*(tp+fn)*(fp+tn))
+  return(phi)
+}
+```
+
+```{r}
+conf_matrix = table(glm.pred,test_set$PHENOTYPE)
+conf_matrix
+```
+
+[**Task for you: Let's identify true and false positives and negatives**]{style="color:yellow"}
+
+```{r}
+## uncommetn and complete below
+# TP = conf_matrix[,]
+# FP = conf_matrix[,]
+# TN = conf_matrix[,]
+# FN = conf_matrix[,]
+# 
+# mcc_score = mcc(tp = TP, fp = FP, tn = TN, fn = FN)
+# print(mcc_score)
+```
+
+Let's use an R package to do the calculations:
+
+```{r}
+library("mltools")
+
+df <- data.frame(conf_matrix)
+dm <- df |> spread(key = Var2, value = Freq) |> select(-glm.pred) |> data.matrix()
+mltools::mcc(confusionM = as.matrix(dm))
 ```
