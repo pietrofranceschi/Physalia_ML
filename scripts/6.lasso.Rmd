@@ -70,6 +70,8 @@ plot(fit.lasso, xvar="lambda", label=TRUE)
 summary(fit.lasso$lambda)
 ```
 
+Let's look at the model coefficients corresponding to a specific value of $\lambda$ (in this case the median value, among those tested):
+
 ```{r}
 lambda_val = median(fit.lasso$lambda)
 tmp_coeffs <- coef(fit.lasso, s = lambda_val)
@@ -135,7 +137,7 @@ df <- data.frame(name = tmp_coeffs@Dimnames[[1]][tmp_coeffs@i + 1], coefficient 
 ```
 
 ```{r}
-kable(df)
+print(df)
 ```
 
 ### Make predictions
@@ -167,7 +169,8 @@ save(ROCit_lasso, file = "ROClasso.RData")
 
 ### Exercise 6.1
 
-Try: - a different training/test split (e.g. 70/30) - a different CV scheme for tuning the hyperparameter $\lambda$ - measure the predictive performance of the model
+Try: - a different training/test split (e.g. 70/30) - a different CV scheme for tuning the hyperparameter $\lambda$ - measure the predictive performance of the model.
+Try also to calculate MCC on the results from Lasso-penalised logistic regression.
 
 ```{r}
 ## your code here
