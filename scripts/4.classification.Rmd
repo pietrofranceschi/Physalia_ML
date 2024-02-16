@@ -47,8 +47,7 @@ The dataset contains data on `r nrow(dogs)` and `r ncol(dogs)-1` SNP genotypes. 
 ```{r}
 dogs %>%
   group_by(PHENOTYPE) %>%
-  summarise(N=n()) |>
-  kable()
+  summarise(N=n())
 ```
 
 ```{r}
@@ -88,7 +87,7 @@ table(test_set$PHENOTYPE)
 
 In *R*, you can use the function `glm()` (generalised linear model) that allows you to specify the distribution (binomial in this case) and the link function (logit, in this case).
 
-```{r}
+```{r, warning=FALSE}
 glm.fit <- glm(PHENOTYPE ~ ., data = training_set, family=binomial(link="logit"))
 ```
 
@@ -104,6 +103,10 @@ table(glm.pred,test_set$PHENOTYPE)
 
 ```{r}
 error = mean(glm.pred!=test_set$PHENOTYPE)
+print(error)
+```
+
+```{r}
 accuracy = 1 - error
 print(accuracy)
 ```
@@ -124,6 +127,8 @@ print(paste("FNR is",FNR))
 
 False positive rate is `r FPR`, false negative rate is `r FNR`
 
+[**Question for you: why this difference between FPR and FNR?**]{style="color:red"}
+
 ## Exercise 4.1
 
 -   implement k-fold cross-validation to assess the performance of the logistic regression model:
@@ -141,13 +146,18 @@ k = 0
 
 We use the same training/test split as above:
 
-```{r}
+```{r, warning=FALSE}
 glm.fit <- glm(PHENOTYPE ~ ., data = training_set, family=binomial(link="logit"))
 
 glm.probs <- predict(glm.fit, newdata = test_set[,-1],type="response") 
 glm.pred <- ifelse(glm.probs > 0.5, 1, 0)
 table(glm.pred,test_set$PHENOTYPE)
 ```
+
+In this example, both **FPR** and **FNR** are high, therefore we expect the AUC to be low (remember, ROC AUC is based on TPR=1-FNR and FPR).
+
+[**Question for you: what do we consider to be a low AUC value?**]{style="color:red"}
+
 
 ```{r label="roc"}
 library("ROCit")
