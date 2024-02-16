@@ -271,10 +271,13 @@ we can also do it step-by-step:
 3.  make predictions on the test data
 
 ```{r}
+## 1 preprocess
 mtbsl1_testing <- mtbsl1_prep %>% bake(testing(mtbsl1_split)) ## preprocess test data
 
+## 2 model fit
 final_lasso_fit <- fit(final_lasso, data = mtbsl1_train) ## fit final model on the training set
 
+## 3 make predictions
 final_lasso_fit %>%
   predict(mtbsl1_testing, type = "class") %>%
   bind_cols(mtbsl1_testing) %>%
@@ -304,7 +307,7 @@ library("vip")
 final_lasso %>%
   fit(mtbsl1_train) %>%
   pull_workflow_fit() %>%
-  vi(lambda = lowest_roc$penalty) %>%
+  vi(lambda = best_roc$penalty) %>%
   mutate(
     Importance = abs(Importance),
     Variable = fct_reorder(Variable, Importance)
@@ -315,6 +318,12 @@ final_lasso %>%
   scale_x_continuous(expand = c(0, 0)) +
   labs(y = NULL)
 ```
+
+Variable importance from `vi`:
+
+`method`: - "model" (the default): for model-specific VI scores (see vi_model for details) - "firm": for variance-based VI scores (see vi_firm for details) - "permute": for permutation-based VI scores (see vi_permute for details) - "shap": for Shapley-based VI scores (see vi_shap for details)
+
+`glmnet`: Similar to (generalized) linear models, the absolute value of the coefficients are returned for a specific model. It is important that the features (and hence, the estimated coefficients) be standardized prior to fitting the model. You can specify which coefficients to return by passing the specific value of the penalty parameter via the lambda argument (this is equivalent to the s argument in coef.glmnet). By default, lambda = NULL and the coefficients corresponding to the final penalty value in the sequence are returned; in other words, you should ALWAYS SPECIFY lambda! For cv.glmnet objects, the largest value of lambda such that the error is within one standard error of the minimum is used by default. For a multinomial response, the coefficients corresponding to the first class are used; that is, the first component of coef.glmnet.
 
 ## Add gender (factor) to the Lasso model
 
