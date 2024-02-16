@@ -138,7 +138,7 @@ We now use `tidymodels` to build a recipe and workflow to tune our boosting mode
 ## data splitting
 diab_dt <- select(mtbsl1, -c(`Primary ID`, Gender, Metabolic_syndrome))
 diab_dt$gender_status <- factor(diab_dt$gender_status)
-mtbsl1_split <- initial_split(diab_dt, strata = gender_status, prop = 0.7)
+mtbsl1_split <- initial_split(diab_dt, strata = gender_status, prop = 0.8)
 mtbsl1_train <- training(mtbsl1_split)
 mtbsl1_test <- testing(mtbsl1_split)
 ```
@@ -156,7 +156,7 @@ preprocessing_recipe <-
 
 ```{r}
 ## k-fold cross-validation for tuning
-diab_cv <- vfold_cv(mtbsl1_train, v=5, repeats = 5, strata = gender_status)
+diab_cv <- vfold_cv(mtbsl1_train, v=5, repeats = 3, strata = gender_status)
 ```
 
 ```{r}
@@ -184,7 +184,7 @@ xgboost_params <-
 xgboost_grid <- 
   grid_max_entropy(
     xgboost_params, 
-    size = 20
+    size = 15
   )
 
 print(xgboost_grid)
