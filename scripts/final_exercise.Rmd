@@ -21,8 +21,7 @@ library("randomForest")
 
 ## Wrap-up exercise
 
-We now use the metabolomics data on raspberries (genus *Rubus*) for a wrap-up exercise on the use of machine learning algorithms for predictions.
-Some code is already there as hint, however you will mostly have to write your own code (and make your own choices)
+We now use the metabolomics data on raspberries (genus *Rubus*) for a wrap-up exercise on the use of machine learning algorithms for predictions. Some code is already there as hint, however you will mostly have to write your own code (and make your own choices)
 
 ### Reading the data
 
@@ -38,8 +37,7 @@ rubus %>%
 
 ### Data preprocessing
 
-We see that we have **three colors** (`R`, `Y`, `P`), and 15 varieties nested within color.
-Color `P` has only one observation, and we can either remove it or assign it to the pigmented samples (`R`).
+We see that we have **three colors** (`R`, `Y`, `P`), and 15 varieties nested within color. Color `P` has only one observation, and we can either remove it or assign it to the pigmented samples (`R`).
 
 ```{r rubus, echo=FALSE}
 rubus <- na.omit(rubus) ## remove observations with missing values (there are none in this dataset)
@@ -51,8 +49,7 @@ corx <- cor(metabolites)
 corx[1:10,1:10]
 ```
 
-The number of pairwise correlations between variables is ${n \choose k}$ = ${10\,986 \choose 2}$ = $60\,340\,605$ (a lot!).
-Let's see how many are highly correlated:
+The number of pairwise correlations between variables is ${n \choose k}$ = ${10\,986 \choose 2}$ = $60\,340\,605$ (a lot!). Let's see how many are highly correlated:
 
 ```{r}
 diag(corx) <- 0
@@ -60,17 +57,23 @@ num_correlated_vars <- sum(abs(corx)>0.99)/2 ## correlation matrix is symmetric
 print(num_correlated_vars)
 ```
 
+In total, `r num_correlated_vars` pairs of variable have linear correlation coefficient $> 0.99$. We can consider removing one variable for each pair.
 
-In total, `r num_correlated_vars` pairs of variable have linear correlation coefficient $> 0.99$.
-We can consider removing one variable for each pair.
+First, however, we split the data in the training and test set.
 
-First, however, we split the data in the training and test set:
+#### Organisation of the exercise
+
+We will proceed in a step-wise manner to go through this wrap-up exercise: we split the exercise in consecutive steps and you will be asked to complete the exercise **one step at a time**.
+
+After each step, we will revise together your progress.
+
+### 1. Training and test sets: do the split!
 
 ```{r}
 ## write here your code
 ```
 
-### Training the classifier
+### 2. Data preprocessing
 
 First we remove highly correlated variables (collinearity) from the training set (remember, that any preprocessing should be done after splitting the data in the training and testing sets!)
 
@@ -78,13 +81,15 @@ First we remove highly correlated variables (collinearity) from the training set
 ## write here your code
 ```
 
-### Lasso
+### 3. Training the classifier
+
+#### Lasso model
 
 ```{r}
 ## write here your code
 ```
 
-#### Fit the final model on the training data
+##### Fit the final model on the training data
 
 We can now fit the final model (tuned with cross-validation) to the training set:
 
@@ -92,39 +97,39 @@ We can now fit the final model (tuned with cross-validation) to the training set
 ## write here your code
 ```
 
-#### Make predictions
+##### Make predictions
 
 ```{r}
 ## write here your code
 ```
 
-### Random Forest
+#### Random Forest
 
-#### Tuning the model
-
-```{r}
-## write here your code
-```
-
-#### Fitting the RF model
+##### Tuning the model
 
 ```{r}
 ## write here your code
 ```
 
-#### Variable importance
+##### Fitting the RF model
+
+```{r}
+## write here your code
+```
+
+##### Variable importance
 
 ```{r varimp}
 ## write here your code
 ```
 
-#### Predictions
+##### Predictions
 
 ```{r}
 ## write here your code
 ```
 
-### ROC curves
+### 4. Compare models: ROC curves (or anything else)
 
 ```{r, label = 'roc'}
 ## write here your code
