@@ -278,3 +278,114 @@ print(cm)
 ```{r}
 autoplot(cm, type = "heatmap")
 ```
+
+### Cohen's k
+
+We briefly introduce one additional metric to evaluate multiclass classification models: **Cohen's kappa** (or $\kappa$ coefficient).
+
+We start from the results of our RF model for the combination of gender and metabolic condition (4 classes):
+
+```{r}
+cm
+```
+
+
+```{r}
+temp <- data.matrix(cm[[1]])
+
+true_fcg = temp[1,1]
+true_fdm = temp[2,2]
+true_mcg = temp[3,3]
+true_mdm = temp[4,4]
+
+n = sum(temp) ## total n. of predictions (test size)
+```
+
+We can now calculate the total accuracy (n. of correct predictions over total number of predictions):
+
+```{r}
+accuracy = (true_fcg + true_fdm + true_mcg + true_mdm)/n
+print(accuracy)
+```
+
+Is this the best metric to evaluate the performance of multiclass classification models?
+
+We already saw with binary classification that it is important also to look at TPR and TNR:
+
+- unbalanced data
+- specific classes may be more relevant
+
+This is especially important when you have more than two classes.
+
+Furthermore, the total ("raw") accuracy does not consider that **correct predictions may also be obtained by chance**! 
+In binary classification, we know that (if data are balanced) the chance accuracy is 0.5.
+
+But what about multiclass classification? This is where **Cohen's kappa** comes into play. The kappa coefficient tries to consider how much better the **predictive performance is over chance accuracy**.
+
+To do so, we need to get some measure of the **expected value for chance accuracy**.
+
+#### Let's calculate chance accuracy!
+
+We use the frequentist definition of probabilities:
+
+- chance predictions (relative frequencies of predictions, per class)
+- chance observations (relative class frequencies from the observed values)
+
+We sum by rows: the predictions!
+
+```{r}
+## sum of predictions per class over total number of predictions (n)
+chance_preds_fcg = sum(temp[1,])/n
+chance_preds_fdm = sum(temp[2,])/n
+chance_preds_mcg = sum(temp[3,])/n
+chance_preds_mdm = sum(temp[4,])/n
+```
+
+```{r}
+print(chance_preds_fcg)
+print(chance_preds_fdm)
+print(chance_preds_mcg)
+print(chance_preds_mdm)
+```
+
+Now, chance observations:
+
+```{r}
+chance_obs_fcg = sum(temp[,1])/n
+chance_obs_fdm = sum(temp[,2])/n
+chance_obs_mcg = sum(temp[,3])/n
+chance_obs_mdm = sum(temp[,4])/n
+```
+
+```{r}
+print(chance_obs_fcg)
+print(chance_obs_fdm)
+print(chance_obs_mcg)
+print(chance_obs_mdm)
+```
+
+Now we have all the ingredients to calculate chance accuracy:
+
+```{r}
+chance_accuracy = chance_preds_fcg*chance_obs_fcg + chance_preds_fdm*chance_obs_fdm + chance_preds_mcg*chance_obs_mcg + chance_preds_mdm*chance_obs_mdm
+print(chance_accuracy)
+```
+
+
+#### Cohen's kappa
+
+$$
+\kappa = \frac{\text{accuracy} - \text{chance_accuracy}}{1- \text{chance_accuracy}}
+$$
+
+```{r}
+kappa = (accuracy-chance_accuracy) / (1 - chance_accuracy)
+print(kappa)
+```
+
+
+- the numerator calculates the difference between accuracy and chance accuracy
+- if accuracy = 1, we have perfect predictive performance (the confusion matrix is diagonal) $\rightarrow \kappa = 1$, regardless of chance accuracy
+- if accuracy = chance accuracy, $\kappa = 0 \rightarrow$ correct predictions are by chance
+- if accuracy < chance accuracy, $\kappa < 0$ (negative) $\rightarrow$ accuracy is lower than what it would be by chance.
+ 
