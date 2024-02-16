@@ -21,8 +21,7 @@ Here we use the `bats` dataset to build a regression model using the programming
 ```{r label="bat_data", echo=TRUE}
 ch4 <- readxl::read_excel("../data/DNA methylation data.xlsm", sheet = 1)
 ch4 <- na.omit(ch4[,-c(1,3)])
-head(ch4) |>
-  kable()
+head(ch4)
 ```
 
 #### 1. partitioning the data
@@ -67,7 +66,7 @@ lm_fit <-
 To evaluate the performance of the model we first collect the error metrics: RMSE and $R^2$. These are averages over the 5 validation folds, together with the standard error:
 
 ```{r}
-collect_metrics(lm_fit) |> kable()
+collect_metrics(lm_fit) |> kable(format = "html", table.attr = "style = \"color: white;\"")
 ```
 
 ```{r}
@@ -81,7 +80,7 @@ We see the error is **`r round(error_pct,2)*100`%** of the average age of bats i
 ```{r}
 collect_predictions(lm_fit) %>% group_by(id) %>% 
   summarise(pearson = cor(.pred,Age)) |>
-  kable()
+  kable(format = "html", table.attr = "style = \"color: white;\"")
 ```
 
 ### Repeated cross-validation
@@ -102,7 +101,7 @@ lm_fit <-
 ```
 
 ```{r}
-collect_metrics(lm_fit) |> kable()
+collect_metrics(lm_fit) |> kable(format = "html", table.attr = "style = \"color: white;\"")
 ```
 
 We see that the standard errors of the estimated RMSE and $R^2$ are now smaller (averages of 50 values instead of 5 values!). We finally get the average Pearson correlation between predicted and observed ages, and its standard deviation:
@@ -135,8 +134,7 @@ This dataset is unbalanced: we have far fewer cases than controls:
 ```{r}
 dogs %>%
   group_by(PHENOTYPE) %>%
-  summarise(N=n()) |>
-  kable()
+  summarise(N=n())
 ```
 
 When data are unbalanced, one possible approach to improve the performance of the predictive model is to **subsample** the data:
@@ -161,12 +159,23 @@ imbal_rec <-
   step_rose(PHENOTYPE, skip = TRUE) ## skip == TRUE is important to make sure that subsampling happens only in the training data
 ```
 
+Let's look at the upsampled data:
+
+```{r}
+temp <- prep(imbal_rec) |>
+  juice()
+
+head(temp)
+```
+
+[**Question for you: what do you notice in the upsampled data?**]{style="color:red"}
+
 ```{r}
 prep(imbal_rec) %>% 
   juice() %>% 
   group_by(PHENOTYPE) %>% 
   summarise(N=n()) |>
-  kable()
+  kable(format = "html", table.attr = "style = \"color: white;\"")
 ```
 
 #### 2. partitioning the data
@@ -215,7 +224,7 @@ We look at the average:
 -   `spec`: TNR (true negative rate)
 
 ```{r}
-collect_metrics(log_res) |> kable()
+collect_metrics(log_res)
 ```
 
 Then we can look at predictions and calculate the overall error rate:
@@ -223,8 +232,7 @@ Then we can look at predictions and calculate the overall error rate:
 ```{r}
 collect_predictions(log_res) %>% 
   group_by(id,id2) %>% 
-  summarise(errors = sum(.pred_class != PHENOTYPE), tot = length(PHENOTYPE), error_rate = errors/tot) |>
-  kable()
+  summarise(errors = sum(.pred_class != PHENOTYPE), tot = length(PHENOTYPE), error_rate = errors/tot)
 ```
 
 ```{r}
@@ -232,10 +240,10 @@ collect_predictions(log_res) %>%
   group_by(id,id2) %>% 
   summarise(errors = sum(.pred_class != PHENOTYPE), tot = length(PHENOTYPE), error_rate = errors/tot) %>%
   ungroup() %>%
-  summarise(avg_er = mean(error_rate), std = sd(error_rate)) |>
-  kable()
+  summarise(avg_er = mean(error_rate), std = sd(error_rate))
 ```
 
 ### Exercise 5.1
 
-Can you calculate the decompostion of the above error rate into the false positive and false negative rates?
+-   Can you calculate the decompostion of the above error rate into the false positive and false negative rates?
+-   Can you add the MCC to the used metrics for model evaluation? [look here](https://yardstick.tidymodels.org/reference/mcc.html)
