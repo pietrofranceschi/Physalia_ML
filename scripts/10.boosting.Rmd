@@ -46,7 +46,7 @@ diab_dt$id <- paste("id",seq(1,nrow(diab_dt)), sep="_")
 
 training_set <- diab_dt %>%
   group_by(gender_status) %>%
-  sample_frac(size = 0.7)
+  sample_frac(size = 0.8)
 
 test_recs <- !(diab_dt$id %in% training_set$id)
 test_set <- diab_dt[test_recs,]
@@ -89,7 +89,7 @@ preds <- predict.gbm(object = boost.diabt,
                      newdata = test_set,
                      n.trees = 1000,
                      type = "response")
-print(preds) |> kable()
+print(preds)
 ```
 
 ```{r}
@@ -125,7 +125,8 @@ We now use `tidymodels` to build a recipe and workflow to tune our boosting mode
 3.  partition the training set in k-folds for cross-validation to tune hyperparameter
 4.  specify the boosting model:
     -   "classification" mode
-    -   n. of trees (sequential models to combine)
+    -   
+        n.  of trees (sequential models to combine)
     -   min. n. of obs per node $\rightarrow$ tuning parameter
     -   tree depth $\rightarrow$ tuning parameter
     -   shrinkage parameter (learning rate) $\rightarrow$ tuning parameter
@@ -163,8 +164,8 @@ diab_cv <- vfold_cv(mtbsl1_train, v=5, repeats = 5, strata = gender_status)
 xgboost_model <- 
   boost_tree(
     mode = "classification",
-    trees = 80, ## B parameter
-    min_n = tune(),
+    trees = 50, ## B parameter
+    min_n = 8,
     tree_depth = tune(), ## d parameter
     learn_rate = tune() 
   ) %>%
@@ -175,7 +176,7 @@ xgboost_model <-
 # grid specification
 xgboost_params <- 
   parameters(
-    min_n(),
+    # min_n(),
     tree_depth(),
     learn_rate()
   )
@@ -183,7 +184,7 @@ xgboost_params <-
 xgboost_grid <- 
   grid_max_entropy(
     xgboost_params, 
-    size = 15
+    size = 20
   )
 
 print(xgboost_grid)

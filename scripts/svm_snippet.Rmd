@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library("ISLR") 
 library("knitr")
 library("e1071")
+library("plotly")
 library("kernlab")      
 library("tidyverse") 
 library("RColorBrewer") 
@@ -219,6 +220,47 @@ ggplot(data = dat, aes(x = x.2, y = x.1, color = y, shape = y)) +
   theme(legend.position = "none")
 ```
 
+------------------------------------------------------------------------
+
+**Intuition: feature space enlargement**
+
+We now manually enlarge the feature space to provide some intuition behind SVM.
+We add a third variable to the dataset `z`, that has positive values for observations from one class and negative values for observations from the other class.
+
+```{r}
+
+temp <- dat
+
+temp$z <- NA
+n1 = table(temp$y)[[1]]
+n2 = table(temp$y)[[2]]
+
+temp[temp$y == 1,"z"] <-  -1*abs(rnorm(n = n1, mean = 0, sd = 1)/10)
+temp[temp$y == 2,"z"] <-  +1*abs(rnorm(n = n2, mean = 0, sd = 1)/10)
+
+
+p <- plot_ly(data = temp, 
+             x = ~x.1, y = ~x.2, z = ~z,
+             type = "scatter3d",
+             color = ~y) %>%
+  add_markers() %>%
+  layout(scene = list(xaxis = list(title = 'x1'),
+                      yaxis = list(title = 'x2'),
+                      zaxis = list(title = 'z')),
+         annotations = list(
+           x = 0.005,
+           y = 0.01,
+           text = 'y',
+           xref = 'paper',
+           yref = 'paper',
+           showarrow = FALSE
+         ))
+
+p
+```
+
+------------------------------------------------------------------------
+
 Now, with the same `svm()` function we fit a **support vector machine** to the data, specifying the `kernel` argument:
 
 ```{r}
@@ -302,7 +344,7 @@ Examples are classified as `benign` or `malignant` based on results from a tissu
 ```{r}
 library("mlbench")
 data(BreastCancer)
-head(BreastCancer) |> kable()
+head(BreastCancer)
 ```
 
 2.  Split the data $\rightarrow$ Training and test sets:
@@ -358,7 +400,7 @@ We use data on chick weights as a function of time and diet:
 
 ```{r}
 data("ChickWeight")
-head(ChickWeight) |> kable()
+head(ChickWeight)
 ChickWeight <- ChickWeight |> mutate(Diet = as.factor(Diet))
 ```
 
