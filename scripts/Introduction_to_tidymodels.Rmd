@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(tidymodels)
+library(poissonreg)
 ```
 
 
@@ -18,7 +19,7 @@ During the lectures we have been stressing the need of standardization when deal
 
 If we stick with a method (let's say `lm`), this is not particularly problematic, but in a ML context where you want to test the performance of different models on the same data one gets easily messy ... so keeping an unified interface to modelling can be an extremely useful asset for high throughput data analysis.In addition, as you will discover during the week, machine learning always requires a fairly complex work of data splitting and parameter tuning ... It would be great also to have all of that well standardized.  
 
-The idea behind `tidymodels` is to introduce a sort of "abstraction" layer where we can define the abstract properties of our model without bothering too much about the structure of the different modelling package. In other words, `tidymodels` acts as an interface between an abstract definition of the model and of its tuning and the actual "fitting" which is very much package dependent.
+The idea behind `tidymodels` is to introduce a sort of "abstraction" layer where we can define the abstract properties of our model without bothering too much about the structure of the different modeling package. In other words, `tidymodels` acts as an interface between an abstract definition of the model and of its tuning and the actual "fitting" which is very much package dependent.
 
 `tidymodels` tries also to integrate this approach on the tidyverse/pipe/broom environment. If some of you is familiar with python, the package tries to do what scikit-learn does. 
 
@@ -28,11 +29,11 @@ The abstract steps of model selection and tuning are
 
 * decide a model
 * Split the data ... just to simulate what will happen on unseen data
-* preprocess your data  ... get better features for modelling
+* preprocess your data  ... get better features for modeling
 * fit the model (and tune it in the ML context)
 * evaluate the performance predicting unseen new observations
 
-The reason for this workflow will be better clear at the end of the course. For now let's start simple
+The reason for this workflow will be better clear at the end of the course. For now let's start simple:
 
 
 **I want to fit a linear regression model on the Iris dataset, predicting Sepal.Length as a function of Species and Sepal.Width**
@@ -95,7 +96,7 @@ points(x = iris$Sepal.Width,y = predict(old_fashion_ign), col = iris$Species, pc
 Here empty dots represents the observations and filled dots represent the model predictions. 
 By eye we clearly see that the slope of the three lines is almost the same. Good! It fits with the model! But I would say that it is not easy to sell that setosa is not different from the other two ...
 
-The reason for this odd behaviour was already remarked during the lecture. The overall idea of comparing intercepts is wrong. First of all the idea of finding a Sepal.Length different from zero when the Sepal.Width is zero is odd. Moreover, If you look to our point you see that to see what happens to zero we are extrapolating away from the cloud of points and this is dangerous. To understand that let's look to the position of our data ...
+The reason for this odd behavior was already remarked during the lecture. The overall idea of comparing intercepts is wrong. First of all the idea of finding a Sepal.Length different from zero when the Sepal.Width is zero is odd. Moreover, If you look to our point you see that to see what happens to zero we are extrapolating away from the cloud of points and this is dangerous. To understand that let's look to the position of our data ...
 
 ```{r}
 
@@ -142,11 +143,11 @@ I'm quite convinced that many of you have been also transforming predictors or r
 
 ## Doing this with tidymodels
 
-As I anticipated, the idea of tidymodels is to clearly disentangle and make it abstract the process of modelling. Following on our regression example the elements of the process will be 
+As I anticipated the idea of tidymodels is to clearly disentangle and make it abstract the process of modeling. Following on our regression example the elements of the process will be 
 
 1) a dataset
 2) a type of model
-3) a series of pre-processing steps which are intended to "cook" our data in a way to make them easier to be modelled
+3) a series of pre-processing steps which are intended to "cook" our data in a way to make them easier to be modeled
 
 in tidymodels elements 2 and 3 are defined in an abstract way, decoupling the process from the package (or the _engine_) that is taking care of the fitting. This process of abstraction is similar to using markdown to write this text .. the content of the text is decoupled from the way you will present it (a pdf, a webpage with a css, ...)
 
@@ -182,7 +183,7 @@ model2
 
 ## Pre process my data
 
-The second abstract block of modelling is pre processing. Since this is often a sort of cooking exercise, the `recipe` package (part of `tidymodels`) is taking care of that
+The second abstract block of modeling is pre processing. Since this is often a sort of cooking exercise, the `recipe` package (part of `tidymodels`) is taking care of that
 
 
 To proceed step-by-step let's start easy and try to model sepal length as a function of sepal width, only for the setosa iris
@@ -193,7 +194,7 @@ iris_recipe <- iris %>%
   update_role(starts_with("Petal"), new_role = "id") %>% 
   update_role(Species, new_role = "id") %>% 
   step_filter(Species == "setosa") %>% 
-  step_center(Sepal.Width) 
+  step_center(Sepal.Width)
   
 ```
 
@@ -225,11 +226,11 @@ iris_recipe %>%
 ```
 
 
-So we see that we have only the setosa flowers and the their sepal with was mean centered. The id columns are still there, but they are unchanged. Another time, all that is done under the hood, so no intermediated df are created, making everything better organised
+So we see that we have only the setosa flowers and the their sepal with was mean centered. The id columns are still there, but they are unchanged. Another time, all that is done under the hood, so no intermediate df are created, making everything better organised
 
 ## Arrenging everything in a workflow and fit the model
 
-Now that we have in place the model and the recipe, we can combine them in an abstract modelling workflow which will be then fit on the data
+Now that we have in place the model and the recipe, we can combine them in an abstract modeling workflow which will be then fit on the data
 
 ```{r}
 iris_workflow <- workflow() %>% 
