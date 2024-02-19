@@ -1,10 +1,6 @@
----
+------------------------------------------------------------------------
 
-title: "Genotype imputation with KNN: a demonstration"
-author: "Filippo Biscarini"
-date: "November 13, 2015"
-output: html_document
----
+title: "Genotype imputation with KNN: a demonstration" author: "Filippo Biscarini" date: "November 13, 2015" output: html_document ---
 
 # KNN: K-Nearest Neighbors (for classification)
 
@@ -14,20 +10,20 @@ $$
 Pr(Y=j|X=x_0) = \frac{1}{K} \sum_{i \in \mathcal{N}_0} I(y_i=j)
 $$
 
-Let's look at this: 
+Let's look at this:
 
-- $K$ is the chosen **number of neighbors** to consider
-- $x_0$ is the **observation** we want to classify (we have features but not know the class it belongs to)
-- $\mathcal{N}_0$ is such neighborhood of $x_0$
-- $I(y_i=j)$ is the number of neighbors in $\mathcal{N}_0$ belonging to class $j$
+-   $K$ is the chosen **number of neighbors** to consider
+-   $x_0$ is the **observation** we want to classify (we have features but not know the class it belongs to)
+-   $\mathcal{N}_0$ is such neighborhood of $x_0$
+-   $I(y_i=j)$ is the number of neighbors in $\mathcal{N}_0$ belonging to class $j$
 
 The observation $x_0$ is then classified to the class with the largest probability ("Bayes rule").
 
 ## Distance function
 
-A crucial aspect in KNN classification is of course how you *define the distance* between observations. A common choice is the Euclidean distance, which basically takes the square root of the sum of **squared differences in feature values** between any two points: 
+A crucial aspect in KNN classification is of course how you *define the distance* between observations. A common choice is the Euclidean distance, which basically takes the square root of the sum of **squared differences in feature values** between any two points:
 
-1. Euclidean distance:
+1.  Euclidean distance:
 
 $$
 D_E(x_i,x_j) = \sqrt{ \sum_{m=1}^M (x_{i,m}-x_{j,m})^2 }
@@ -35,7 +31,7 @@ $$
 
 The Euclidean distance, though, is designed for **continuous features**, and is therefore not very suited for categorical features. Luckily, other distance functions exist for **categorical features**, like the Hamming distance function:
 
-2. Hamming distance (categorical features):
+2.  Hamming distance (categorical features):
 
 $$
 D_H(x_i,x_j) = \frac{1}{M} \sum_{m=1}^M I(x_{i,m} \neq x_{j,m})
@@ -43,10 +39,10 @@ $$
 
 In this brief practical/demonstration, we'll go through an illustration of how to apply KNN to the problem of imputing missing SNP genotypes in rice (*Oryza sativa*).
 
-1. Raw data
-2. Introduce (artificial) missing genotypes
-3. Imputation with R package
-4. Step by step KNN imputation: write our own code!
+1.  Raw data
+2.  Introduce (artificial) missing genotypes
+3.  Imputation with R package
+4.  Step by step KNN imputation: write our own code!
 
 ```{r echo=FALSE, results='hide'}
 library("ggplot2")
@@ -71,6 +67,7 @@ oldcode <- c("AA","BB","--")
 neucode <- c(-1,1,NA)
 
 M0 <- apply(rice44[,5:ncol(rice44)],2,function(x) neucode[match(x,oldcode)])
+print(paste("number of SNPs before filtering:", nrow(M0)))
 head(M0)
 ```
 
@@ -89,6 +86,10 @@ missing_rate <- n_missing/data_size
 print(missing_rate)
 ```
 
+## MEASURING THE ACCURACY OF IMPUTATION
+
+Now we select only SNPs without missing data:
+
 ```{r}
 M <- M0[missingRate==0,]
 colnames(M) <- paste("sample",seq(1:ncol(M)),sep="_")
@@ -105,7 +106,7 @@ Mreduced <- t(M[vec,])
 head(Mreduced)
 ```
 
-Now, we randomly introduce 10\% artificially missing SNP genotypes. In this way, we will be able to measure the accuracy of our imputation method.
+Now, we randomly introduce 10% artificially missing SNP genotypes. In this way, we will be able to measure the accuracy of our imputation method.
 
 ```{r}
 nSNP <- ncol(Mreduced)
@@ -118,14 +119,43 @@ missing_matrix[!is.na(missing_matrix)] = 0
 injected_data = Mreduced + missing_matrix
 
 artificialMissingRate <- length(injected_data[is.na(injected_data)])/(nInd*nSNP) 
-print(artificialMissingRate)
 
 missing_map = missing_matrix
 head(injected_data)
 ```
 
+```{r}
+print(artificialMissingRate)
+```
+
 The current missing rate (in the injected subset) is `r artificialMissingRate`.
 
+### Imputation with tidymodels
+
+We'll now impute missing genotypes using **KNN** with the `tidymodels` R library.
+
+In this package there is the *step_impute_knn()* function, which uses by default the *Gower distance*, and allows the user to specify the number of neighbors $K$. The measure of \`\`probability'' of belonging to any given class is the **average** (continuous variables) or the **mode** (**majority vote**, categorical variables).
+
+```{r}
+missing_data <- as.data.frame(injected_data)
+
+rec <- recipe(missing_data) %>% 
+  update_role(all_numeric(), new_role = "predictor")
+
+ratio_recipe <- rec %>%
+  step_impute_knn(all_predictors(), neighbors = 3)
+
+ratio_recipe2 <- prep(ratio_recipe, training = missing_data, verbose = FALSE)
+imputed = juice(ratio_recipe2)
+
+head(imputed)
+```
+
+```{r}
+results <- round(imputed[is.na(missing_map)])==Mreduced[is.na(missing_map)]
+accuracy <- length(results[results==TRUE])/length(results)
+print(accuracy)
+```
 
 ### Step-by-step KNN implementation
 
@@ -150,8 +180,7 @@ Hamming <- function(x) {
 }
 ```
 
-We choose a small value of $K$ ($K=3$), given the small size of the exercise (and being sure of avoiding the "*curse of dimensionality*" :-)).
-The objective is to impute missing SNP genotypes at one SNP locus, using all remaining available information (except the target SNP locus).
+Again, we choose a small value of $K$ ($K=3$), given the small size of the exercise (and being sure of avoiding the "*curse of dimensionality*" :-)). The objective is to impute missing SNP genotypes at one SNP locus, using all remaining available information (except the target SNP locus).
 
 ```{r echo=FALSE}
 k <- 3
@@ -170,7 +199,7 @@ row.names(D) <- names(y)
 colnames(D) <- names(y)
 ```
 
-Let's have a look at the first elements of the matrix of Hamming distances:
+Let's have a look at the first elements of the matrix of Hamming distances (the smaller the number, the closer the samples):
 
 ```{r echo=FALSE}
 print(D[1:6,1:6])
@@ -191,7 +220,7 @@ This is the vector of SNP genotypes to be imputed: `r y`.
 print(y)
 ```
 
-Non-missing genotypes at this SNP locus are the "*training*" observations, to be used for the imputation of the missing data points. The subset of distances for the missing observations is extracted and ordered by reverse distance (the matrix below is showing, for the test samples, the closest and farthest samples in the training set, orderd from closest to farthest)
+Non-missing genotypes at this SNP locus are the "*training*" observations, to be used for the imputation of the missing data points. The subset of distances for the missing observations is extracted and ordered by reverse distance (the matrix below is showing, for the test samples, the closest and farthest samples in the training set, ordered from closest to farthest)
 
 ```{r}
 testIDS <- names(y[is.na(y)])
@@ -201,6 +230,16 @@ NN <- apply(D[as.character(testIDS),as.character(trainIDS)],1,order)
 NN <- t(NN)
 
 print(NN)
+```
+
+We see here the indexes of the neighbors for the "test" observations (samples with missing data to impute), ordered from closest to farthest (mind you, missing elements from `y` are skipped).
+
+Below we can see, for the first "test" sample (sample whose missing genotype we want to impute) the genotypes for the first `k` neighbors (that will be used for KNN-imputation by majority vote):
+
+```{r}
+neighbs <- NN[1,1:k] ## first k neighbors for first "test" sample
+print(neighbs)
+print(y[trainIDS][neighbs]) ## neighbor genotypes of first k samples 
 ```
 
 We'll now use KNN to impute the missing genotypes, based on the most frequent genotype in the $K$ neighbors.
@@ -281,36 +320,6 @@ accuracy <- length(results[results==TRUE])/length(results)
 print(accuracy)
 ```
 
-<span style="background-color:yellow">The accuracy of imputation with the our R code is:<strong> `r accuracy`</strong></span>
-
-
-### Imputation with tidymodels
-
-We'll now impute missing genotypes using **KNN** with the `tidymodels` R library. 
-
-
-
-```{r}
-missing_data <- as.data.frame(injected_data)
-
-imputation_recipe <- recipe(missing_data) %>% 
-  update_role(all_numeric(), new_role = "predictor") %>%
-  step_knnimpute(all_predictors(), neighbors = 3)
-
-imputation_recipe_prep <- prep(imputation_recipe)
-
-imputed <- bake(imputation_recipe_prep, missing_data)
-imputed2 = juice(imputation_recipe_prep)
-
-head(imputed)
-```
-
-```{r}
-results <- imputed[is.na(missing_map)]==Mreduced[is.na(missing_map)]
-accuracy <- length(results[results==TRUE])/length(results)
-print(accuracy)
-```
+[The accuracy of imputation with the our R code is:<strong> `r accuracy`</strong>]{style="background-color:yellow"}
 
 !! important caveat: the R code shown here is intended for demonstration only, and has not been optimized nor tested for applications !!
-
-
