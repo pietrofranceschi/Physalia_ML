@@ -409,6 +409,8 @@ Choose a built-in dataset, fit a linear model and measure the accuracy of predic
 1.  you can choose one of the many built-in R datasets, using the function `data()`:
 2.  or you can generate a dataset (e.g. sampling from a Gaussian distribution)
 
+#### Part 1
+
 ```{r}
 data()
 ```
@@ -424,6 +426,8 @@ data()
 ```{r results="asis"}
 # fit <- lm()
 ```
+
+#### Part 2
 
 3.  Obtain predictions
 
