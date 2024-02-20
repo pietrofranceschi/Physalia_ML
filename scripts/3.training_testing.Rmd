@@ -125,11 +125,25 @@ res.train |> inner_join(res.test, by = "metric") |> rename(training = value.x, t
   mutate(tst_trn_pct = round(100*(test-training)/training, 3))
 ```
 
-
 ## Exercise 3.1
 
--   try different training/testing sets
+-   try a different training/testing split
+-   train the model
 -   measure the performance of the model
+
+#### 1. split the data
+
+```{r}
+## write your code here
+```
+
+#### 2. train the model
+
+```{r}
+## write your code here
+```
+
+#### 3. evaluate the model on the test data
 
 ```{r}
 ## write your code here

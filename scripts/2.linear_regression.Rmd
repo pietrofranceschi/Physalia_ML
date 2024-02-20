@@ -48,7 +48,7 @@ mCH4 %>%
             n_missing = sum(is.na(value)),
             avg = round(mean(value, na.rm = TRUE),2),
             std = round(sd(value, na.rm = TRUE),2),
-            min = min(value),
+            min = min(value, na.rm = TRUE),
             max = max(value))
 ```
 
