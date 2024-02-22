@@ -171,6 +171,8 @@ save(ROCit_lasso, file = "ROClasso.RData")
 
 Try: - a different training/test split (e.g. 70/30) - a different CV scheme for tuning the hyperparameter $\lambda$ - measure the predictive performance of the model. Try also to calculate MCC on the results from Lasso-penalised logistic regression.
 
+For the bravest of the braves: try a different dataset (e.g. `iris`)
+
 #### 1. Split the data
 
 ```{r}
