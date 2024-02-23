@@ -79,7 +79,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [dataset 1 (rubus)](data/rubusTable.txt) [dataset 3 (komp reduced)](data/KOMP_data_targeted.RData)
 * Final interactive exercise: [(.Rmd)](scripts/final_exercise.Rmd)
 * Kahoot quiz: let’s test our machine learning skills!
-   * [Go to test!](http://www.joinmyquiz.com) 
+   * [Go to test!](https://joinmyquiz.com/) 
 * Q&A
 
 **R Libraries**
