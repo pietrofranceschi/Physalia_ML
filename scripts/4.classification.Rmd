@@ -199,7 +199,7 @@ conf_matrix
 # FP = conf_matrix[,]
 # TN = conf_matrix[,]
 # FN = conf_matrix[,]
-# 
+
 # mcc_score = mcc(tp = TP, fp = FP, tn = TN, fn = FN)
 # print(mcc_score)
 ```
