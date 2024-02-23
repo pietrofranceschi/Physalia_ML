@@ -159,7 +159,7 @@ lasso_fit %>%
 lasso_fit %>%
   pull_workflow_fit() %>%
   tidy() %>%
-  filter(estimate > 0)
+  filter(estimate > 0 | estimate < 0)
 ```
 
 ## Tuning the hyperparameters
