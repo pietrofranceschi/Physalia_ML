@@ -483,12 +483,16 @@ hist(abs(preds-test_y), xlab = "errors", breaks = 20, main = "Distribution of er
 library("tidymodels")
 ```
 
+We first define the **SVM model**:
+
 ```{r 'svm_with_tidymodels'}
 svm_mod <-
   svm_rbf(cost = tune(), rbf_sigma = tune()) %>%
   set_mode("classification") %>%
   set_engine("kernlab")
 ```
+
+Then the **preprocessing recipe**:
 
 ```{r}
 breast_rec <-
@@ -499,17 +503,25 @@ breast_rec <-
   step_lincomb(all_numeric())
 ```
 
+And the **cross-validation** partitioning for the **fine-tuning of the hyperparameters**:
+
 ```{r}
 breast_rs <- vfold_cv(BreastCancer, v = 5, repeats = 5)
 ```
+
+We choose a target metric, AUC:
 
 ```{r}
 roc_vals <- metric_set(roc_auc)
 ```
 
+We now specify that we want to save the predictions from fine-tuning (cross-validation):
+
 ```{r}
 ctrl <- control_grid(verbose = FALSE, save_pred = TRUE)
 ```
+
+Now we do the fine tuning with default grid values:
 
 ```{r}
 formula_res <-
@@ -524,31 +536,40 @@ formula_res
 ```
 
 ```{r}
-formula_res %>% 
-  select(.metrics) %>% 
-  dplyr::slice(1) %>% 
-  pull(1)
+# formula_res %>% 
+#   select(.metrics) %>% 
+#   dplyr::slice(1) %>% 
+#   pull(1)
 ```
+
+From the `tidymodels` object, we can extract the AUC values corresponding to the tested values for the hyperparameters (averages over 25 replicates: 5-fold CV repeated 5 times):
 
 ```{r}
 estimates <- collect_metrics(formula_res)
 estimates
 ```
 
+The function `show_best()` shows the best `n` models (default, the top 5 modfels):
+
 ```{r}
 top_models <- show_best(formula_res, metric = "roc_auc")
 top_models
 ```
 
+We can also collect all predictions from cross-validation (fine-tuning):
+
 ```{r}
 collect_predictions(formula_res)
 ```
+
+And plot their distribution:
 
 ```{r}
 augment(formula_res) %>%
   ggplot(aes(.pred_malignant, color = Class)) +
   geom_boxplot()
 ```
+Now, we focus on the **best model** from corss-validation:
 
 ```{r}
 svm_best <- 
@@ -561,6 +582,8 @@ svm_best <- top_models |> dplyr::slice(1)
 svm_best
 ```
 
+And plot the ROC curve for the best model:
+
 ```{r}
 svm_auc <- 
   formula_res %>% 
@@ -570,6 +593,8 @@ svm_auc <-
 
 autoplot(svm_auc)
 ```
+
+Finally, we can look at predictions (confusion matrix) from one repetition and one validation fold:
 
 ```{r}
 formula_res %>% 
