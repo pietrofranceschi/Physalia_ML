@@ -47,6 +47,8 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [slides 6.classification](slides/6.classification.pdf) (Filippo)
 * Regression and classification with tidymodels
    * [script 5.regression_and_classification_with_tidymodels] [(.Rmd)](scripts/5.regression_classification_tidymodels.Rmd) <!-- [(ipynb)](scripts/5.regression_classification_tidymodels.ipynb) -->
+   * [script 5.2 Snippet on model complexity] [(.Rmd)](scripts/5.2.model_complexity.Rmd) 
+   * [script 5.3 Snippet on finetuning the model complexity hyperparameter] [(.Rmd)](scripts/5.3.tuning_complexity.Rmd)
 * Lasso-penalised linear and logistic regression
    * [data_lasso](data/dogs_imputed.raw) 
    * [script 6.lasso] [(.Rmd)](scripts/6.lasso.Rmd) <!-- [(ipynb)](scripts/6.lasso.ipynb) -->
