@@ -21,18 +21,23 @@ library("data.table")
 poly_data <- fread("../data/poly_data.txt")
 ```
 
-#### Train/test split
+#### Train/test split + model fit
+
+We define a function that splits the data in training/test sets and then fits the polynomial regression model.
+!! Important !!: we specify the **complexity parameter $\delta$ (d)** (for degree of polynomial).
 
 ```{r split, echo=FALSE}
-
-cross_validate <- function(df, n, k) {
+## df = data frame with the data
+## n = size of the test set
+## d = complexity parameter
+cross_validate <- function(df, n, d) {
   
   ## split train/test
   vec <- sample(nrow(df), n)
   test <- df[vec, -1]
   train <- df[!vec, -1]
   
-  fit <- lm(y ~ poly(x, k, raw = TRUE), data = train)
+  fit <- lm(y ~ poly(x = x, degree = d, raw = TRUE), data = train)
   
   predictions <- predict(fit, test, interval="none", type = "response", na.action=na.pass)
   preds = cbind(test, predictions)
@@ -45,29 +50,39 @@ cross_validate <- function(df, n, k) {
 }
 ```
 
+We try this function once, manually:
 
 ```{r}
-cross_validate(df = poly_data, n = 4, k = 1)
+cross_validate(df = poly_data, n = 4, d = 1) |>
+  regulartable() |>
+  autofit()
 ```
 
+### Cross-validation
+
+Now we try different values for the complexity parameter, so to **fine-tune** it.
+We define a vector of values for $\delta$; in addition, instead of running the model only once for each value of $\delta$,
+we do this multiple times (replicates), each time on a different random split of the data.
+
 ```{r}
-kval = seq(1,8)
-nrep = 25
-ntest = 5
+dval = seq(1,9) ## values of the hyperparameter to be tested
+nrep = 50 ## n. of replicates for each value of d
+ntest = 5 ## size of the test set
+
 res = data.frame(NULL)
 
-for (k in kval) {
+for (d in dval) {
   
-  print(paste("trying complexity value = ",k))
+  print(paste("trying complexity value = ", d))
   for (i in 1:nrep) {
     
     # print(paste("replicate n.", i))
   
-    temp = cross_validate(df = poly_data, n = ntest, k = k)
+    temp = cross_validate(df = poly_data, n = ntest, d = d)
   
     temp$rep = i
     temp$test_size = ntest
-    temp$k = k
+    temp$d = d
   
     res = rbind.data.frame(res, temp)
   }
@@ -76,13 +91,13 @@ for (k in kval) {
 ```
 
 ```{r}
-res$k = factor(res$k)
-ggplot(res, aes(x = k, y = rmse)) + geom_jitter(aes(color=k)) + geom_boxplot(aes(color=k))
+res$d = factor(res$d)
+ggplot(res, aes(x = d, y = log(rmse))) + geom_jitter(aes(color=d)) + geom_boxplot(aes(color=d))
 ```
 
 ```{r}
 temp <- res |>
-  group_by(k) |>
+  group_by(d) |>
   summarise(avg = mean(rmse))
 
 temp |>
@@ -93,4 +108,3 @@ temp |>
 ```{r}
 temp[which.min(temp$avg),]
 ```
-
