@@ -8,43 +8,58 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+library("knitr")
 library("dplyr")
 library("ggplot2")
+library("flextable")
 library("data.table")
 ```
 
 ## Linear relationships?
 
-From [here](https://www.geo.fu-berlin.de/en/v/soga-r/Basics-of-statistics/Linear-Regression/Polynomial-Regression/Polynomial-Regression---An-example/index.html)
+From [here](https://www.geo.fu-berlin.de/en/v/soga-r/Basics-of-statistics/Linear-Regression/Polynomial-Regression/Polynomial-Regression---An-example/index.html):
 
 ```{r poly_data}
 poly_data <- fread("../data/poly_data.txt")
 ```
 
+We see that the relationship between $y$ and $x$ is not necessarily linear: fitting a straight line might be suboptimal in such cases.
+
 ```{r plot_data, echo=FALSE}
 ggplot(poly_data, aes(x = x, y = y)) + geom_point()
 ```
 
-```{r label='split'}
-set.seed(137)
+Fortunately, we have (many) tools to deal with non-linearity in the data. One such tool is **polynomial regression**: we add higher order terms of x, e.g. a **quadratic term**, or a **cubic term**. This is done in the following way:
 
-vec <- sample(nrow(poly_data), 6)
+$$
+y = \beta_0 + \beta_1 x + \beta_2 x^2 + \beta_3 x^3 + \ldots + \beta_n x^n + e 
+$$
+
+#### Complexity hyperparameter
+
+This is still a linear model (linear combination of parameters), but allows for additional complexity (the polynomial terms) that captures the non-linearity in the data. To do this, we need to introduce a **complexity hyperparameter** that will control the degree of complexity of our model, i.e. how much it departs from simple linear regression (where the complexity hyperparameter has the minimum value of 1).
+
+------------------------------------------------------------------------
+
+Let's see how this works!
+
+We start by splitting the data in a **training set** and a **test set**:
+
+```{r label='split'}
+set.seed(13) ## 13; 137; 210
+
+vec <- sample(nrow(poly_data), 4)
 test <- poly_data[vec, -1]
 train <- poly_data[!vec, -1]
 ```
 
+### Simple linear regression model
+
+First, we try the usual linear regression model (**degree of complexity = 1**):
+
 ```{r}
 fit <- lm(y ~ x, data = train)
 summary(fit)
-```
-
-```{r}
-# plot(train$x, train$y, pch = 16, col = "blue",
-#        ylim = c(min(train$y) * 1.3, max(train$y) * 1.3))
-# 
-# intercept = fit$coefficients[[1]]
-# slope = fit$coefficients[[2]]
-# abline(intercept, slope)
 ```
 
 ```{r}
@@ -54,11 +69,18 @@ print(preds)
 ```
 
 ```{r}
-preds |>
+temp <- preds |>
   mutate(squared_error = (y-predictions)^2) |>
   summarise(rmse = sqrt(mean(squared_error)), r = round(cor(y, predictions, method = "pearson"),3), pct_error = 100*rmse/abs(mean(train$y)))
+  
+temp |>
+  regulartable() |>
+  autofit()
 ```
 
+We see that the **RMSE is `r temp$rmse`** (**`r round(temp$pct_error, 2)`%** as percentage of the mean of the target variable $y$).
+
+Let's visualize the training data, the fitted regression curve and the predictions vs test values:
 
 ```{r}
 train$label = "train"
@@ -68,7 +90,6 @@ temp <- preds |> select(-y) |> rename(y = predictions) |> mutate(label = "predic
 df <- bind_rows(train,test, temp)
 ```
 
-
 ```{r}
 p <- ggplot(df, aes(x = x, y = y)) + geom_point(aes(color=label)) + scale_color_manual(values = c("red", "blue", "gray"))
 p <- p + theme_bw()
@@ -76,6 +97,8 @@ p + stat_smooth(data = train, method = "lm", formula = y ~ x, size = 0.5, se = F
 ```
 
 ### Quadratic model
+
+We now try a quadratic model, i.e. a model where we add the term $x^2$: **degree of complexity = 2**
 
 ```{r}
 fit2 <- lm(y ~ poly(x, 2, raw = TRUE), data = train)
@@ -89,9 +112,13 @@ print(preds)
 ```
 
 ```{r}
-preds |>
+temp <- preds |>
   mutate(squared_error = (y-predictions)^2) |>
   summarise(rmse = sqrt(mean(squared_error)), r = round(cor(y, predictions, method = "pearson"),3), pct_error = 100*rmse/abs(mean(train$y)))
+  
+temp |>
+  regulartable() |>
+  autofit()
 ```
 
 ```{r}
@@ -100,7 +127,16 @@ p <- p + theme_bw()
 p + stat_smooth(data = train, method = "lm", formula = y ~ poly(x, 2, raw=TRUE), size = 0.5, se = FALSE)
 ```
 
+The fit seems slightly better, but still rather off the actual data: **RMSE is `r temp$rmse`** (**`r round(temp$pct_error, 2)`%** as percentage of the mean of the target variable $y$).
+
+
 ### Polynomial model
+
+We now move on to a model with **degree of complexity = 3**, where we add the cubic term.
+
+::: {style="color:red"}
+**Question for you: what does the model look like now?**
+:::
 
 ```{r}
 fit3 <- lm(y ~ poly(x, 3, raw = TRUE), data = train)
@@ -114,9 +150,13 @@ print(preds)
 ```
 
 ```{r}
-preds |>
+temp <- preds |>
   mutate(squared_error = (y-predictions)^2) |>
   summarise(rmse = sqrt(mean(squared_error)), r = round(cor(y, predictions, method = "pearson"),3), pct_error = 100*rmse/abs(mean(train$y)))
+
+temp |>
+  regulartable() |>
+  autofit()
 ```
 
 ```{r}
@@ -125,4 +165,47 @@ p <- p + theme_bw()
 p + stat_smooth(data = train, method = "lm", formula = y ~ poly(x, 3, raw=TRUE), size = 0.5, se = FALSE)
 ```
 
+The fit looks much better, and this is reflected in the predictions: **RMSE is `r temp$rmse`** (**`r round(temp$pct_error, 2)`%** as percentage of the mean of the target variable $y$).
 
+### What if we overdo it?
+
+We can keep increasing the complexity of the model: what if we try degree = 10?
+
+```{r}
+fitx <- lm(y ~ poly(x, 10, raw = TRUE), data = train)
+summary(fitx)
+```
+
+```{r}
+predictions <- predict(fitx, test, interval="none", type = "response", na.action=na.pass)
+preds = cbind(test, predictions)
+print(preds)
+```
+
+```{r}
+temp <- preds |>
+  mutate(squared_error = (y-predictions)^2) |>
+  summarise(rmse = sqrt(mean(squared_error)), r = round(cor(y, predictions, method = "pearson"),3), pct_error = 100*rmse/abs(mean(train$y)))
+
+temp |>
+  regulartable() |>
+  autofit()
+```
+
+```{r}
+p <- ggplot(df, aes(x = x, y = y)) + geom_point(aes(color=label)) + scale_color_manual(values = c("red", "blue", "gray"))
+p <- p + theme_bw()
+p + stat_smooth(data = train, method = "lm", formula = y ~ poly(x, 10, raw=TRUE), size = 0.5, se = FALSE)
+```
+
+The fit went rather astray: **RMSE is `r temp$rmse`** (**`r round(temp$pct_error, 2)`%** as percentage of the mean of the target variable $y$).
+
+::: {style="color:red"}
+**Question for you: why do you think this happened?**
+:::
+
+---
+
+::: {style="color:red"}
+**Question for you: how do we choose the best value for the complexity (hyper)parameter?**
+:::
