@@ -78,7 +78,7 @@ temp |>
   autofit()
 ```
 
-We see that the **RMSE is `r temp$rmse`** (**`r round(temp$pct_error, 2)`%** as percentage of the mean of the target variable $y$).
+We see that the **RMSE is 0.6865** (**230.2%** as percentage of the mean of the target variable $y$).
 
 Let's visualize the training data, the fitted regression curve and the predictions vs test values:
 
@@ -86,7 +86,6 @@ Let's visualize the training data, the fitted regression curve and the predictio
 train$label = "train"
 test$label = "test"
 temp <- preds |> select(-y) |> rename(y = predictions) |> mutate(label = "prediction")
-
 df <- bind_rows(train,test, temp)
 ```
 
@@ -122,13 +121,15 @@ temp |>
 ```
 
 ```{r}
+temp <- preds |> select(-y) |> rename(y = predictions) |> mutate(label = "prediction")
+df <- bind_rows(train,test, temp)
+
 p <- ggplot(df, aes(x = x, y = y)) + geom_point(aes(color=label)) + scale_color_manual(values = c("red", "blue", "gray"))
 p <- p + theme_bw()
 p + stat_smooth(data = train, method = "lm", formula = y ~ poly(x, 2, raw=TRUE), size = 0.5, se = FALSE)
 ```
 
-The fit seems slightly better, but still rather off the actual data: **RMSE is `r temp$rmse`** (**`r round(temp$pct_error, 2)`%** as percentage of the mean of the target variable $y$).
-
+The fit seems slightly better, but still rather off the actual data: **RMSE is 0.6454** (**216.4%** as percentage of the mean of the target variable $y$).
 
 ### Polynomial model
 
@@ -160,12 +161,15 @@ temp |>
 ```
 
 ```{r}
+temp <- preds |> select(-y) |> rename(y = predictions) |> mutate(label = "prediction")
+df <- bind_rows(train,test, temp)
+
 p <- ggplot(df, aes(x = x, y = y)) + geom_point(aes(color=label)) + scale_color_manual(values = c("red", "blue", "gray"))
 p <- p + theme_bw()
 p + stat_smooth(data = train, method = "lm", formula = y ~ poly(x, 3, raw=TRUE), size = 0.5, se = FALSE)
 ```
 
-The fit looks much better, and this is reflected in the predictions: **RMSE is `r temp$rmse`** (**`r round(temp$pct_error, 2)`%** as percentage of the mean of the target variable $y$).
+The fit looks much better, and this is reflected in the predictions: **RMSE is 0.2243** (**75.2%** as percentage of the mean of the target variable $y$).
 
 ### What if we overdo it?
 
@@ -193,18 +197,21 @@ temp |>
 ```
 
 ```{r}
+temp <- preds |> select(-y) |> rename(y = predictions) |> mutate(label = "prediction")
+df <- bind_rows(train,test, temp)
+
 p <- ggplot(df, aes(x = x, y = y)) + geom_point(aes(color=label)) + scale_color_manual(values = c("red", "blue", "gray"))
 p <- p + theme_bw()
 p + stat_smooth(data = train, method = "lm", formula = y ~ poly(x, 10, raw=TRUE), size = 0.5, se = FALSE)
 ```
 
-The fit went rather astray: **RMSE is `r temp$rmse`** (**`r round(temp$pct_error, 2)`%** as percentage of the mean of the target variable $y$).
+The fit went rather astray: **RMSE is 1.6359** (**548.5%** as percentage of the mean of the target variable $y$).
 
 ::: {style="color:red"}
 **Question for you: why do you think this happened?**
 :::
 
----
+------------------------------------------------------------------------
 
 ::: {style="color:red"}
 **Question for you: how do we choose the best value for the complexity (hyper)parameter?**
