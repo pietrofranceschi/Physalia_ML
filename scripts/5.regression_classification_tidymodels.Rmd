@@ -9,6 +9,7 @@ output: html_document
 library("knitr")
 library("glmnet")
 library("ggplot2")
+library("flextable")
 library("tidyverse")
 library("tidymodels")
 library("data.table")
@@ -66,7 +67,7 @@ lm_fit <-
 To evaluate the performance of the model we first collect the error metrics: RMSE and $R^2$. These are averages over the 5 validation folds, together with the standard error:
 
 ```{r}
-collect_metrics(lm_fit) |> kable(format = "html", table.attr = "style = \"color: white;\"")
+collect_metrics(lm_fit) |> regulartable() 
 ```
 
 ```{r}
@@ -80,7 +81,7 @@ We see the error is **`r round(error_pct,2)*100`%** of the average age of bats i
 ```{r}
 collect_predictions(lm_fit) %>% group_by(id) %>% 
   summarise(pearson = cor(.pred,Age)) |>
-  kable(format = "html", table.attr = "style = \"color: white;\"")
+  regulartable()
 ```
 
 ### Repeated cross-validation
@@ -101,7 +102,7 @@ lm_fit <-
 ```
 
 ```{r}
-collect_metrics(lm_fit) |> kable(format = "html", table.attr = "style = \"color: white;\"")
+collect_metrics(lm_fit) |> regulartable()
 ```
 
 We see that the standard errors of the estimated RMSE and $R^2$ are now smaller (averages of 50 values instead of 5 values!). We finally get the average Pearson correlation between predicted and observed ages, and its standard deviation:
@@ -110,7 +111,8 @@ We see that the standard errors of the estimated RMSE and $R^2$ are now smaller 
 collect_predictions(lm_fit) %>% 
   group_by(id) %>% 
   summarise(pearson = cor(.pred,Age)) %>% 
-  summarise(avg = mean(pearson), std = sd(pearson))
+  summarise(avg = mean(pearson), std = sd(pearson)) |>
+  regulartable()
 ```
 
 ## Classification
@@ -232,7 +234,8 @@ Then we can look at predictions and calculate the overall error rate:
 ```{r}
 collect_predictions(log_res) %>% 
   group_by(id,id2) %>% 
-  summarise(errors = sum(.pred_class != PHENOTYPE), tot = length(PHENOTYPE), error_rate = errors/tot)
+  summarise(errors = sum(.pred_class != PHENOTYPE), tot = length(PHENOTYPE), error_rate = errors/tot) |>
+  regulartable()
 ```
 
 ```{r}
@@ -240,7 +243,9 @@ collect_predictions(log_res) %>%
   group_by(id,id2) %>% 
   summarise(errors = sum(.pred_class != PHENOTYPE), tot = length(PHENOTYPE), error_rate = errors/tot) %>%
   ungroup() %>%
-  summarise(avg_er = mean(error_rate), std = sd(error_rate))
+  summarise(avg_er = mean(error_rate), std = sd(error_rate)) |>
+  regulartable() |>
+  autofit()
 ```
 
 ### Exercise 5.1
