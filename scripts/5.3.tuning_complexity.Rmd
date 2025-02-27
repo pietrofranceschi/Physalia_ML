@@ -1,0 +1,96 @@
+---
+title: "Tuning the complexity hyperparameter"
+author: "Filippo Biscarini"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library("knitr")
+library("dplyr")
+library("ggplot2")
+library("flextable")
+library("data.table")
+```
+
+### Read the data
+
+```{r poly_data}
+poly_data <- fread("../data/poly_data.txt")
+```
+
+#### Train/test split
+
+```{r split, echo=FALSE}
+
+cross_validate <- function(df, n, k) {
+  
+  ## split train/test
+  vec <- sample(nrow(df), n)
+  test <- df[vec, -1]
+  train <- df[!vec, -1]
+  
+  fit <- lm(y ~ poly(x, k, raw = TRUE), data = train)
+  
+  predictions <- predict(fit, test, interval="none", type = "response", na.action=na.pass)
+  preds = cbind(test, predictions)
+  
+  temp <- preds |>
+  mutate(squared_error = (y-predictions)^2) |>
+  summarise(rmse = sqrt(mean(squared_error)), r = round(cor(y, predictions, method = "pearson"),3), pct_error = 100*rmse/abs(mean(train$y)))
+  
+  return(temp)
+}
+```
+
+
+```{r}
+cross_validate(df = poly_data, n = 4, k = 1)
+```
+
+```{r}
+kval = seq(1,8)
+nrep = 25
+ntest = 5
+res = data.frame(NULL)
+
+for (k in kval) {
+  
+  print(paste("trying complexity value = ",k))
+  for (i in 1:nrep) {
+    
+    # print(paste("replicate n.", i))
+  
+    temp = cross_validate(df = poly_data, n = ntest, k = k)
+  
+    temp$rep = i
+    temp$test_size = ntest
+    temp$k = k
+  
+    res = rbind.data.frame(res, temp)
+  }
+}
+
+```
+
+```{r}
+res$k = factor(res$k)
+ggplot(res, aes(x = k, y = rmse)) + geom_jitter(aes(color=k)) + geom_boxplot(aes(color=k))
+```
+
+```{r}
+temp <- res |>
+  group_by(k) |>
+  summarise(avg = mean(rmse))
+
+temp |>
+  regulartable() |>
+  autofit()
+```
+
+```{r}
+temp[which.min(temp$avg),]
+```
+
