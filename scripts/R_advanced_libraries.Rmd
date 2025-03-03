@@ -1,5 +1,5 @@
 ---
-title: "Day_1"
+title: "R Advanced Libraries"
 author: "Pietro Franceschi"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: html_document
@@ -35,19 +35,20 @@ library(data.table)    ## a less flexible (but more fast) approach to the manipu
 
 # Piping
 
-The overall idea behind piping is to make easy to read (and perform) a chain of functions. Pipes `%>%` have been introduced in the `magrittr` package but are now a core tool of the _tidyverse_
+The overall idea behind piping is to make easy to read (and perform) a chain of functions. Pipes `%>%` have been introduced in the `magrittr` package but are now a core tool of the _tidyverse_. Since R 4.1.0  pipes `|>` has been included also in the base R installation. Here we will stick to the `tidyverse` flavour.
 
 ```{r}
 ## sequence going from 1 to the square root of 100
-one_old <-seq(1,sqrt(100)) 
+one_old <-log10(seq(1,sqrt(100))) 
 
 ## The old style work have to be read in an "onion" fashion
 
 one_pipe <- sqrt(100) %>%  ## calculate the square root of 100
-  seq(1,.) ## make the sqrt
+  seq(1,.) %>%  ## make the sqrt
+  log10(.)      ## make the log
 
 ## one_old and one_pipe are exactly equivalent, but the second is by far more easy to read
-## in addition, whan used in data manipulation tasks, pipes do not save intermediate objects
+## in addition, when used in data manipulation tasks, pipes do not save intermediate objects
 
 ```
 
@@ -59,7 +60,8 @@ When putting a function in a pipe, you refer to "what is coming from the pipe" w
 data(iris) ## iris dataset
 
 ## note the dot to refer to the iris data.frame which reach the pairs function from the pipe
-iris %>% pairs(., col = factor(iris$Species), pch = 19) 
+iris %>% 
+  pairs(., col = factor(iris$Species), pch = 19) 
 ```
 
 ### Advantages
@@ -70,18 +72,18 @@ iris %>% pairs(., col = factor(iris$Species), pch = 19)
 
 ### Disadvantages
 
-* no big disadvantages, even if I normally rely on them when I use the console, while in programming tasks I prefer to rely on the "old" onion approach
+* no big disadvantages, even if I normally rely on them when I use the console, while in programming tasks I prefer to rely on the "old" onion approach.
 
 
 # Tabular Data
 
-In R tabular data are commonly treated with three different classes of objects
+In R tabular data are commonly treated with three different classes of objects:
 
-* `data.frame`: old, faithful and the father of almost everything else. A data frame is a list
-* `data.table`: basically still a data.frame which have been optimized for efficiency
-* `tibble`: is the tidyverse form of data.frames, less efficient than data.table, but more flexible since it is integrated in the tidy environment
+* `data.frame`: old, faithful and the father of almost everything else. A data frame is a list.
+* `data.table`: basically still a data.frame which have been optimized for efficiency.
+* `tibble`: is the tidyverse form of data.frames, less efficient than data.table, but more flexible since it is integrated in the tidy environment.
 
-Both data.tables and tibble retains the characteristics of dfs (indexing with square brackets, possible use of $ to get the columns). Importantly, in both cases the row.names attribute has been removed and  its use is discouraged even if sometimes useful ;-)
+Both data.tables and tibble retains the characteristics of dfs (indexing with square brackets, possible use of $ to get the columns). Importantly, in both cases the *row.names* attribute has been removed and  its use is discouraged even if sometimes useful ;-)
 
 These three box of code allow to benchmark the efficiency of the three solution sin reading a relatively big dataset (35 MB)
 
@@ -100,9 +102,9 @@ system.time(fread("athlete_events.csv"))
 system.time(read_csv("athlete_events.csv"))
 ```
 
-As it can be seen data.table is almost ten times faster than base R, while tidyverse stays somehow in the middle
+As it can be seen data.table is almost ten times faster than base R, while tidyverse stays somehow in the middle.
 
-tibbles and data.tables also own an improved print method that allows for a more relaxed visualization of the content of the table
+tibbles and data.tables also own an improved print method that allows for a more relaxed visualization of the content of the table.
 
 ```{r}
 ## read the three tables
@@ -133,7 +135,7 @@ Data tables and tibbles are very useful when you are engaged in manipulating tab
 It is helpful to summarize the data.table slicing approach:
 
 `DT[i, j, by]`
-“Take DT, subset rows using i, then calculate j grouped by by”
+“Take DT, subset rows using i, then calculate j grouped by *by*”
 
 ```{r}
 ## filtering with data.table 
@@ -177,7 +179,8 @@ iris %>%
 
 
 
-## extracting one column as as vector
+## extracting one column as as vector. Beware,, if you use the previous syntax
+## you will get a data table
 iris %>% 
   data.table(.) %>% 
   .[,Species]
@@ -193,7 +196,7 @@ iris %>%
   .[,.(Species,Sepal.Width)]
 ```
 
-Let's call this, dot deluge ... ;-)
+Let's call this, *dot deluge* ... ;-)
 
 In tidyverse the extraction of a single column as a vector is performed by the `pull` function, while the selection of one or more column resulting in a smaller tibble is performed by the `select` function
 
@@ -223,6 +226,12 @@ iris %>%
 iris %>% 
   tibble() %>% 
   select(where(~is.numeric(.x)))
+
+
+## The syntax ~ something is a shorthand for function(.x) ....
+iris %>%  
+  tibble() %>% 
+  select(where(function(c) is.numeric(c)))
 
 ```
 
@@ -278,7 +287,7 @@ In TB there is specific function `mutate` which can be piped to create or manipu
 ```{r}
 ## here the creation!
 nef_tb_col <- iris %>% 
-  tibble(.) %>% 
+ # tibble(.) %>%       ## thi s step is implicitly transforming the Df into ia tibble
   mutate(myratio = Sepal.Length/Sepal.Width,
          myratio2 = Petal.Length/Petal.Width)
 
@@ -303,6 +312,14 @@ iris %>%
 ## the .names argument allows you to specify a set of new names ... {.col} refers to the old names ...
 
 ```
+
+```{r}
+iris %>% 
+  mutate(across(where(~is.numeric(.x)),~log10(.x)))
+```
+
+
+
 
 ## Perform operations on subgroups of samples (lines)
 
@@ -335,7 +352,7 @@ in the case of TB, "by group" operations are performed by using the `group_by` f
 ## this does what we have just done ...
 iris %>% 
   group_by(Species) %>% 
-  summarise(myratio = mean(Sepal.Width), sd = sd(Sepal.Width))
+  summarise(mymean = mean(Sepal.Width), sd = sd(Sepal.Width))
 
 ## note that I have here two summary functions
 ```
@@ -394,13 +411,13 @@ dat <- read_csv("athlete_events.csv")
 ```
 
 ```{r}
-## Athlete participating to the large number of events
+## Athlete participating to the largest number of events in athletics
 dat %>% 
   filter(Sport == "Athletics") %>%  ## here I wanted to focus only on people doing athletics
-  group_by(ID,Name, Sport) %>%       ## I group by more columns because I want to retain them in the output of summarise
+  group_by(Name) %>%       ## I group by more columns because I want to retain them in the output of summarise
   summarise(nevents = length(NOC)) %>% 
-  arrange(desc(nevents))         ## arrange allows to order the output ascending (or descending with desc) 
-  
+  arrange(desc(nevents))  %>%        ## arrange allows to order the output ascending (or descending with desc) 
+  slice(1:10)
 ```
 
 ```{r}
@@ -411,21 +428,25 @@ dat <- dat %>%
 
 
 ```{r}
-# find the top athletes in terms of absolute number of medals on the olympic games history 
+# find the top athletes in terms of absolute number of medals on the Olympic games history 
 dat %>% 
   filter(!is.na(Medal)) %>%      ## keeping only rows where Medal is not NA
   filter(Sport == "Athletics") %>%
-  group_by(Name, Sport, Event) %>% 
+  group_by(Name) %>% 
   summarise(nevents = length(NOC)) %>% 
-  arrange(desc(nevents))
+  ungroup() %>% 
+  arrange(desc(nevents)) %>% 
+  slice_head(n = 10)
 
 ## per year
 dat %>% 
   filter(!is.na(Medal)) %>% 
   filter(Sport == "Athletics") %>%
-  group_by(Name, Year, Sport) %>% 
+  group_by(Name, Year) %>% 
   summarise(nevents = length(NOC)) %>% 
-  arrange(desc(nevents)) 
+  ungroup() %>% 
+  arrange(desc(nevents)) %>% 
+  slice_head(n = 10)
 ```
 
 We were discussing whether there are athletes who got medals in different sports ...
@@ -437,13 +458,14 @@ dat %>%
   group_by(Name) %>% 
   summarise(n_sport = length(unique(Sport)),
             what_sport = paste(unique(Sport), collapse = ";")) %>% 
-  filter(n_sport > 1)  
+  filter(n_sport > 1)  %>% 
+  arrange(desc(n_sport))
 ```
 
 
 ## Brooming models (`broom`)
 
-`broom` is a package part of the tidyverse environment which allow to reformat the output of a model (actually of many classes of models, tests, etc) makingm them tidier and easy to use
+`broom` is a package part of the tidyverse environment which allow to reformat the output of a model (actually of many classes of models, tests, etc) making them tidier and easy to use
 
 ```{r}
 ## this is an ignorant model of the iris dataset
@@ -523,7 +545,7 @@ Now let's try to combine tibbles and purr. The objective is organize the output 
 
 ```{r}
 ## the syntax here is self explanatory ...
-iris_nest %>% 
+iris_nest <- iris_nest %>% 
   mutate(mydim = map(data,~dim(.x)))
 ```
 
@@ -542,9 +564,24 @@ iris_nest <- iris_nest %>%
 
 ```
 
+
+```{r}
+iris %>% 
+  nest(data = !c(Species)) %>% 
+  mutate(models = map(data, ~lm(Sepal.Length ~ Sepal.Width, data = .x))) %>%     ## here I'm mapping the modelling
+  mutate(coefficients = map(models, ~tidy(.x))) %>%                              ## here I'm mapping the tidying
+  unnest(coefficients) %>% 
+  select(-c("data","models")) %>% 
+  write_csv(file = "test.csv")
+  
+  
+```
+
+
+
 ## Wide to long
 
-In the previous step we have been using modelling on sample groups ... could I use the same approach to model the separate variables?
+In the previous step we have been using modeling on sample groups ... could I use the same approach to model the separate variables?
 
 To do that I have first to reshape my data in "long" format. This is done in tidyverse by the `pivot_longer` function
 
@@ -564,9 +601,9 @@ iris_long
 
 But now we have a column with the variable names! ... 
 
-so I could nest the long DF and switch on my modelling machinery ;-)
+so I could nest the long DF and switch on my modeling machinery ;-)
 
-Suppose, for example that you want to use t.test to compare all thenproerties of virginica and versicolor flowers
+Suppose, for example that you want to use t.test to compare all the properties of virginica and versicolor flowers
 
 
 ```{r}
@@ -587,13 +624,5 @@ iris %>%
   theme_light()
   
 ```
-
-Like this I have a tibble of model coefficients ... and now I get them out!
-
-
-
-
-
-
 
 
