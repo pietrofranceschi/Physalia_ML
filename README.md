@@ -54,8 +54,6 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Unsupervised learning demos
    * UMAP demo [(.Rmd)](scripts/UMAP_with_tidymodels.Rmd)
    * SOM demo [(.Rmd)](scripts/SOMs_also_with_tidymodels.Rmd)
-* KNN imputation [optional]
-   * [script knni] [(.Rmd)](scripts/knni.Rmd) <!-- [(ipynb)](scripts/knni.ipynb) -->
 
 **Day 4**
 
@@ -70,6 +68,8 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [script 8.random_forest] [(.Rmd)](scripts/8.random_forest.Rmd) <!-- [(ipynb)](scripts/8.random_forest.ipynb) -->
    * [script 9.multiclass_random_forest] [(.Rmd)](scripts/9.multiclass_random_forest.Rmd) <!-- [(ipynb)](scripts/9.multiclass_random_forest.ipynb) -->
    * [slides 8.random_forest](slides/8.random_forest.pdf) (Filippo)
+* KNN imputation [optional]
+   * [script knni] [(.Rmd)](scripts/knni.Rmd) <!-- [(ipynb)](scripts/knni.ipynb) -->
 
 **Day 5**
 
