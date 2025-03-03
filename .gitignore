@@ -24,4 +24,7 @@
 ## general files
 *.log
 
+## compiled notebooks
+scripts/*.html
+
 
