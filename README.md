@@ -49,6 +49,16 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [script 5.regression_and_classification_with_tidymodels] [(.Rmd)](scripts/5.regression_classification_tidymodels.Rmd) <!-- [(ipynb)](scripts/5.regression_classification_tidymodels.ipynb) -->
    * [script 5.2 Snippet on model complexity] [(.Rmd)](scripts/5.2.model_complexity.Rmd) 
    * [script 5.3 Snippet on finetuning the model complexity hyperparameter] [(.Rmd)](scripts/5.3.tuning_complexity.Rmd)
+* Unsupervised learning: PCA, Umap, Self-organizing maps (Pietro) 
+   * PCA demo [(.Rmd)](scripts/PCA_with_tidymodels.Rmd)
+* Unsupervised learning demos
+   * UMAP demo [(.Rmd)](scripts/UMAP_with_tidymodels.Rmd)
+   * SOM demo [(.Rmd)](scripts/SOMs_also_with_tidymodels.Rmd)
+* KNN imputation [optional]
+   * [script knni] [(.Rmd)](scripts/knni.Rmd) <!-- [(ipynb)](scripts/knni.ipynb) -->
+
+**Day 4**
+
 * Lasso-penalised linear and logistic regression
    * [data_lasso](data/dogs_imputed.raw) 
    * [script 6.lasso] [(.Rmd)](scripts/6.lasso.Rmd) <!-- [(ipynb)](scripts/6.lasso.ipynb) -->
@@ -56,27 +66,17 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Lasso and model tuning
    * [data lasso 2](data/MTBSL1.tsv)
    * [script 7.lasso_with_tidymodels] [(.Rmd)](scripts/7.lasso_with_tidymodels.Rmd) <!-- [(ipynb)](scripts/7.lasso_with_tidymodels.ipynb) -->
-* KNN imputation [optional]
-   * [script knni] [(.Rmd)](scripts/knni.Rmd) <!-- [(ipynb)](scripts/knni.ipynb) -->
-
-**Day 4**
-
 * Random Forest for regression and classification
    * [script 8.random_forest] [(.Rmd)](scripts/8.random_forest.Rmd) <!-- [(ipynb)](scripts/8.random_forest.ipynb) -->
    * [script 9.multiclass_random_forest] [(.Rmd)](scripts/9.multiclass_random_forest.Rmd) <!-- [(ipynb)](scripts/9.multiclass_random_forest.ipynb) -->
    * [slides 8.random_forest](slides/8.random_forest.pdf) (Filippo)
-* Slow learning: the boosting approach
-   * [script 10.boosting] [(.Rmd)](scripts/10.boosting.Rmd) <!-- [(ipynb)](scripts/10.boosting.ipynb) -->
-   * [slides 9.boosting](slides/9.boosting.pdf) (Filippo)
-* Unsupervised learning: PCA, Umap, Self-organizing maps (Pietro) 
-   * PCA demo [(.Rmd)](scripts/PCA_with_tidymodels.Rmd)
 
 **Day 5**
 
+* Slow learning: the boosting approach
+   * [script 10.boosting] [(.Rmd)](scripts/10.boosting.Rmd) <!-- [(ipynb)](scripts/10.boosting.ipynb) -->
+   * [slides 9.boosting](slides/9.boosting.pdf) (Filippo)
 * SVM demo [(.Rmd)](scripts/svm_snippet.Rmd)
-* Unsupervised learning demos
-   * UMAP demo [(.Rmd)](scripts/UMAP_with_tidymodels.Rmd)
-   * SOM demo [(.Rmd)](scripts/SOMs_also_with_tidymodels.Rmd)
 * Datasets
    * [dataset 1 (rubus)](data/rubusTable.txt) [dataset 3 (komp reduced)](data/KOMP_data_targeted.RData)
 * Final interactive exercise: [(.Rmd)](scripts/final_exercise.Rmd)
