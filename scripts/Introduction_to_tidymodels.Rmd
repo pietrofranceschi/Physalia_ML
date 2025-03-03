@@ -15,15 +15,17 @@ library(poissonreg)
 
 ## Introduction to Tidymodels
 
-During the lectures we have been stressing the need of standardization when dealing with multiple R packages. The origin of the problem is that often the way we specify models and we get out model results is strongly depending on which package we are using the model.
+During the lectures we have been stressing the need of standardization when dealing with multiple R packages. The origin of the problem is that often the way we specify models and we get out model results is strongly depending on which package we are using to perform the modeling.
 
-If we stick with a method (let's say `lm`), this is not particularly problematic, but in a ML context where you want to test the performance of different models on the same data one gets easily messy ... so keeping an unified interface to modelling can be an extremely useful asset for high throughput data analysis.In addition, as you will discover during the week, machine learning always requires a fairly complex work of data splitting and parameter tuning ... It would be great also to have all of that well standardized.  
+If we decide to stick to a model (let's say `lm`), this is not particularly problematic, but in a ML context where you want to test the performance of different models on the same data one gets easily messy ... so keeping an unified interface to modeling can be an extremely useful asset for high throughput data analysis.In addition, as you will discover during the week, machine learning always requires a fairly complex work of data splitting and parameter tuning ... It would be great also to have all of that well standardized.  
+
+In addition, new and powerful model are often made available trough specific machine learning "platforms" (e.g. H2O) and programming langages are connected to these platforms through specific interfaces.
 
 The idea behind `tidymodels` is to introduce a sort of "abstraction" layer where we can define the abstract properties of our model without bothering too much about the structure of the different modeling package. In other words, `tidymodels` acts as an interface between an abstract definition of the model and of its tuning and the actual "fitting" which is very much package dependent.
 
 `tidymodels` tries also to integrate this approach on the tidyverse/pipe/broom environment. If some of you is familiar with python, the package tries to do what scikit-learn does. 
 
-In the following we will look to the basic use of `tidymodels` to fit linear regression through lm. This is something like chasing a fly with a nuclear weapon ... but it highlights the basic ideas ... 
+In the following we will look to the basic use of `tidymodels` to fit linear regression through `lm`. This is something like chasing a fly with a nuclear weapon ... but it highlights the basic ideas ... 
 
 The abstract steps of model selection and tuning are 
 
@@ -94,9 +96,9 @@ points(x = iris$Sepal.Width,y = predict(old_fashion_ign), col = iris$Species, pc
 ```
 
 Here empty dots represents the observations and filled dots represent the model predictions. 
-By eye we clearly see that the slope of the three lines is almost the same. Good! It fits with the model! But I would say that it is not easy to sell that setosa is not different from the other two ...
+By eye we clearly see that the slope of the three lines is almost the same. Good! It fits with the model! But I would say that it is not easy to sell that setosa intercept is not different from the other two ...
 
-The reason for this odd behavior was already remarked during the lecture. The overall idea of comparing intercepts is wrong. First of all the idea of finding a Sepal.Length different from zero when the Sepal.Width is zero is odd. Moreover, If you look to our point you see that to see what happens to zero we are extrapolating away from the cloud of points and this is dangerous. To understand that let's look to the position of our data ...
+The reason for this odd behavior is that the overall idea of comparing intercepts is wrong. First of all the idea of finding a Sepal.Length different from zero when the Sepal.Width is zero is odd. Moreover, If you look to our point you see that to see what happens to zero we are extrapolating away from the cloud of points and this is dangerous. To understand that let's look to the position of our data ...
 
 ```{r}
 
@@ -186,16 +188,17 @@ model2
 The second abstract block of modeling is pre processing. Since this is often a sort of cooking exercise, the `recipe` package (part of `tidymodels`) is taking care of that
 
 
-To proceed step-by-step let's start easy and try to model sepal length as a function of sepal width, only for the setosa iris
+To proceed step-by-step let's start easy and try to model sepal length as a function of sepal width, only for the setosa specie
 
 ```{r}
 iris_recipe <- iris %>% 
   recipe(Sepal.Length~.) %>% ## I'll start saying that Sepal Length will be my outcome variable
-  update_role(starts_with("Petal"), new_role = "id") %>% 
-  update_role(Species, new_role = "id") %>% 
-  step_filter(Species == "setosa") %>% 
-  step_center(Sepal.Width)
-  
+  update_role(starts_with("Petal"), new_role = "id") %>%   ## all "petal" variables are ids
+  update_role(Species, new_role = "id") %>%                ## the variety id an id
+  step_filter(Species == "setosa") %>%                    ## I'm keeping only setosa flowers
+  step_center(Sepal.Width)                                ## The sepal width  should be centered
+
+iris_recipe
 ```
 
 The objective of the previous recipe is to explicitly perform all the steps that before were performed either by hand (the centering) or implicitly by the `lm function`
