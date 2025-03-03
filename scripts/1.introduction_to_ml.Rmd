@@ -377,6 +377,17 @@ error
 
 The MAE is **`r round(error,3)`**.
 
+**RMSE** and **MAE** can also be expressed as percentage of the response mean value:
+
+```{r}
+avg = mean(dataset$y)
+
+print(paste("RMSE is", round((rmse/avg)*100,2), "% of the average chick weight"))
+print(paste("MAE is", round((error/avg)*100,2), "% of the average chick weight"))
+```
+
+------------------------------------------------------------------------
+
 The we have correlations:
 
 4.  **Pearson's linear** correlation coefficient
