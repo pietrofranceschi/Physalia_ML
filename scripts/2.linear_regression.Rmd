@@ -150,6 +150,17 @@ ggplot(data.frame("y"=ch4$Age,"predictions"=predictions), aes(x=predictions,y=y)
   geom_point()
 ```
 
+## Exercise 2.1 (optional)
+
+-   write your own model: remove variables (e.g. collinearity), add interactions, quadratic effects etc.
+-   measure the performance of your model
+-   try to improve the model performance! (e.g. higher correlation between predictions and observations or lower RMSE)
+
+```{r}
+## write your code here
+```
+
+
 ### Normalised Discounted Cumulative Gain
 
 **NDCG** (Normalised Discounted Cumulative Gain)
@@ -229,14 +240,4 @@ ndcg <- function(y_hat,y,k) {
 ```{r}
 NDCG <- ndcg(y_hat = predictions, y = ch4$Age, k = 10)
 print(round(NDCG,4))
-```
-
-## Exercise 2.1 (optional)
-
--   write your own model: remove variables (e.g. collinearity), add interactions, quadratic effects etc.
--   measure the performance of your model
--   try to improve the model performance! (e.g. higher correlation between predictions and observations or lower RMSE)
-
-```{r}
-## write your code here
 ```
