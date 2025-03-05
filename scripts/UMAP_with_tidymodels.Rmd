@@ -17,7 +17,7 @@ library(tidymodels)
 
 The objective of this demo is to demonstrate how how to use UMAP by using `tidymodels`. 
 
-The steps needed to include UMAP projection in a recipe are included in the `embed` package with also include other methods for embedding predictors in new columns. Also *sparse pca* is ioncluded there
+The steps needed to include UMAP projection in a recipe are included in the `embed` package with also include other methods for embedding predictors in new columns. Also *sparse pca* is included there
 
 ```{r}
 library(embed)
@@ -28,7 +28,7 @@ library(embed)
 
 Here we get the data
 ```{r}
-load("KOMP_data_targeted.RData")
+load("data/KOMP_data_targeted.RData")
 komp
 ```
 
@@ -40,7 +40,7 @@ komp_recipe <- recipe(~., data = komp1) %>%
   step_impute_lower(all_predictors()) %>%
   step_log(all_predictors()) %>% 
   #step_normalize(all_predictors()) %>%  
-  step_umap(all_predictors(), neighbors = 8) %>% 
+  step_umap(all_predictors(), neighbors = 30) %>% 
   prep()
 ```
 
@@ -66,7 +66,7 @@ We see many groups. Can we link them to something interpretable?
 ```{r}
 komp_recipe %>% 
   juice() %>% 
-  filter(UMAP1 < 0 & UMAP2 < 0)
+  filter(UMAP1 > 0 & UMAP2 > 0)
 ```
 
 
@@ -82,7 +82,7 @@ Not clear unfortunately. Now it would be necessary to discuss the outcomes with 
 
 ```{r}
 library(readr)
-MTBSL1 <- read_delim("MTBSL1.tsv", delim = "\t", 
+MTBSL1 <- read_delim("data/MTBSL1.tsv", delim = "\t", 
     escape_double = FALSE, trim_ws = TRUE)
 ```
 
@@ -104,7 +104,7 @@ MTBLS1_recipe_umap <- recipe(~., data = MTBSL1) %>%
   update_role(!all_numeric(), new_role = "id") %>% 
   step_zv(all_predictors()) %>% 
   step_center(all_predictors()) %>% 
-  step_umap(all_predictors(), neighbors = 8) %>% 
+  step_umap(all_predictors(), neighbors = 7) %>% 
   prep()
   
 ```
