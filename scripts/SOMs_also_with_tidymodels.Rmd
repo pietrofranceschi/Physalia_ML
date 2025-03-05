@@ -16,7 +16,7 @@ library(kohonen)
 
 ## Introduction
 
-The objective of this demo is to demonstrate how how to combine `tidymodels` and the `kohonen` package to start using Self Organising maps to analyze complex datasets 
+The objective of this demo is to demonstrate how how to combine `tidymodels` and the `kohonen` package to start using Self Organising maps to analyze complex datasets.
 
 This is the description of the dataset from the R documentation:
 
@@ -87,7 +87,7 @@ wines_som_hc <- cutree(hclust(dist(first_som$codes[[1]])), 5)
 
 
 ```{r}
-plot(first_som, type = "codes")
+plot(first_som, type = "mapping", col = vintages, pchs = 19)
 add.cluster.boundaries(first_som, wines_som_hc)
 
 ```
@@ -98,7 +98,7 @@ Ok, let's try with the metabolomics dataset
 
 Here we get the data
 ```{r}
-load("KOMP_data_targeted.RData")
+load("data/KOMP_data_targeted.RData")
 komp
 ```
 

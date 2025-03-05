@@ -43,7 +43,7 @@ Now we set-up the recipe to run the PCA analysis
 iris_PCA <- recipe(~., data = iris) %>%      ## no target variable there 
   update_role(Species, new_role = "id") %>%  ## we are not interested of including the Specie
   step_center(all_numeric()) %>%             ## we have to center the cloud of points
-  step_pca(all_numeric())                    ## we run the PCA by using prcomp unde the hood
+  step_pca(all_numeric())                    ## we run the PCA by using prcomp under the hood
 
 iris_PCA
 
@@ -54,13 +54,13 @@ We are now ready to prepare the recipe and to give a look to the results. Just t
 ```{r}
 recipe(~., data = iris) %>%      ## no target variable there 
   update_role(Species, new_role = "id") %>%  ## we are not interested of including the Specie
-  step_normalize(all_numeric()) %>% 
+  #step_normalize(all_numeric()) %>% 
+  step_center(all_numeric()) %>% 
   prep() %>% 
   juice()
 ```
 
 As you can see we have the set of centered variables. Back to the PCA
-
 
 ```{r}
 
@@ -91,9 +91,9 @@ iris_PCA_prep %>%
   theme(aspect.ratio = 1)
 ```
 
-PCA is a projection so almost always one is interested in understanding how many variance is a projection representing.
+PCA is a projection so almost always one is interested in understanding how much variance is a projection representing.
 
-This info is typically happily provided by many PCA packages, in Tidymodels we have to follow another way, by tidyng a part of the prepared recipe. In tidymodels we can indeed tydy out a specific step of our recipe
+This info is typically happily provided by many PCA packages, in Tidymodels we have to follow another way, by tidying a part of the prepared recipe. In tidymodels we can indeed tidy out a specific step of our recipe
 
 ```{r}
 tidy(iris_PCA_prep,      ## the recipe
@@ -146,7 +146,6 @@ iris_PCA_prep$steps[[2]]
 ```
 
 
-
 The last thing we would like to do is a Biplot!
 
 First we need to make the loadings less ugly ;-)
@@ -180,6 +179,13 @@ iris_PCA_prep %>%
   theme(aspect.ratio = 1)
 ```
 
+## Other suggested packages for PCA
+
+Tidymodels is not the only package you could use for PCA (I mean avery multivariate analysis package does PCA ...)
+
+Among the different possibilities I'd like to mention `factomineR` and `FactoExtra`
+
+
 ## Projecting new data
 
 PCA can be useful to see where new data will be fit on the picture we have. This is a common application in the field of "novelty" detection. How can this be done in tidymodels?
@@ -196,8 +202,8 @@ And now we perform PCA on the training set ..
 ```{r}
 small_iris_pca <- recipe(~., data = training(iris_split)) %>%      ## no target variable there 
   update_role(Species, new_role = "id") %>%  ## we are not interested of including the Specie
-  step_normalize(all_numeric()) %>% 
-   step_pca(all_numeric()) %>% 
+  step_normalize(all_numeric()) %>% ## equivalent to base R scale()
+  step_pca(all_numeric()) %>% 
   prep() 
 ```
 
@@ -255,7 +261,7 @@ In this demo we will use only the metabolites quantified in the targeted assays.
 
 Here we get the data
 ```{r}
-load("KOMP_data_targeted.RData")
+load("data/KOMP_data_targeted.RData")
 komp
 ```
 
@@ -274,7 +280,7 @@ Anyway, here we are dealing with unsupervised learning and we want only to look 
 
 Another thing that you have most likely notes is that we have missing values! Here missing values are of analytical origin and they are clearly not randomly distributed. Progesterone, for example, shows a large number of samples.
 
-So what we sould do is:
+So what we should do is:
 
 * remove variables (and maybe samples) with too many NAs
 * look to similarity patterns in missing data both comparing variables and comparing samples
@@ -373,8 +379,8 @@ Well we see some sort of partial separation there. We also have some outlier, le
 komp_recipe %>% 
   juice() %>% 
   ggplot() + 
-  geom_point(aes(x = PC1, y = PC2, col = Gender), size = 2, alpha = 0.7) + 
-  geom_text_repel(aes(x = PC1, y = PC2, col = Gender, label = ifelse(PC1>5,as.character(Genotype),''))) + 
+  geom_point(aes(x = PC1, y = PC3, col = Gender), size = 2, alpha = 0.7) + 
+  geom_text_repel(aes(x = PC1, y = PC3, col = Gender, label = ifelse(PC1>5,as.character(Genotype),''))) + 
   scale_color_brewer(palette = "Set1") + 
   ggtitle("Komp Scoreplot") + 
   theme_bw() + 
@@ -382,6 +388,26 @@ komp_recipe %>%
 ```
 
 Other food for brain. In terms of the genetic background, instead
+
+
+Let's look the the metabolites which are mostly contributiong to PC1
+
+
+
+```{r fig.height=10, fig.width=7}
+tidy(komp_recipe, 4) %>% 
+  filter(component %in% paste0("PC", 1)) %>% 
+  arrange(value) %>% 
+  mutate(terms = fct_inorder(terms)) %>% ## 
+  ggplot() +
+  geom_point(aes(x = value, y = terms)) + 
+  geom_segment(aes(xend = value, x = 0, y = terms, yend = terms)) + 
+  labs(y = NULL) + 
+  theme_light() 
+  
+```
+
+
 
 
 ```{r}
@@ -400,7 +426,7 @@ Thsi is not easy to see, but the problem here is the number of genotypes. An alt
 komp_recipe %>% 
   juice() %>% 
   ggplot() + 
-  geom_point(aes(x = PC1, y = PC2, col = Genotype == "Null"), size = 2) + 
+  geom_point(aes(x = PC1, y = PC2, col = Genotype == "C8a"), size = 2) + 
   scale_color_manual(values = c("gray80","red")) + 
   ggtitle("Komp Scoreplot") + 
   theme_bw() + 
@@ -413,6 +439,7 @@ komp_recipe %>%
 * Go through the code and understand what I did
 * Try different methods of scaling and imputing (eg. knn `step_impute_knn`)
 * Try PCA on the MTBLS1 dataset
+* Try to make a "loop" which can be used get the previous plot for the complete series of genotypes
 
 
 
