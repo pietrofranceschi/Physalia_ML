@@ -36,17 +36,6 @@ print(paste("N. SNPs (features):",nsnps))
 table(dogs$PHENOTYPE)
 ```
 
-```{r}
-maf_controls <- colSums(dogs[dogs$PHENOTYPE==0,-c(1,2)])/(2*nrow(dogs[dogs$PHENOTYPE==0,]))
-maf_cases <- colSums(dogs[dogs$PHENOTYPE==1,-c(1,2)])/(2*nrow(dogs[dogs$PHENOTYPE==1,]))
-```
-
-```{r}
-maf <- data.frame("cases"=maf_cases, "controls"=maf_controls)
-mD <- reshape2::melt(maf)
-ggplot(mD, aes(y = value, x = variable)) + geom_boxplot(aes(fill=variable)) + ylab("MAF")
-```
-
 ## Fitting the Lasso-penalised logistic regression model
 
 We have **`r nrow(dogs)`** records (sample size) and **`r ncol(dogs)-1`** SNP markers: this is a $p > n$ problem, and **regularization** is therefore needed.
