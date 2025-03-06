@@ -135,11 +135,49 @@ False positive rate is `r FPR`, false negative rate is `r FNR`
 
 ```{r}
 n = nrow(dogs)
-k = 0
+k = 5
+
+## constrain the random sampling to create equally-sized partitions
+mat <- replicate(n = n/k, sample(x = seq(1,k), size = k), simplify = TRUE)
+folds = sample(c(mat)) ## convert from matrix to vector and reshufle the elements in the vector
+table(folds)
 ```
 
 ```{r}
 ## continue with your code here
+cv.error = data.frame("fold"=NULL,"MSE"=NULL,"RMSE"=NULL,
+                   "NRMSE"=NULL,"r_pearson"=NULL,"r_spearman"=NULL)
+for(i in 1:k) {
+  
+  print(paste("using validation fold",i))
+  training_set <- dogs[folds!=i,]
+  
+  ##########################################
+  ## WRITE HERE YOUR CLASSIFICATION MODEL ##
+  ##########################################
+  
+  ## train the model 
+  fit = NULL
+  
+  
+  #############################################
+  ## EVALUATE HERE YOUR CLASSIFICATION MODEL ##
+  #############################################
+  test_set <- dogs[folds==i,]
+  
+  predictions = NULL
+  
+  r_pearson = cor(test_set$Age,predictions) 
+  r_spearman = cor(test_set$Age,predictions, method = "spearman")
+  mse = mean((test_set$Age-predictions)^2)
+  rmse = sqrt(mse)
+  nrmse = sqrt(mse)/mean(test_set$Age)
+  
+  res = data.frame("fold"=i,"MSE"=mse,"RMSE"=rmse,
+                   "NRMSE"=nrmse,"r_pearson"=r_pearson,"r_spearman"=r_spearman)
+  cv.error <- rbind.data.frame(cv.error,res)
+}
+
 ```
 
 ## ROC curves
