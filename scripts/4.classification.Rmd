@@ -134,6 +134,7 @@ False positive rate is `r FPR`, false negative rate is `r FNR`
 -   implement k-fold cross-validation to assess the performance of the logistic regression model:
 
 ```{r}
+dogs$id <- NULL
 n = nrow(dogs)
 k = 5
 
@@ -145,8 +146,8 @@ table(folds)
 
 ```{r}
 ## continue with your code here
-cv.error = data.frame("fold"=NULL,"MSE"=NULL,"RMSE"=NULL,
-                   "NRMSE"=NULL,"r_pearson"=NULL,"r_spearman"=NULL)
+cv.error = data.frame("fold"=NULL,"TER"=NULL,"FPR"=NULL, "FNR"=NULL)
+
 for(i in 1:k) {
   
   print(paste("using validation fold",i))
@@ -157,24 +158,25 @@ for(i in 1:k) {
   ##########################################
   
   ## train the model 
-  fit = NULL
-  
+  fit = glm(PHENOTYPE ~ ., data = training_set, family=binomial(link="logit"))
   
   #############################################
   ## EVALUATE HERE YOUR CLASSIFICATION MODEL ##
   #############################################
   test_set <- dogs[folds==i,]
   
-  predictions = NULL
+  predictions = predict(fit, newdata = test_set[,-1], type="response")
+  predictions <- ifelse(predictions > 0.5, 1, 0)
   
-  r_pearson = cor(test_set$Age,predictions) 
-  r_spearman = cor(test_set$Age,predictions, method = "spearman")
-  mse = mean((test_set$Age-predictions)^2)
-  rmse = sqrt(mse)
-  nrmse = sqrt(mse)/mean(test_set$Age)
+  TER = sum(predictions != test_set$PHENOTYPE)/length(predictions)
+  TP = sum(predictions == 1 & test_set$PHENOTYPE == 1)
+  FN = sum(predictions == 0 & test_set$PHENOTYPE == 1)
+  TN = sum(predictions == 0 & test_set$PHENOTYPE == 0)
+  FP = sum(predictions == 1 & test_set$PHENOTYPE == 0)
+  FPR = FP/(FP+TN)
+  FNR = FN/(FN+TP)
   
-  res = data.frame("fold"=i,"MSE"=mse,"RMSE"=rmse,
-                   "NRMSE"=nrmse,"r_pearson"=r_pearson,"r_spearman"=r_spearman)
+  res = data.frame("fold"=i,"TER"=TER,"FPR"=FPR,"FNR"=FNR)
   cv.error <- rbind.data.frame(cv.error,res)
 }
 
