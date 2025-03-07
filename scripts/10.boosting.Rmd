@@ -221,8 +221,8 @@ options(repr.plot.width=14, repr.plot.height=8)
 xgboost_tuned %>%
   collect_metrics() %>%
   filter(.metric == "accuracy") %>%
-  select(mean, min_n:learn_rate) %>%
-  pivot_longer(min_n:learn_rate,
+  dplyr::select(mean, tree_depth:learn_rate) %>%
+  pivot_longer(tree_depth:learn_rate,
                values_to = "value",
                names_to = "parameter"
   ) %>%
@@ -250,7 +250,7 @@ xgboost_tuned %>%
 
 ```{r}
 xgboost_best_params <- xgboost_tuned %>%
-  select_best("roc_auc")
+  select_best(metric = "roc_auc")
 
 print(xgboost_best_params)
 ```
