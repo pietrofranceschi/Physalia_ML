@@ -204,13 +204,13 @@ We now select the best model from the hyperparameters tuning, and fit it to the 
 1.  selecting the best model based on AUC:
 
 ```{r}
-best_auc <- select_best(regular_res, "roc_auc")
+best_auc <- select_best(regular_res, metric = "roc_auc")
 # print(best_auc)
 show_best(regular_res, metric = "roc_auc", n=1)
 ```
 
 ```{r}
-best_auc <- select_best(tune_res, "roc_auc")
+best_auc <- select_best(tune_res, metric = "roc_auc")
 # print(best_auc)
 show_best(tune_res, metric = "roc_auc", n=1)
 ```
@@ -289,7 +289,6 @@ We start from the results of our RF model for the combination of gender and meta
 cm
 ```
 
-
 ```{r}
 temp <- data.matrix(cm[[1]])
 
@@ -312,13 +311,12 @@ Is this the best metric to evaluate the performance of multiclass classification
 
 We already saw with binary classification that it is important also to look at TPR and TNR:
 
-- unbalanced data
-- specific classes may be more relevant
+-   unbalanced data
+-   specific classes may be more relevant
 
 This is especially important when you have more than two classes.
 
-Furthermore, the total ("raw") accuracy does not consider that **correct predictions may also be obtained by chance**! 
-In binary classification, we know that (if data are balanced) the chance accuracy is 0.5.
+Furthermore, the total ("raw") accuracy does not consider that **correct predictions may also be obtained by chance**! In binary classification, we know that (if data are balanced) the chance accuracy is 0.5.
 
 But what about multiclass classification? This is where **Cohen's kappa** comes into play. The kappa coefficient tries to consider how much better the **predictive performance is over chance accuracy**.
 
@@ -328,8 +326,8 @@ To do so, we need to get some measure of the **expected value for chance accurac
 
 We use the frequentist definition of probabilities:
 
-- chance predictions (relative frequencies of predictions, per class)
-- chance observations (relative class frequencies from the observed values)
+-   chance predictions (relative frequencies of predictions, per class)
+-   chance observations (relative class frequencies from the observed values)
 
 We sum by rows: the predictions!
 
@@ -371,7 +369,6 @@ chance_accuracy = chance_preds_fcg*chance_obs_fcg + chance_preds_fdm*chance_obs_
 print(chance_accuracy)
 ```
 
-
 #### Cohen's kappa
 
 $$
@@ -383,9 +380,7 @@ kappa = (accuracy-chance_accuracy) / (1 - chance_accuracy)
 print(kappa)
 ```
 
-
-- the numerator calculates the difference between accuracy and chance accuracy
-- if accuracy = 1, we have perfect predictive performance (the confusion matrix is diagonal) $\rightarrow \kappa = 1$, regardless of chance accuracy
-- if accuracy = chance accuracy, $\kappa = 0 \rightarrow$ correct predictions are by chance
-- if accuracy < chance accuracy, $\kappa < 0$ (negative) $\rightarrow$ accuracy is lower than what it would be by chance.
- 
+-   the numerator calculates the difference between accuracy and chance accuracy
+-   if accuracy = 1, we have perfect predictive performance (the confusion matrix is diagonal) $\rightarrow \kappa = 1$, regardless of chance accuracy
+-   if accuracy = chance accuracy, $\kappa = 0 \rightarrow$ correct predictions are by chance
+-   if accuracy \< chance accuracy, $\kappa < 0$ (negative) $\rightarrow$ accuracy is lower than what it would be by chance.
