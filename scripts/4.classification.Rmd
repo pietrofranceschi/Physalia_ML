@@ -133,35 +133,40 @@ False positive rate is `r FPR`, false negative rate is `r FNR`
 
 -   implement k-fold cross-validation to assess the performance of the logistic regression model:
 
+
 ```{r}
 dogs$id <- NULL
-n = nrow(dogs)
+
 k = 5
 
+## CONTROLS
+controls = filter(dogs, PHENOTYPE == 0)
+n = nrow(controls)
+
 ## constrain the random sampling to create equally-sized partitions
-mat <- replicate(n = n/k, sample(x = seq(1,k), size = k), simplify = TRUE)
+mat <- replicate(n = ceiling(n/k), sample(x = seq(1,k), size = k), simplify = TRUE)
 folds = sample(c(mat)) ## convert from matrix to vector and reshufle the elements in the vector
+folds = sample(folds, size = n) ## make sure that you have the same size as the the input data
+# table(folds)
+
+## CASES
+cases = filter(dogs, PHENOTYPE == 1)
+n = nrow(cases)
+
+## constrain the random sampling to create equally-sized partitions
+mat <- replicate(n = ceiling(n/k), sample(x = seq(1,k), size = k), simplify = TRUE)
+foldsx = sample(c(mat)) ## convert from matrix to vector and reshufle the elements in the vector
+foldsx = sample(folds, size = n) ## make sure that you have the same size as the the input data
+# table(foldsx)
+
+## CASES + CONTROLS
+folds = c(folds,foldsx)
 table(folds)
 ```
 
 
-```{r}
-# dogs$id <- NULL
-# 
-# k = 5
-# 
-# cases = filter(dogs, PHENOTYPE == 0)
-# n = nrow(cases)
-# 
-# ## constrain the random sampling to create equally-sized partitions
-# mat <- replicate(n = ceiling(n/k), sample(x = seq(1,k), size = k), simplify = TRUE)
-# folds = sample(c(mat)) ## convert from matrix to vector and reshufle the elements in the vector
-# table(folds)
-```
 
-
-
-```{r}
+```{r, warning=FALSE}
 ## continue with your code here
 cv.error = data.frame("fold"=NULL,"TER"=NULL,"FPR"=NULL, "FNR"=NULL)
 
@@ -169,6 +174,7 @@ for(i in 1:k) {
   
   print(paste("using validation fold",i))
   trn_set <- dogs[folds!=i,]
+  print(table(trn_set$PHENOTYPE))
   
   ##########################################
   ## WRITE HERE YOUR CLASSIFICATION MODEL ##
@@ -181,6 +187,7 @@ for(i in 1:k) {
   ## EVALUATE HERE YOUR CLASSIFICATION MODEL ##
   #############################################
   tst_set <- dogs[folds==i,]
+  print(table(tst_set$PHENOTYPE))
   
   predictions = predict(fit, newdata = tst_set[,-1], type="response")
   predictions <- ifelse(predictions > 0.5, 1, 0)
@@ -196,8 +203,12 @@ for(i in 1:k) {
   res = data.frame("fold"=i,"TER"=TER,"FPR"=FPR,"FNR"=FNR)
   cv.error <- rbind.data.frame(cv.error,res)
 }
-
 ```
+
+```{r}
+print(cv.error)
+```
+
 
 ## ROC curves
 
