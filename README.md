@@ -16,17 +16,18 @@ Code and data will be available at the beginning of each day. Slides will be ava
 
 * General Introduction 
 * Data mining, -omics and machine learning
-    * [slides 0: Hands-off introduction to ML](slides/0.introduction_to_machine_learning.pdf) (Filippo) 
-    * [Omics meet ML](slides/omics_meet_ML.pdf) (Pietro) 
+   * [slides 0: Hands-off introduction to ML](slides/0.introduction_to_machine_learning.pdf) (Filippo)
+* Model and variable selection: the machine learning paradigm
+   * [slides 1.variable_selection](slides/1.variable_selection.pdf)  (Filippo)
 * Introduction to advanced R data libraries [Rmd](scripts/R_advanced_libraries.Rmd)
-* Introduction to `tidymodels` [Rmd](scripts/Introduction_to_tidymodels.Rmd)
-    * [data_athletes](data/athlete_events.csv)
+* Multivariate data: things to always remember
+    * [Omics meet ML](slides/omics_meet_ML.pdf) (Pietro) 
+
 
 **Day 2**
 
-* Multivariate data: things to always remember
-* Model and variable selection: the machine learning paradigm
-   * [slides 1.variable_selection](slides/1.variable_selection.pdf)  (Filippo)
+* Introduction to `tidymodels` [Rmd](scripts/Introduction_to_tidymodels.Rmd)
+    * [data_athletes](data/athlete_events.csv)
 * Supervised learning: regression and classification
    * [slides 2.Supervised learning](slides/2.supervised_learning.pdf)  (Filippo) 
    * [script 1.introduction_to_ml] [(.Rmd)](scripts/1.introduction_to_ml.Rmd) <!-- [(ipynb)](scripts/1.introduction_to_ml.ipynb) -->
@@ -80,8 +81,8 @@ Code and data will be available at the beginning of each day. Slides will be ava
 * Datasets
    * [dataset 1 (rubus)](data/rubusTable.txt) [dataset 3 (komp reduced)](data/KOMP_data_targeted.RData)
 * Final interactive exercise: [(.Rmd)](scripts/final_exercise.Rmd)
-* Kahoot quiz: let’s test our machine learning skills!
-   * [Go to test!](https://joinmyquiz.com/) 
+* Wrap-up **quiz**: let’s test our machine learning skills!
+   * [Go to test!](https://docs.google.com/forms/d/e/1FAIpQLSd6pqcn6I_X3Ag1jq_sPcRbOnbJXMnXRa2cgxgCxYMLiNspwA/viewform?usp=sharing) 
 * Q&A
 
 **R Libraries**
