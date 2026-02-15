@@ -43,12 +43,6 @@ One-class classification can either be semi-supervised, where only the normal (m
 or unsupervised, where the method can handle anomalies in the training class. 
 The **one-class SVM** is a popular implementation of one-class classifiers.
 
-https://www.r-bloggers.com/2023/03/one-class-svm/
-
-https://github.com/benmack/oneClass
-
-https://machinelearningmastery.com/one-class-classification-algorithms/ (translate from python)
-
 
 ### The set-up
 
