@@ -78,6 +78,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [script 10.boosting] [(.Rmd)](scripts/10.boosting.Rmd) <!-- [(ipynb)](scripts/10.boosting.ipynb) -->
    * [slides 9.boosting](slides/9.boosting.pdf) (Filippo)
 * SVM demo [(.Rmd)](scripts/svm_snippet.Rmd) [optional]
+* One-class classification (SVM inside) [.Rmd]() [optional]
 * Datasets
    * [dataset 1 (rubus)](data/rubusTable.txt) [dataset 3 (komp reduced)](data/KOMP_data_targeted.RData)
 * Final interactive exercise: [(.Rmd)](scripts/final_exercise.Rmd)
