@@ -15,11 +15,11 @@ library(poissonreg)
 
 ## Introduction to Tidymodels
 
-During the lectures we have been stressing the need of standardization when dealing with multiple R packages. The origin of the problem is that often the way we specify models and we get out model results is strongly depending on which package we are using to perform the modeling.
+Throughout the lectures, we have emphasized the need for standardization when working with multiple R packages. The challenge arises because model specification and result extraction often depend heavily on the specific package used for the analysis.
 
-If we decide to stick to a model (let's say `lm`), this is not particularly problematic, but in a ML context where you want to test the performance of different models on the same data one gets easily messy ... so keeping an unified interface to modeling can be an extremely useful asset for high throughput data analysis.In addition, as you will discover during the week, machine learning always requires a fairly complex work of data splitting and parameter tuning ... It would be great also to have all of that well standardized.  
+If we decide to stick to a model (let's say `lm`), this is not particularly problematic, but in a ML context - where you want to test the performance of different models on the same data - one gets easily lost ... so keeping an unified interface to modeling can be an extremely useful asset for high throughput data analysis. In addition, as you will discover during the week, machine learning always requires a fairly complex work of data splitting and parameter tuning ... It would be great also to have all of that well standardized.  
 
-In addition, new and powerful model are often made available trough specific machine learning "platforms" (e.g. H2O) and programming langages are connected to these platforms through specific interfaces.
+In addition, new and powerful model are often made available trough specific machine learning "platforms" (e.g. H2O) and programming languages are connected to these platforms through specific interfaces.
 
 The idea behind `tidymodels` is to introduce a sort of "abstraction" layer where we can define the abstract properties of our model without bothering too much about the structure of the different modeling package. In other words, `tidymodels` acts as an interface between an abstract definition of the model and of its tuning and the actual "fitting" which is very much package dependent.
 
@@ -63,7 +63,7 @@ summary(old_fashion_ign)
 
 The output of the previous command will be familiar to many of you.  Basically, we have the parameters of three lines (intercepts and slopes) for the samples belonging to the three groups.
 
-For basic R choices, both parameters are returned taking as a reference the first level of the categorical variable (here setosa because s in the alphabet comes before v ;-) ). What I mean is that :
+For basic R choices, both parameters are returned taking as a reference the first level of the categorical variable (here setosa because "s" in the alphabet comes before "v" ;-) ). What I mean is that :
 
 * the `(Intercept)` term estimate the intercept (i.e. the value of Sepal.Length when Sepal.Width is zero ...) of the line for the setosa variety 
 * The other two Species* terms  estimate the intercepts for the other two varieties, not on absolute, but as differences with the reference value.
@@ -72,7 +72,7 @@ For basic R choices, both parameters are returned taking as a reference the firs
 This type of coding has to deal with the "question" which is tested (here: Is the trend for setosa different from "no trend? Are the trends for Virginica and Versicolor different from the one we see for setosa?) 
 To change this type of _coding_ one should change the **contrasts** but this goes beyond the point of our present discussion.
 
-In view of the objective of this demo, it is important to have a glimpse on how R handles under the hood the process of fitting a line when categorical variables are present in the model. Fitting is done by matrix operations, so in some way it is necessary to transform categorical variables (here the species) in numbers. This is done "under the hood" by creating a series of dummy (0,1,-1) variables which are then used in my fitting. Another time, the details of how you code the dummy variables is linked to the contrasts you want, but the important point to focus here is that lm does automatically a preprocessing step to make your data ready to be fitted by linear regression.
+In view of the objective of this demo, it is important to have a glimpse on how R handles under the hood the process of fitting a line when categorical variables are present in the model. Fitting is done by matrix operations, so in some way it is necessary to **transform categorical variables (here the species) into numbers**. This is done "under the hood" by creating a series of dummy (0,1,-1) variables which are then used in my fitting. Another time, the details of how you code the dummy variables is linked to the contrasts you want, but the important point to focus here is that lm does automatically a preprocessing step to make your data ready to be fitted by linear regression.
 
 If you want to see the results of this process of dummization you can give a look to the model matrix, which is the matrix which is actually used in the mathematical solution of the regression problem
 
@@ -201,7 +201,7 @@ iris_recipe <- iris %>%
 iris_recipe
 ```
 
-The objective of the previous recipe is to explicitly perform all the steps that before were performed either by hand (the centering) or implicitly by the `lm function`
+The objective of the previous recipe is to explicitly perform all the steps that before were performed either by hand (the centering) or implicitly by the `lm` function
 
 The important point is that also the previous recipe is completely abstract. Nothing is calculated yet from the data.
 
@@ -212,7 +212,7 @@ This estimation of the pre-processing parameters has not yet been done. We only 
 In order to be ready to be applied to a dataset, the previous recipe should be **prepared**
 
 ```{r}
-iris_recipe %>% 
+prepared_iris_recipe <- iris_recipe %>% 
   prep()
 ```
 
@@ -285,7 +285,7 @@ summary(iris_recipe_interaction)
 
 
 ```{r}
-iris_recipe_interaction %>% 
+aa <- iris_recipe_interaction %>% 
   prep() %>% 
   juice()
 ```

@@ -1,0 +1,116 @@
+---
+title: "Modeling_olympic_games"
+author: "Pietro Franceschi"
+date: "3/23/2021"
+output: html_document
+---
+
+
+```{r}
+library(tidymodels)
+library(tidyverse)
+```
+
+
+## read the data
+```{r}
+dat <- read_csv("data/athlete_events.csv")
+```
+
+```{r}
+## Athlete participating to getting a gold medal somewhere
+dat <- dat %>% 
+  filter(Sport == "Athletics") %>%
+  filter(Medal == "Gold") %>% 
+  mutate(bmi = Weight/(0.01*Height^2))   ## calculate the BMI
+```
+
+We now manually identify the "right" events
+
+```{r}
+unique(dat$Event)
+```
+
+
+
+
+```{r}
+## vector with the "good" events
+eventsin <- c("Athletics Men's 100 metres", "Athletics Men's 200 metres" ,
+              "Athletics Men's 400 metres","Athletics Men's 800 metres",
+              "Athletics Men's Marathon", "Athletics Men's 1,500 metres", 
+              "Athletics Men's 5,000 metres")
+
+## Filter the data ...
+x <- dat %>% 
+  filter(Event %in% eventsin) 
+
+```
+
+
+Now we nest 
+
+```{r}
+x_nest <- x %>% 
+  nest(data = -Event)
+```
+
+
+## Create a regression model
+
+Here we create a regression model which will be iteratively digest different sub data sets
+
+```{r}
+## we define the model
+new_model <- linear_reg() %>%   ## I want to fit an abstract linear regression
+  set_engine("lm")              ## I will use lm to do that
+```
+
+```{r}
+## and now we prepare a function which will take care of the individual data preparation 
+## and fitting
+
+my_workflow <- function(d) {
+
+## recipe on the d dataset
+  athl_recipe <- d %>% 
+    recipe(bmi ~ Year) %>%
+    step_mutate(Year = Year - min(Year))  ## shift the Year to so the have the intercept in a good place
+  
+## Arrange the model and the preprocessing into a workflow
+  athl_workflow <- workflow() %>% 
+    add_model(new_model) %>%     ## adding my model
+    add_recipe(athl_recipe)
+
+## fit and return  
+  return(fit(athl_workflow,d))
+}
+
+
+```
+
+Now we map the workflow on the data
+
+```{r}
+x_nest <- x_nest %>% 
+  mutate(models = map(data, ~my_workflow(.x))) 
+```
+
+
+Not that the workflow are now present as a separate column in my dataset
+
+```{r}
+x_nest <- x_nest %>% 
+  mutate(coef = map(models, ~tidy(.x))) %>%     ## extract the coefficients with broom
+  unnest(coef) %>%                              ## bring them out from the nesting
+  filter(term == "Year")                        ## keep only the slope
+```
+
+
+```{r}
+x_nest %>% 
+  arrange(desc(estimate))
+```
+
+
+
