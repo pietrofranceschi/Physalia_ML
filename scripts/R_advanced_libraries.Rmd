@@ -18,8 +18,8 @@ In particular:
 
 * Pipes (`%>%`)
 * Tabular data
-  * `data.frame`, `tibble`, `data.table`
-  * data carpentry (`tidyverse`, `data.table`)
+  * `data.frame`, `tibble`, `data.table`,`tidy.tables`
+  * data carpentry (`tidyverse`, `data.table`, `tidytable`)
   * *long* and *wide* tables 
   * modeling (`broom`)
 * Writing R functions (maybe ...)
@@ -30,6 +30,7 @@ In particular:
 library(tidyverse)     ## the full tidyverse ecosystem for seamless working with tables
 library(broom)         ## a broom to tidy the outcomes of modelling
 library(data.table)    ## a less flexible (but more fast) approach to the manipulation of tabular data
+library(tidytable)     ## an effective mix of tidyverse style and data.table speed
 ```
 
 
@@ -61,7 +62,7 @@ data(iris) ## iris dataset
 
 ## note the dot to refer to the iris data.frame which reach the pairs function from the pipe
 iris %>% 
-  pairs(., col = factor(iris$Species), pch = 19) 
+  pairs(col = factor(iris$Species), pch = 19) 
 ```
 
 ### Advantages
@@ -89,17 +90,17 @@ These three box of code allow to benchmark the efficiency of the three solution 
 
 ```{r}
 ## Base R
-system.time(read.csv("athlete_events.csv"))
+system.time(read.csv("data/athlete_events.csv"))
 ```
 
 ```{r}
 # data.table
-system.time(fread("athlete_events.csv"))
+system.time(fread("data/athlete_events.csv"))
 ```
 
 ```{r}
 # tidyverse
-system.time(read_csv("athlete_events.csv"))
+system.time(read_csv("data/athlete_events.csv"))
 ```
 
 As it can be seen data.table is almost ten times faster than base R, while tidyverse stays somehow in the middle.
@@ -109,9 +110,9 @@ tibbles and data.tables also own an improved print method that allows for a more
 ```{r}
 ## read the three tables
 
-baseR <- read.csv("athlete_events.csv")
-datat <- fread("athlete_events.csv")
-tidyv <- read_csv("athlete_events.csv")
+baseR <- read.csv("data/athlete_events.csv")
+datat <- fread("data/athlete_events.csv")
+tidyv <- read_csv("data/athlete_events.csv")
 ```
 
 
@@ -219,7 +220,7 @@ An interesting and useful characteristic of `select` is the possibility of using
 ```{r}
 ## extract all the column with a name starting with sepal
 iris %>% 
-  tibble() %>% 
+  #tibble() %>% 
   select(starts_with("Sepal"))
 
 ## interesting! getting only numeric columns
@@ -374,7 +375,7 @@ De dataset we will be using contains the information on the participants to the 
 
 ```{r}
 ## read the data
-dat <- read_csv("athlete_events.csv")
+dat <- read_csv("data/athlete_events.csv")
 
 ## these are the variables
 head(dat)
@@ -407,7 +408,7 @@ Get the Olympic game dataset and:
 
 ```{r}
 ## read the data
-dat <- read_csv("athlete_events.csv")
+dat <- read_csv("data/555555athlete_events.csv")
 ```
 
 ```{r}
@@ -566,11 +567,14 @@ iris_nest <- iris_nest %>%
 
 
 ```{r}
+## I've found an inconsistency between unnesting of tidyr and unnesting of tidytables!
+
+
 iris %>% 
-  nest(data = !c(Species)) %>% 
-  mutate(models = map(data, ~lm(Sepal.Length ~ Sepal.Width, data = .x))) %>%     ## here I'm mapping the modelling
-  mutate(coefficients = map(models, ~tidy(.x))) %>%                              ## here I'm mapping the tidying
-  unnest(coefficients) %>% 
+  tidyr::nest(data = !c(Species)) %>% 
+  dplyr::mutate(models = map(data, ~lm(Sepal.Length ~ Sepal.Width, data = .x))) %>%     ## here I'm mapping the modelling
+  dplyr::mutate(coefficients = map(models, ~tidy(.x))) %>%                              ## here I'm mapping the tidying
+  tidyr::unnest(coefficients) %>% 
   select(-c("data","models")) %>% 
   write_csv(file = "test.csv")
   
