@@ -18,6 +18,8 @@ Some times data are **highly imbalanced**, or the research interest is highly **
 One-class classification is a field of **Machine Learning** (ML) that focusses on the identification of "outliers/anomalies" in the data.
 These are unsupervised learning algorithms that attempt to model "normal" examples (records) in order to classify new examples as either normal or abnormal (e.g. outliers).
 
+![outliers](../material/outlier.png "Outliers/Anomalies")
+
 One-class classification algorithms can be applied to binary classification problems with a severely skewed class distribution.
 One-class classification models can be fit on the input examples from the majority class in the training dataset, then evaluated on a holdout test set.
 
@@ -139,13 +141,11 @@ print(two_class_confTest)
 ### One-class SVM
 
 Now, let’s compare this to the one-class classifier.
-We will use the one-class classifier in supervised mode; that is, with labeled data, 
-but only for the normal (majority) class.
+We will use the one-class classifier in supervised mode; that is, with labeled data, but only for the normal (majority) class.
 Then we will predict and calculate metrics based on both classes.
 There are a few different ways we can prepare this data.
 
-We filter out all the outliers from the training set and add them to the test set, 
-so you can get a better idea of how the model works for outlier detection.
+We filter out all the outliers from the training set and add them to the test set, so you can get a better idea of how the model works for outlier detection.
 The regular and one class SVM will be predicting on the same test data set.
 
 ```{r}
