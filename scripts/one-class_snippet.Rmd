@@ -2,6 +2,9 @@
 title: "One-class classification - snippet"
 output: html_document
 date: "2026-02-12"
+editor_options: 
+  markdown: 
+    wrap: sentence
 ---
 
 ```{r setup, include=FALSE}
@@ -12,37 +15,31 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Some times data are **highly imbalanced**, or the research interest is highly **skewed towards one class** vs anything else: examples are outliers or anomalies, i.e. rare examples that do not fit in with the -much larger- bulk of the data.
 
-One-class classification is a field of **Machine Learning** (ML) that focusses on the identification of "outliers/anomalies" in the data. 
+One-class classification is a field of **Machine Learning** (ML) that focusses on the identification of "outliers/anomalies" in the data.
 These are unsupervised learning algorithms that attempt to model "normal" examples (records) in order to classify new examples as either normal or abnormal (e.g. outliers).
 
-One-class classification algorithms can be applied to binary classification problems with a severely skewed class distribution. 
+One-class classification algorithms can be applied to binary classification problems with a severely skewed class distribution.
 One-class classification models can be fit on the input examples from the majority class in the training dataset, then evaluated on a holdout test set.
 
 One-class classification algorithms can be effective for imbalanced classification datasets where there are none or very few examples of the minority class (or datasets where there is no coherent structure to separate the classes that could be learned by a supervised algorithm).
 
-One-class classification algorithms include: 
- - SVM
- - isolation forest
- - elliptic envelope
- - local outlier factor.
+One-class classification algorithms include: - SVM - isolation forest - elliptic envelope - local outlier factor.
 
-The **minority class** is often **the class of interest** (think of fraudulent bank transactions, positive disease diagnoses, or intruder detection). Sometimes these applications are framed as a two-class classification problem, but other times they are called **anomaly**, **outlier**, or **novelty** detection.
+The **minority class** is often **the class of interest** (think of fraudulent bank transactions, positive disease diagnoses, or intruder detection).
+Sometimes these applications are framed as a two-class classification problem, but other times they are called **anomaly**, **outlier**, or **novelty** detection.
 
-Imbalanced classification problems are tricky for a couple of reasons. Models can achieve high accuracy by classifying everything as the dominant class. You can somewhat mitigate this problem by choosing models based on other metrics, such as sensitivity. 
-You can also downsample the data to balance the classes (which throws out a lot of data) 
-or upsample the infrequent class using techniques like SMOTE (Synthetic Minority Oversampling TEchnique) 
-or ROSE (Random Over-Sampling Examples) to create synthetic data points.
+Imbalanced classification problems are tricky for a couple of reasons.
+Models can achieve high accuracy by classifying everything as the dominant class.
+You can somewhat mitigate this problem by choosing models based on other metrics, such as sensitivity.
+You can also downsample the data to balance the classes (which throws out a lot of data) or upsample the infrequent class using techniques like SMOTE (Synthetic Minority Oversampling TEchnique) or ROSE (Random Over-Sampling Examples) to create synthetic data points.
 
-Collecting enough labeled data can also be expensive in highly imbalanced classes. 
+Collecting enough labeled data can also be expensive in highly imbalanced classes.
 Techniques like SMOTE won't help if you only have 2 of a class in the dataset; the model needs enough data to learn from.
 
-Another way to handle a minority class is to use a **one-class classifier**. 
-One-class classifiers are among the most widely used methods in anomaly detection 
-because they don't require extensive labeled data for training. 
-One-class classification can either be semi-supervised, where only the normal (major) class is used for training, 
-or unsupervised, where the method can handle anomalies in the training class. 
+Another way to handle a minority class is to use a **one-class classifier**.
+One-class classifiers are among the most widely used methods in anomaly detection because they don't require extensive labeled data for training.
+One-class classification can either be semi-supervised, where only the normal (major) class is used for training, or unsupervised, where the method can handle anomalies in the training class.
 The **one-class SVM** is a popular implementation of one-class classifiers.
-
 
 ### The set-up
 
@@ -80,7 +77,7 @@ thyroid <- thyroid %>%
   mutate(label = ifelse(label == 0, TRUE, FALSE))
 ```
 
-### Trainig/validation split
+### Training/validation split
 
 ```{r}
 prop = 0.75
@@ -107,11 +104,11 @@ test_labels <- test_set$label
 
 ### Two-class SVM
 
-We first try with a traditional binary classifier (two classes). 
-We are using SVM for the classification. 
-The option type ='C-classification' performs normal classification.  
+We first try with a traditional binary classifier (two classes).
+We are using SVM for the classification.
+The option type ='C-classification' performs normal classification.\
 We are not going to tune any hyperparameters.
- 
+
 ```{r}
 # fitting SVM on training data 
 two_class_svm_model <- svm(train_predictors, y = train_labels,
@@ -141,7 +138,15 @@ print(two_class_confTest)
 
 ### One-class SVM
 
-Now, let’s compare this to the one-class classifier. I will use the one-class classifier in supervised mode; that is, I will pass it labeled data, but only for the normal class. Then I will predict and calculate metrics based on both classes. There are a few different ways we can prepare this data. For ease of comparison with the regular classifier, I will use the same splits but filter out the anomalies from the training data. You might instead filter out all the outliers from the training set and add them to the test set, so you can get a better idea of how the model works for outlier detection. However, I want an apples-to-apples comparison, so I’m not doing that here. The regular and one class SVM will be predicting on the same test data set.
+Now, let’s compare this to the one-class classifier.
+We will use the one-class classifier in supervised mode; that is, with labeled data, 
+but only for the normal (majority) class.
+Then we will predict and calculate metrics based on both classes.
+There are a few different ways we can prepare this data.
+
+We filter out all the outliers from the training set and add them to the test set, 
+so you can get a better idea of how the model works for outlier detection.
+The regular and one class SVM will be predicting on the same test data set.
 
 ```{r}
 # subset the labeled data into the two classes
@@ -181,4 +186,3 @@ print(one_class_confTrain)
 ```{r}
 print(one_class_confTest)
 ```
-
