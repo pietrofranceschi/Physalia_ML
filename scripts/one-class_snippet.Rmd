@@ -14,11 +14,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Why one-class classification?
 
 Some times data are **highly imbalanced**, or the research interest is highly **skewed towards one class** vs anything else: examples are outliers or anomalies, i.e. rare examples that do not fit in with the -much larger- bulk of the data.
+See figure below (0: "normal" data points; 1: anomalies).
 
-One-class classification is a field of **Machine Learning** (ML) that focusses on the identification of "outliers/anomalies" in the data.
+![outliers](../material/outlier.png "Outliers/Anomalies") One-class classification is a field of **Machine Learning** (ML) that focusses on the identification of "outliers/anomalies" in the data.
 These are unsupervised learning algorithms that attempt to model "normal" examples (records) in order to classify new examples as either normal or abnormal (e.g. outliers).
-
-![outliers](../material/outlier.png "Outliers/Anomalies")
 
 One-class classification algorithms can be applied to binary classification problems with a severely skewed class distribution.
 One-class classification models can be fit on the input examples from the majority class in the training dataset, then evaluated on a holdout test set.
@@ -109,7 +108,13 @@ test_labels <- test_set$label
 We first try with a traditional binary classifier (two classes).
 We are using SVM for the classification.
 The option type ='C-classification' performs normal classification.\
-We are not going to tune any hyperparameters.
+We are not going to tune any hyperparameters:
+
+- `degree`: parameter needed for kernel of type polynomial (default: 3)
+- `gamma`: parameter needed for all kernels except linear (default: 1/(data dimension))
+- `coef0`: parameter needed for kernels of type polynomial and sigmoid (default: 0)
+- `cost`: cost of constraints violation (default: 1)
+
 
 ```{r}
 # fitting SVM on training data 
@@ -130,9 +135,8 @@ two_class_confTrain <- table(Predicted = two_class_svm_predtrain, Reference = tr
 two_class_confTest <- table(Predicted = two_class_svm_predtest, Reference = test_labels)
 ```
 
-```{r}
-print(two_class_confTrain)
-```
+We see that we make zero errors in the majority class (easy), but 2 out of 5 mistakes (40%) in the outliers:
+this is a lot!
 
 ```{r}
 print(two_class_confTest)
@@ -145,8 +149,8 @@ We will use the one-class classifier in supervised mode; that is, with labeled d
 Then we will predict and calculate metrics based on both classes.
 There are a few different ways we can prepare this data.
 
-We filter out all the outliers from the training set and add them to the test set, so you can get a better idea of how the model works for outlier detection.
-The regular and one class SVM will be predicting on the same test data set.
+We filter out all the outliers from the training set, but not from the test set.
+The regular and one-class SVM are tested for predictions on the same test data set.
 
 ```{r}
 # subset the labeled data into the two classes
@@ -158,8 +162,19 @@ train_normal_class_label <- train_normal_class$label
 ```
 
 ```{r}
+## all training observations belong to one class
+table(train_normal_class_label)
+```
+
+
+Again, no fine-tuning of hyperparameters (but you should!):
+
+- `nu`: upper bound on the fraction of margin errors and a lower bound of the fraction of support vectors relative to the total number of training examples. For example, if you set it to 0.05 you are guaranteed to find at most 5% of your training examples being misclassified (at the cost of a small margin, though) and at least 5% of your training examples being support vectors.
+
+
+```{r}
 # fitting one class SVM on training data- no labels needed! 
-one_class_svm_model <- svm(train_normal_class_pred, y = NULL,
+one_class_svm_model <- svm(train_normal_class_pred, y = train_normal_class_label,
                type = 'one-classification',
                nu = 0.10,
                scale = TRUE,
@@ -179,9 +194,7 @@ one_class_confTest <- table(Predicted = one_class_svm_predtest,
                             Reference = test_labels)
 ```
 
-```{r}
-print(one_class_confTrain)
-```
+Now we make some errors in the "normal" class (false outliers), but we identify correctly all (100%) of the true outliers:
 
 ```{r}
 print(one_class_confTest)
