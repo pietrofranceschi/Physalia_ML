@@ -210,4 +210,7 @@ Now we make some errors in the "normal" class (false outliers), but we identify 
 ```{r}
 print(one_class_confTest)
 ```
-![](../material/decision_boundary.png) 
+
+![](../material/training_boundary.png)
+
+![](../material/decision_boundary.png)
