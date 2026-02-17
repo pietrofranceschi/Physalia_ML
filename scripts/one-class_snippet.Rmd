@@ -16,20 +16,27 @@ knitr::opts_chunk$set(echo = TRUE)
 Some times data are **highly imbalanced**, or the research interest is highly **skewed towards one class** vs anything else: examples are outliers or anomalies, i.e. rare examples that do not fit in with the -much larger- bulk of the data.
 See figure below (0: "normal" data points; 1: anomalies).
 
-![outliers](../material/outlier.png "Outliers/Anomalies") One-class classification is a field of **Machine Learning** (ML) that focusses on the identification of "outliers/anomalies" in the data.
+![](../material/outlier.png)
+
+One-class classification is a field of **Machine Learning** (ML) that focusses on the identification of "outliers/anomalies" in the data.
 These are unsupervised learning algorithms that attempt to model "normal" examples (records) in order to classify new examples as either normal or abnormal (e.g. outliers).
 
-One-class classification algorithms can be applied to binary classification problems with a severely skewed class distribution.
+One-class classification algorithms can be applied to binary classification problems with a **severely skewed class distribution**.
 One-class classification models can be fit on the input examples from the majority class in the training dataset, then evaluated on a holdout test set.
 
 One-class classification algorithms can be effective for imbalanced classification datasets where there are none or very few examples of the minority class (or datasets where there is no coherent structure to separate the classes that could be learned by a supervised algorithm).
 
-One-class classification algorithms include: - SVM - isolation forest - elliptic envelope - local outlier factor.
+One-class classification algorithms include:
+
+-   SVM
+-   isolation forest
+-   elliptic envelope
+-   local outlier factor.
 
 The **minority class** is often **the class of interest** (think of fraudulent bank transactions, positive disease diagnoses, or intruder detection).
 Sometimes these applications are framed as a two-class classification problem, but other times they are called **anomaly**, **outlier**, or **novelty** detection.
 
-Imbalanced classification problems are tricky for a couple of reasons.
+Imbalanced classification problems are tricky.
 Models can achieve high accuracy by classifying everything as the dominant class.
 You can somewhat mitigate this problem by choosing models based on other metrics, such as sensitivity.
 You can also downsample the data to balance the classes (which throws out a lot of data) or upsample the infrequent class using techniques like SMOTE (Synthetic Minority Oversampling TEchnique) or ROSE (Random Over-Sampling Examples) to create synthetic data points.
@@ -44,9 +51,10 @@ The **one-class SVM** is a popular implementation of one-class classifiers.
 
 ### The set-up
 
+We use the package `e1071` for SVM functions.
+
 ```{r set-up, echo=FALSE, message=FALSE, warning=FALSE}
 library("e1071")
-library("corrplot")
 library("tidyverse")
 library("data.table")
 ```
@@ -60,12 +68,14 @@ inputdata = "Physalia_ML/data/thyroid.csv"
 
 ### Read the data
 
+We use a dataset on thyroid disease (hyperthyroidism) -the label- and thyroid blood parameters (TSH, T3, TT\$ etc.) [data from [here](https://medium.datadriveninvestor.com/how-to-do-thyroid-detection-using-machine-learning-d577ef24c88a) and [here](https://campus.datacamp.com/courses/introduction-to-anomaly-detection-in-r/comparing-performance?ex=2)]:
+
 ```{r thyroid}
 fname = file.path(basefolder, inputdata)
 thyroid <- fread(fname)
 ```
 
-We see that this dataset is highly imbalanced:
+We see that this dataset is highly imbalanced: 22 cases (hyperthyroidism) out of 1000 examples.
 
 ```{r EDA, echo=FALSE}
 table(thyroid$label) |> print()
@@ -110,11 +120,10 @@ We are using SVM for the classification.
 The option type ='C-classification' performs normal classification.\
 We are not going to tune any hyperparameters:
 
-- `degree`: parameter needed for kernel of type polynomial (default: 3)
-- `gamma`: parameter needed for all kernels except linear (default: 1/(data dimension))
-- `coef0`: parameter needed for kernels of type polynomial and sigmoid (default: 0)
-- `cost`: cost of constraints violation (default: 1)
-
+-   `degree`: parameter needed for kernel of type polynomial (default: 3)
+-   `gamma`: parameter needed for all kernels except linear (default: 1/(data dimension))
+-   `coef0`: parameter needed for kernels of type polynomial and sigmoid (default: 0)
+-   `cost`: cost of constraints violation (default: 1)
 
 ```{r}
 # fitting SVM on training data 
@@ -135,8 +144,7 @@ two_class_confTrain <- table(Predicted = two_class_svm_predtrain, Reference = tr
 two_class_confTest <- table(Predicted = two_class_svm_predtest, Reference = test_labels)
 ```
 
-We see that we make zero errors in the majority class (easy), but 2 out of 5 mistakes (40%) in the outliers:
-this is a lot!
+We see that we make zero errors in the majority class (easy), but 2 out of 5 mistakes (40%) in the outliers: this is a lot!
 
 ```{r}
 print(two_class_confTest)
@@ -166,11 +174,14 @@ train_normal_class_label <- train_normal_class$label
 table(train_normal_class_label)
 ```
 
-
 Again, no fine-tuning of hyperparameters (but you should!):
 
-- `nu`: upper bound on the fraction of margin errors and a lower bound of the fraction of support vectors relative to the total number of training examples. For example, if you set it to 0.05 you are guaranteed to find at most 5% of your training examples being misclassified (at the cost of a small margin, though) and at least 5% of your training examples being support vectors.
+-   `nu`: is a parameter that controls the trade-off between model complexity and training error
 
+In one-class classification `nu` sets an upper bound on the fraction of outliers (margin errors), and a lower bound on the fraction of support vectors.
+For example, if we set `nu` to 0.05, at most 5% of the training data are allowed to lie outside the learned decision boundary.
+Therefore, higher `nu` values force more support vectors, which translates to a more complex model (low bias, high variance); at the same time, more errors are allowed, which partially counteracts overfitting.
+Still, the larger number of support vectors usually dominates, and large `nu` values lead to the risk of overfitting.
 
 ```{r}
 # fitting one class SVM on training data- no labels needed! 
@@ -199,3 +210,4 @@ Now we make some errors in the "normal" class (false outliers), but we identify 
 ```{r}
 print(one_class_confTest)
 ```
+![](../material/decision_boundary.png) 
