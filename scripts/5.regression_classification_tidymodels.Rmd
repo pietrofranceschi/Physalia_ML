@@ -84,6 +84,14 @@ collect_predictions(lm_fit) %>% group_by(id) %>%
   regulartable()
 ```
 
+```{r}
+collect_predictions(lm_fit) %>% 
+  group_by(id) %>% 
+  summarise(pearson = cor(.pred,Age)) %>% 
+  summarise(avg = mean(pearson), std = sd(pearson)) |>
+  regulartable()
+```
+
 ### Repeated cross-validation
 
 This was one single 5-fold cross-validation partition. However, to really take advantage of the full power of resampling methods and get robust estimates of the model performance, it is better (and usually done) to replicate the k-fold cross-validation **n times** (thereby resampling at each of the *n* replicates a different 5-fold partition):
@@ -126,7 +134,7 @@ dogs <- dogs %>%
 
 ## values for logistic regression in glm() must be 0 - 1
 dogs$PHENOTYPE = dogs$PHENOTYPE-1
-head(dogs)
+# head(dogs)
 print(nrow(dogs))
 print(ncol(dogs)-1)
 ```
@@ -250,5 +258,5 @@ collect_predictions(log_res) %>%
 
 ### Exercise 5.1
 
--   Can you calculate the decompostion of the above error rate into the false positive and false negative rates?
+-   Can you calculate the decomposition of the above error rate into the false positive and false negative rates?
 -   Can you add the MCC to the used metrics for model evaluation? [look here](https://yardstick.tidymodels.org/reference/mcc.html)
