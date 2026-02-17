@@ -39,9 +39,9 @@ Code and data will be available at the beginning of each day. Slides will be ava
 **Day 3**
 
 * Overfitting and resampling techniques
-   * [script 3.training_testing] [(.Rmd)](scripts/3.training_testing.Rmd) <!-- [(ipynb)](scripts/3.training_testing.ipynb) -->
-   * [slides 4.overfitting](slides/4.overfitting.pdf) (Filippo)
-   * [slides 5.resampling](slides/5.resampling.pdf) (Filippo)
+   <!-- * [script 3.training_testing] [(.Rmd)](scripts/3.training_testing.Rmd) --> <!-- [(ipynb)](scripts/3.training_testing.ipynb) -->
+   * [slides 3.overfitting](slides/3.overfitting.pdf) (Filippo)
+   * [slides 4.resampling](slides/4.resampling.pdf) (Filippo)
 * Classification problems
    * [data_class](data/dogs_imputed_reduced.raw) 
    * [script 4.classification] [(.Rmd)](scripts/4.classification.Rmd) <!-- [(ipynb)](scripts/4.classification.ipynb) -->
