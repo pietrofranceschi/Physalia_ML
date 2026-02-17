@@ -57,16 +57,16 @@ Note: we use only the **training data** to fit the model!
 
 ```{r}
 fit <- lm(Age ~ ., data = training_set)
-tidy(fit)
+# tidy(fit)
 r_squared <- summary(fit)$r.squared
-print(paste("
-cbind.data.framR^2", round(r_squared,4)))
+print(paste("R^2: ", round(r_squared,4)))
 ```
 
 The coefficient of determination $R^2$ is `r r_squared`
 
 ```{r}
-data.frame("coefficient"=coef(fit))
+# data.frame("coefficient"=coef(fit))
+tidy(fit)
 ```
 
 [Question: How do we interpret the model coefficients?]{style="color:red"}
