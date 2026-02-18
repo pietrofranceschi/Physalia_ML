@@ -227,7 +227,7 @@ lasso_grid %>%
 
 ```{r}
 best_roc <- lasso_grid %>%
-  select_best("roc_auc")
+  select_best(metric = "roc_auc")
 
 print(best_roc)
 ```
