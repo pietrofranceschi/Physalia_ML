@@ -42,8 +42,9 @@ Now we set-up the recipe to run the PCA analysis
 ```{r}
 iris_PCA <- recipe(~., data = iris) %>%      ## no target variable there 
   update_role(Species, new_role = "id") %>%  ## we are not interested of including the Specie
-  step_center(all_numeric()) %>%             ## we have to center the cloud of points
+  step_center(all_numeric()) %>%  ## we have to center the cloud of points
   step_pca(all_numeric())                    ## we run the PCA by using prcomp under the hood
+  
 
 iris_PCA
 
@@ -168,7 +169,8 @@ iris_PCA_prep %>%
   ggplot() + 
   geom_point(aes(x = PC1, y = PC2, col = Species), size = 2, alpha = 0.7) + 
   geom_segment(data = loadings_wider, 
-               mapping = aes(xend = 1.5*PC1, x = 0, y = 0, yend = 1.5*PC2, col = "steelblue")) + 
+               mapping = aes(xend = 1.5*PC1, x = 0, y = 0, 
+                             yend = 1.5*PC2), col = "steelblue") + 
   geom_point(data = loadings_wider, 
                mapping = aes(x = 1.5*PC1, y = 1.5*PC2), col = "steelblue") +
   geom_text_repel(data = loadings_wider, 
@@ -287,7 +289,7 @@ So what we should do is:
 * impute the variables we will decide to keep 
 
 
-I'll leave the second step to you ;-) ... but it is a nice matrix algebra exercice.
+I'll leave the second step to you ;-) ... but it is a nice matrix algebra exercise.
 
 Let's look to the variables with a large fraction of missingness
 
@@ -318,7 +320,7 @@ komp1 <- komp %>%
 ```
 
 
-And now I can use a specific recipe fro imputation ...
+And now I can use a specific recipe for imputation ...
 
 ```{r}
 komp_recipe <- recipe(~., data = komp1) %>% 
@@ -390,8 +392,7 @@ komp_recipe %>%
 Other food for brain. In terms of the genetic background, instead
 
 
-Let's look the the metabolites which are mostly contributiong to PC1
-
+Let's look the the metabolites which are mostly contributing to PC1
 
 
 ```{r fig.height=10, fig.width=7}
@@ -406,8 +407,6 @@ tidy(komp_recipe, 4) %>%
   theme_light() 
   
 ```
-
-
 
 
 ```{r}
@@ -438,8 +437,7 @@ komp_recipe %>%
 
 * Go through the code and understand what I did
 * Try different methods of scaling and imputing (eg. knn `step_impute_knn`)
-* Try PCA on the MTBLS1 dataset
-* Try to make a "loop" which can be used get the previous plot for the complete series of genotypes
+
 
 
 
