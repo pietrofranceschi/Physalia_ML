@@ -136,31 +136,13 @@ False positive rate is `r FPR`, false negative rate is `r FNR`
 ```{r}
 dogs$id <- NULL
 
-k = 5
+### CREATE K-FOLDS FOR CROSS VALIDATION
 
-## CONTROLS
-controls = filter(dogs, PHENOTYPE == 0)
-n = nrow(controls)
+# k = 
 
-## constrain the random sampling to create equally-sized partitions
-mat <- replicate(n = ceiling(n/k), sample(x = seq(1,k), size = k), simplify = TRUE)
-folds = sample(c(mat)) ## convert from matrix to vector and reshufle the elements in the vector
-folds = sample(folds, size = n) ## make sure that you have the same size as the the input data
+### YOUR CODE HERE
+
 # table(folds)
-
-## CASES
-cases = filter(dogs, PHENOTYPE == 1)
-n = nrow(cases)
-
-## constrain the random sampling to create equally-sized partitions
-mat <- replicate(n = ceiling(n/k), sample(x = seq(1,k), size = k), simplify = TRUE)
-foldsx = sample(c(mat)) ## convert from matrix to vector and reshufle the elements in the vector
-foldsx = sample(folds, size = n) ## make sure that you have the same size as the the input data
-# table(foldsx)
-
-## CASES + CONTROLS
-folds = c(folds,foldsx)
-table(folds)
 ```
 
 ```{r, warning=FALSE}
@@ -178,24 +160,14 @@ for(i in 1:k) {
   ##########################################
   
   ## train the model 
-  fit = glm(PHENOTYPE ~ ., data = trn_set, family=binomial(link="logit"))
+  ### YOUR CODE HERE
   
   #############################################
   ## EVALUATE HERE YOUR CLASSIFICATION MODEL ##
   #############################################
-  tst_set <- dogs[folds==i,]
-  print(table(tst_set$PHENOTYPE))
+  # tst_set <- ?
   
-  predictions = predict(fit, newdata = tst_set[,-1], type="response")
-  predictions <- ifelse(predictions > 0.5, 1, 0)
-  
-  TER = sum(predictions != tst_set$PHENOTYPE)/length(predictions)
-  TP = sum(predictions == 1 & tst_set$PHENOTYPE == 1)
-  FN = sum(predictions == 0 & tst_set$PHENOTYPE == 1)
-  TN = sum(predictions == 0 & tst_set$PHENOTYPE == 0)
-  FP = sum(predictions == 1 & tst_set$PHENOTYPE == 0)
-  FPR = FP/(FP+TN)
-  FNR = FN/(FN+TP)
+  ### YOUR CODE HERE
   
   res = data.frame("fold"=i,"TER"=TER,"FPR"=FPR,"FNR"=FNR)
   cv.error <- rbind.data.frame(cv.error,res)
