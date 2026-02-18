@@ -133,7 +133,6 @@ False positive rate is `r FPR`, false negative rate is `r FNR`
 
 -   implement k-fold cross-validation to assess the performance of the logistic regression model:
 
-
 ```{r}
 dogs$id <- NULL
 
@@ -163,8 +162,6 @@ foldsx = sample(folds, size = n) ## make sure that you have the same size as the
 folds = c(folds,foldsx)
 table(folds)
 ```
-
-
 
 ```{r, warning=FALSE}
 ## continue with your code here
@@ -208,7 +205,6 @@ for(i in 1:k) {
 ```{r}
 print(cv.error)
 ```
-
 
 ## ROC curves
 
@@ -258,6 +254,7 @@ mcc = function(tp,fp,tn,fn) {
 conf_matrix = table(glm.pred,test_set$PHENOTYPE)
 conf_matrix
 ```
+
 ```{r}
 table(glm.pred)
 ```
