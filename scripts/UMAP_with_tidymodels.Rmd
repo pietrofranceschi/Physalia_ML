@@ -35,12 +35,14 @@ komp
 And now imputation!
 
 ```{r}
-komp_recipe <- recipe(~., data = komp1) %>% 
+komp_recipe <- recipe(~., data = komp) %>% 
   update_role(c("MouseID","Genotype","Gender","Zygosity"), new_role = "id") %>% 
+  step_mutate_at(all_numeric_predictors(), 
+                 fn = ~ ifelse(is.na(.), min(., na.rm = TRUE), .)) %>% 
   step_impute_lower(all_predictors()) %>%
   step_log(all_predictors()) %>% 
   #step_normalize(all_predictors()) %>%  
-  step_umap(all_predictors(), neighbors = 30) %>% 
+  step_umap(all_predictors(), neighbors = 10) %>% 
   prep()
 ```
 
@@ -61,16 +63,7 @@ komp_recipe %>%
   theme(aspect.ratio = 1)
 ```
 
-We see many groups. Can we link them to something interpretable?  
-
-```{r}
-komp_recipe %>% 
-  juice() %>% 
-  filter(UMAP1 > 0 & UMAP2 > 0)
-```
-
-
-Not clear unfortunately. Now it would be necessary to discuss the outcomes with the chemical analyst, the biochemists ...
+We see many groups. Not clear unfortunately. Now it would be necessary to discuss the outcomes with the chemical analyst, the biochemists ...
 
 
 ## Something for you
