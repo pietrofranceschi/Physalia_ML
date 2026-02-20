@@ -172,6 +172,10 @@ xgboost_model <-
   set_engine("xgboost", objective = "multi:softprob", num_class = 4, lambda=0, alpha=1, verbose=0)
 ```
 
+- `multi:softprob`: multi-class classification through multinomial logistic likelihood
+- `lambda`: L2 regularization term on weights (Ridge penalty) (0 means no L2 regularization)
+- `alpha`: L1 regularization term on weights (Lasso penalty) (alpha = 1 → moderate L1 regularization)
+
 ```{r}
 # grid specification
 xgboost_params <- 
