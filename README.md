@@ -76,7 +76,7 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [script knni] [(.Rmd)](scripts/knni.Rmd) <!-- [(ipynb)](scripts/knni.ipynb) -->
 * Slow learning: the boosting approach [optional]
    * [script 10.boosting] [(.Rmd)](scripts/10.boosting.Rmd) <!-- [(ipynb)](scripts/10.boosting.ipynb) -->
-   * [slides 9.boosting](slides/9.boosting.pdf) (Filippo)
+   * [slides 8.boosting](slides/8.boosting.pdf) (Filippo)
 * SVM demo [(.Rmd)](scripts/svm_snippet.Rmd) [optional]
 * One-class classification (SVM inside) [.Rmd](scripts/one-class_snippet.Rmd) [optional]
 * Datasets
