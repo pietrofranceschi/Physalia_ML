@@ -63,12 +63,12 @@ Code and data will be available at the beginning of each day. Slides will be ava
    * [data lasso 2](data/MTBSL1.tsv)
    * [script 7.lasso_with_tidymodels] [(.Rmd)](scripts/7.lasso_with_tidymodels.Rmd) <!-- [(ipynb)](scripts/7.lasso_with_tidymodels.ipynb) -->
 * Random Forest for regression and classification
+   * [slides 7.random_forest](slides/7.random_forest.pdf) (Filippo)
    * [script 8.random_forest] [(.Rmd)](scripts/8.random_forest.Rmd) <!-- [(ipynb)](scripts/8.random_forest.ipynb) -->
    * [script 9.multiclass_random_forest] [(.Rmd)](scripts/9.multiclass_random_forest.Rmd) <!-- [(ipynb)](scripts/9.multiclass_random_forest.ipynb) -->
 * Unsupervised learning - part 2: demos
    * UMAP demo [(.Rmd)](scripts/UMAP_with_tidymodels.Rmd)
    * SOM demo [(.Rmd)](scripts/SOMs_also_with_tidymodels.Rmd)
-   * [slides 8.random_forest](slides/8.random_forest.pdf) (Filippo)
 
 **Day 5**
 
